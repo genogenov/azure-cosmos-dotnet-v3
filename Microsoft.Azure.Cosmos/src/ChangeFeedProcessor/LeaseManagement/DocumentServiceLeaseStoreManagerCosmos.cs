@@ -42,62 +42,39 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
             RequestOptionsFactory requestOptionsFactory,
             DocumentServiceLeaseUpdater leaseUpdater) // For testing purposes only.
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.ContainerNamePrefix == null) throw new ArgumentNullException(nameof(options.ContainerNamePrefix));
+            if (string.IsNullOrEmpty(options.HostName)) throw new ArgumentNullException(nameof(options.HostName));
+            if (container == null) throw new ArgumentNullException(nameof(container));
+            if (requestOptionsFactory == null) throw new ArgumentException(nameof(requestOptionsFactory));
+            if (leaseUpdater == null) throw new ArgumentException(nameof(leaseUpdater));
 
-            if (options.ContainerNamePrefix == null)
-            {
-                throw new ArgumentNullException(nameof(options.ContainerNamePrefix));
-            }
-
-            if (string.IsNullOrEmpty(options.HostName))
-            {
-                throw new ArgumentNullException(nameof(options.HostName));
-            }
-
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            if (requestOptionsFactory == null)
-            {
-                throw new ArgumentException(nameof(requestOptionsFactory));
-            }
-
-            if (leaseUpdater == null)
-            {
-                throw new ArgumentException(nameof(leaseUpdater));
-            }
-
-            leaseStore = new DocumentServiceLeaseStoreCosmos(
+            this.leaseStore = new DocumentServiceLeaseStoreCosmos(
                 container,
                 options.ContainerNamePrefix,
                 requestOptionsFactory);
 
-            leaseManager = new DocumentServiceLeaseManagerCosmos(
+            this.leaseManager = new DocumentServiceLeaseManagerCosmos(
                 container,
                 leaseUpdater,
                 options,
                 requestOptionsFactory);
 
-            leaseCheckpointer = new DocumentServiceLeaseCheckpointerCore(
+            this.leaseCheckpointer = new DocumentServiceLeaseCheckpointerCore(
                 leaseUpdater,
                 requestOptionsFactory);
 
-            leaseContainer = new DocumentServiceLeaseContainerCosmos(
+            this.leaseContainer = new DocumentServiceLeaseContainerCosmos(
                 container,
                 options);
         }
 
-        public override DocumentServiceLeaseStore LeaseStore => leaseStore;
+        public override DocumentServiceLeaseStore LeaseStore => this.leaseStore;
 
-        public override DocumentServiceLeaseManager LeaseManager => leaseManager;
+        public override DocumentServiceLeaseManager LeaseManager => this.leaseManager;
 
-        public override DocumentServiceLeaseCheckpointer LeaseCheckpointer => leaseCheckpointer;
+        public override DocumentServiceLeaseCheckpointer LeaseCheckpointer => this.leaseCheckpointer;
 
-        public override DocumentServiceLeaseContainer LeaseContainer => leaseContainer;
+        public override DocumentServiceLeaseContainer LeaseContainer => this.leaseContainer;
     }
 }

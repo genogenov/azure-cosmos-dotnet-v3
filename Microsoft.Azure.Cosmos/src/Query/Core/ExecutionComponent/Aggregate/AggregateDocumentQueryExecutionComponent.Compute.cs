@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
@@ -81,12 +82,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
 
                 // Draining aggregates is broken down into two stages
                 QueryResponseCore response;
-                if (!Source.IsDone)
+                if (!this.Source.IsDone)
                 {
                     // Stage 1:
                     // Drain the aggregates fully from all continuations and all partitions
                     // And return empty pages in the meantime.
-                    QueryResponseCore sourceResponse = await Source.DrainAsync(int.MaxValue, cancellationToken);
+                    QueryResponseCore sourceResponse = await this.Source.DrainAsync(int.MaxValue, cancellationToken);
                     if (!sourceResponse.IsSuccess)
                     {
                         return sourceResponse;
@@ -95,25 +96,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
                     foreach (CosmosElement element in sourceResponse.CosmosElements)
                     {
                         RewrittenAggregateProjections rewrittenAggregateProjections = new RewrittenAggregateProjections(
-                            isValueAggregateQuery,
+                            this.isValueAggregateQuery,
                             element);
-                        singleGroupAggregator.AddValues(rewrittenAggregateProjections.Payload);
+                        this.singleGroupAggregator.AddValues(rewrittenAggregateProjections.Payload);
                     }
 
-                    if (Source.IsDone)
+                    if (this.Source.IsDone)
                     {
-                        response = GetFinalResponse();
+                        response = this.GetFinalResponse();
                     }
                     else
                     {
-                        response = GetEmptyPage(sourceResponse);
+                        response = this.GetEmptyPage(sourceResponse);
                     }
                 }
                 else
                 {
                     // Stage 2:
                     // Return the final page after draining.
-                    response = GetFinalResponse();
+                    response = this.GetFinalResponse();
                 }
 
                 return response;
@@ -122,7 +123,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
             private QueryResponseCore GetFinalResponse()
             {
                 List<CosmosElement> finalResult = new List<CosmosElement>();
-                CosmosElement aggregationResult = singleGroupAggregator.GetResult();
+                CosmosElement aggregationResult = this.singleGroupAggregator.GetResult();
                 if (aggregationResult != null)
                 {
                     finalResult.Add(aggregationResult);
@@ -155,14 +156,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                if (IsDone)
+                if (this.IsDone)
                 {
                     return default;
                 }
 
                 AggregateContinuationToken aggregateContinuationToken = new AggregateContinuationToken(
-                    singleGroupAggregatorContinuationToken: singleGroupAggregator.GetCosmosElementContinuationToken(),
-                    sourceContinuationToken: Source.GetCosmosElementContinuationToken());
+                    singleGroupAggregatorContinuationToken: this.singleGroupAggregator.GetCosmosElementContinuationToken(),
+                    sourceContinuationToken: this.Source.GetCosmosElementContinuationToken());
                 return AggregateContinuationToken.ToCosmosElement(aggregateContinuationToken);
             }
 
@@ -175,8 +176,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
                     CosmosElement singleGroupAggregatorContinuationToken,
                     CosmosElement sourceContinuationToken)
                 {
-                    SingleGroupAggregatorContinuationToken = singleGroupAggregatorContinuationToken;
-                    SourceContinuationToken = sourceContinuationToken;
+                    this.SingleGroupAggregatorContinuationToken = singleGroupAggregatorContinuationToken;
+                    this.SourceContinuationToken = sourceContinuationToken;
                 }
 
                 public CosmosElement SingleGroupAggregatorContinuationToken { get; }

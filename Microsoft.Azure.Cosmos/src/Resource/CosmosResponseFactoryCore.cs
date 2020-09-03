@@ -17,12 +17,12 @@ namespace Microsoft.Azure.Cosmos
         public CosmosResponseFactoryCore(
             CosmosSerializerCore jsonSerializerCore)
         {
-            serializerCore = jsonSerializerCore;
+            this.serializerCore = jsonSerializerCore;
         }
 
         public override FeedResponse<T> CreateItemFeedResponse<T>(ResponseMessage responseMessage)
         {
-            return CreateQueryFeedResponseHelper<T>(
+            return this.CreateQueryFeedResponseHelper<T>(
                 responseMessage,
                 Documents.ResourceType.Document);
         }
@@ -30,14 +30,14 @@ namespace Microsoft.Azure.Cosmos
         public override FeedResponse<T> CreateChangeFeedUserTypeResponse<T>(
             ResponseMessage responseMessage)
         {
-            return CreateChangeFeedResponseHelper<T>(
+            return this.CreateChangeFeedResponseHelper<T>(
                 responseMessage);
         }
 
         public override FeedResponse<T> CreateQueryFeedUserTypeResponse<T>(
             ResponseMessage responseMessage)
         {
-            return CreateQueryFeedResponseHelper<T>(
+            return this.CreateQueryFeedResponseHelper<T>(
                 responseMessage,
                 Documents.ResourceType.Document);
         }
@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos
             ResponseMessage responseMessage,
             Documents.ResourceType resourceType)
         {
-            return CreateQueryFeedResponseHelper<T>(
+            return this.CreateQueryFeedResponseHelper<T>(
                 responseMessage,
                 resourceType);
         }
@@ -59,12 +59,12 @@ namespace Microsoft.Azure.Cosmos
             {
                 return QueryResponse<T>.CreateResponse<T>(
                     cosmosQueryResponse: queryResponse,
-                    serializerCore: serializerCore);
+                    serializerCore: this.serializerCore);
             }
 
             return ReadFeedResponse<T>.CreateResponse<T>(
                        cosmosResponseMessage,
-                       serializerCore);
+                       this.serializerCore);
         }
 
         private FeedResponse<T> CreateChangeFeedResponseHelper<T>(
@@ -72,15 +72,15 @@ namespace Microsoft.Azure.Cosmos
         {
             return ReadFeedResponse<T>.CreateResponse<T>(
                        cosmosResponseMessage,
-                       serializerCore);
+                       this.serializerCore);
         }
 
         public override ItemResponse<T> CreateItemResponse<T>(
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                T item = ToObjectpublic<T>(cosmosResponseMessage);
+                T item = this.ToObjectpublic<T>(cosmosResponseMessage);
                 return new ItemResponse<T>(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -93,9 +93,9 @@ namespace Microsoft.Azure.Cosmos
             Container container,
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                ContainerProperties containerProperties = ToObjectpublic<ContainerProperties>(cosmosResponseMessage);
+                ContainerProperties containerProperties = this.ToObjectpublic<ContainerProperties>(cosmosResponseMessage);
                 return new ContainerResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -109,9 +109,9 @@ namespace Microsoft.Azure.Cosmos
             User user,
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                UserProperties userProperties = ToObjectpublic<UserProperties>(cosmosResponseMessage);
+                UserProperties userProperties = this.ToObjectpublic<UserProperties>(cosmosResponseMessage);
                 return new UserResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -125,9 +125,9 @@ namespace Microsoft.Azure.Cosmos
             Permission permission,
             ResponseMessage responseMessage)
         {
-            return ProcessMessage<PermissionResponse>(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage<PermissionResponse>(responseMessage, (cosmosResponseMessage) =>
             {
-                PermissionProperties permissionProperties = ToObjectpublic<PermissionProperties>(cosmosResponseMessage);
+                PermissionProperties permissionProperties = this.ToObjectpublic<PermissionProperties>(cosmosResponseMessage);
                 return new PermissionResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -141,9 +141,9 @@ namespace Microsoft.Azure.Cosmos
             Database database,
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                DatabaseProperties databaseProperties = ToObjectpublic<DatabaseProperties>(cosmosResponseMessage);
+                DatabaseProperties databaseProperties = this.ToObjectpublic<DatabaseProperties>(cosmosResponseMessage);
 
                 return new DatabaseResponse(
                     cosmosResponseMessage.StatusCode,
@@ -157,9 +157,9 @@ namespace Microsoft.Azure.Cosmos
         public override ThroughputResponse CreateThroughputResponse(
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                ThroughputProperties throughputProperties = ToObjectpublic<ThroughputProperties>(cosmosResponseMessage);
+                ThroughputProperties throughputProperties = this.ToObjectpublic<ThroughputProperties>(cosmosResponseMessage);
                 return new ThroughputResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -170,9 +170,9 @@ namespace Microsoft.Azure.Cosmos
 
         public override StoredProcedureExecuteResponse<T> CreateStoredProcedureExecuteResponse<T>(ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                T item = ToObjectpublic<T>(cosmosResponseMessage);
+                T item = this.ToObjectpublic<T>(cosmosResponseMessage);
                 return new StoredProcedureExecuteResponse<T>(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -183,9 +183,9 @@ namespace Microsoft.Azure.Cosmos
 
         public override StoredProcedureResponse CreateStoredProcedureResponse(ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                StoredProcedureProperties cosmosStoredProcedure = ToObjectpublic<StoredProcedureProperties>(cosmosResponseMessage);
+                StoredProcedureProperties cosmosStoredProcedure = this.ToObjectpublic<StoredProcedureProperties>(cosmosResponseMessage);
                 return new StoredProcedureResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -196,9 +196,9 @@ namespace Microsoft.Azure.Cosmos
 
         public override TriggerResponse CreateTriggerResponse(ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                TriggerProperties triggerProperties = ToObjectpublic<TriggerProperties>(cosmosResponseMessage);
+                TriggerProperties triggerProperties = this.ToObjectpublic<TriggerProperties>(cosmosResponseMessage);
                 return new TriggerResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -210,9 +210,9 @@ namespace Microsoft.Azure.Cosmos
         public override UserDefinedFunctionResponse CreateUserDefinedFunctionResponse(
             ResponseMessage responseMessage)
         {
-            return ProcessMessage(responseMessage, (cosmosResponseMessage) =>
+            return this.ProcessMessage(responseMessage, (cosmosResponseMessage) =>
             {
-                UserDefinedFunctionProperties settings = ToObjectpublic<UserDefinedFunctionProperties>(cosmosResponseMessage);
+                UserDefinedFunctionProperties settings = this.ToObjectpublic<UserDefinedFunctionProperties>(cosmosResponseMessage);
                 return new UserDefinedFunctionResponse(
                     cosmosResponseMessage.StatusCode,
                     cosmosResponseMessage.Headers,
@@ -239,7 +239,7 @@ namespace Microsoft.Azure.Cosmos
                 return default(T);
             }
 
-            return serializerCore.FromStream<T>(responseMessage.Content);
+            return this.serializerCore.FromStream<T>(responseMessage.Content);
         }
     }
 }

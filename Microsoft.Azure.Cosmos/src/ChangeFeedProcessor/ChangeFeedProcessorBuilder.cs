@@ -46,11 +46,9 @@ namespace Microsoft.Azure.Cosmos
                 ChangeFeedProcessorOptions,
                 ContainerInternal> applyBuilderConfiguration)
         {
-            changeFeedLeaseOptions = new ChangeFeedLeaseOptions
-            {
-                LeasePrefix = processorName
-            };
-            monitoredContainer = container;
+            this.changeFeedLeaseOptions = new ChangeFeedLeaseOptions();
+            this.changeFeedLeaseOptions.LeasePrefix = processorName;
+            this.monitoredContainer = container;
             this.changeFeedProcessor = changeFeedProcessor;
             this.applyBuilderConfiguration = applyBuilderConfiguration;
         }
@@ -62,7 +60,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         public ChangeFeedProcessorBuilder WithInstanceName(string instanceName)
         {
-            InstanceName = instanceName;
+            this.InstanceName = instanceName;
             return this;
         }
 
@@ -78,9 +76,9 @@ namespace Microsoft.Azure.Cosmos
             TimeSpan? expirationInterval = null,
             TimeSpan? renewInterval = null)
         {
-            changeFeedLeaseOptions.LeaseRenewInterval = renewInterval ?? ChangeFeedLeaseOptions.DefaultRenewInterval;
-            changeFeedLeaseOptions.LeaseAcquireInterval = acquireInterval ?? ChangeFeedLeaseOptions.DefaultAcquireInterval;
-            changeFeedLeaseOptions.LeaseExpirationInterval = expirationInterval ?? ChangeFeedLeaseOptions.DefaultExpirationInterval;
+            this.changeFeedLeaseOptions.LeaseRenewInterval = renewInterval ?? ChangeFeedLeaseOptions.DefaultRenewInterval;
+            this.changeFeedLeaseOptions.LeaseAcquireInterval = acquireInterval ?? ChangeFeedLeaseOptions.DefaultAcquireInterval;
+            this.changeFeedLeaseOptions.LeaseExpirationInterval = expirationInterval ?? ChangeFeedLeaseOptions.DefaultExpirationInterval;
             return this;
         }
 
@@ -94,13 +92,10 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         public ChangeFeedProcessorBuilder WithPollInterval(TimeSpan pollInterval)
         {
-            if (pollInterval == null)
-            {
-                throw new ArgumentNullException(nameof(pollInterval));
-            }
+            if (pollInterval == null) throw new ArgumentNullException(nameof(pollInterval));
 
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
-            changeFeedProcessorOptions.FeedPollDelay = pollInterval;
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions.FeedPollDelay = pollInterval;
             return this;
         }
 
@@ -117,8 +112,8 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         internal virtual ChangeFeedProcessorBuilder WithStartFromBeginning()
         {
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
-            changeFeedProcessorOptions.StartFromBeginning = true;
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions.StartFromBeginning = true;
             return this;
         }
 
@@ -135,13 +130,10 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         public ChangeFeedProcessorBuilder WithStartTime(DateTime startTime)
         {
-            if (startTime == null)
-            {
-                throw new ArgumentNullException(nameof(startTime));
-            }
+            if (startTime == null) throw new ArgumentNullException(nameof(startTime));
 
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
-            changeFeedProcessorOptions.StartTime = startTime;
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions.StartTime = startTime;
             return this;
         }
 
@@ -152,13 +144,10 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="ChangeFeedProcessorBuilder"/>.</returns>
         public ChangeFeedProcessorBuilder WithMaxItems(int maxItemCount)
         {
-            if (maxItemCount <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(maxItemCount));
-            }
+            if (maxItemCount <= 0) throw new ArgumentOutOfRangeException(nameof(maxItemCount));
 
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
-            changeFeedProcessorOptions.MaxItemCount = maxItemCount;
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions.MaxItemCount = maxItemCount;
             return this;
         }
 
@@ -169,20 +158,9 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         public ChangeFeedProcessorBuilder WithLeaseContainer(Container leaseContainer)
         {
-            if (leaseContainer == null)
-            {
-                throw new ArgumentNullException(nameof(leaseContainer));
-            }
-
-            if (this.leaseContainer != null)
-            {
-                throw new InvalidOperationException("The builder already defined a lease container.");
-            }
-
-            if (LeaseStoreManager != null)
-            {
-                throw new InvalidOperationException("The builder already defined an in-memory lease container instance.");
-            }
+            if (leaseContainer == null) throw new ArgumentNullException(nameof(leaseContainer));
+            if (this.leaseContainer != null) throw new InvalidOperationException("The builder already defined a lease container.");
+            if (this.LeaseStoreManager != null) throw new InvalidOperationException("The builder already defined an in-memory lease container instance.");
 
             this.leaseContainer = (ContainerInternal)leaseContainer;
             return this;
@@ -197,22 +175,15 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         internal virtual ChangeFeedProcessorBuilder WithInMemoryLeaseContainer()
         {
-            if (leaseContainer != null)
+            if (this.leaseContainer != null) throw new InvalidOperationException("The builder already defined a lease container.");
+            if (this.LeaseStoreManager != null) throw new InvalidOperationException("The builder already defined an in-memory lease container instance.");
+
+            if (string.IsNullOrEmpty(this.InstanceName))
             {
-                throw new InvalidOperationException("The builder already defined a lease container.");
+                this.InstanceName = ChangeFeedProcessorBuilder.InMemoryDefaultHostName;
             }
 
-            if (LeaseStoreManager != null)
-            {
-                throw new InvalidOperationException("The builder already defined an in-memory lease container instance.");
-            }
-
-            if (string.IsNullOrEmpty(InstanceName))
-            {
-                InstanceName = ChangeFeedProcessorBuilder.InMemoryDefaultHostName;
-            }
-
-            LeaseStoreManager = new DocumentServiceLeaseStoreManagerInMemory();
+            this.LeaseStoreManager = new DocumentServiceLeaseStoreManagerInMemory();
             return this;
         }
 
@@ -226,17 +197,14 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The instance of <see cref="ChangeFeedProcessorBuilder"/> to use.</returns>
         internal virtual ChangeFeedProcessorBuilder WithSessionContinuationToken(string startContinuation)
         {
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
-            changeFeedProcessorOptions.StartContinuation = startContinuation;
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions.StartContinuation = startContinuation;
             return this;
         }
 
         internal virtual ChangeFeedProcessorBuilder WithMonitoredContainerRid(string monitoredContainerRid)
         {
-            if (monitoredContainerRid != null)
-            {
-                throw new ArgumentNullException(nameof(monitoredContainerRid));
-            }
+            if (monitoredContainerRid != null) throw new ArgumentNullException(nameof(monitoredContainerRid));
 
             this.monitoredContainerRid = monitoredContainerRid;
             return this;
@@ -248,36 +216,36 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="ChangeFeedProcessor"/>.</returns>
         public ChangeFeedProcessor Build()
         {
-            if (isBuilt)
+            if (this.isBuilt)
             {
                 throw new InvalidOperationException("This builder instance has already been used to build a processor. Create a new instance to build another.");
             }
 
-            if (monitoredContainer == null)
+            if (this.monitoredContainer == null)
             {
-                throw new InvalidOperationException(nameof(monitoredContainer) + " was not specified");
+                throw new InvalidOperationException(nameof(this.monitoredContainer) + " was not specified");
             }
 
-            if (leaseContainer == null && LeaseStoreManager == null)
+            if (this.leaseContainer == null && this.LeaseStoreManager == null)
             {
                 throw new InvalidOperationException($"Defining the lease store by WithLeaseContainer or WithInMemoryLeaseContainer is required.");
             }
 
-            if (changeFeedLeaseOptions.LeasePrefix == null)
+            if (this.changeFeedLeaseOptions.LeasePrefix == null)
             {
                 throw new InvalidOperationException("Processor name not specified during creation.");
             }
 
-            InitializeDefaultOptions();
-            applyBuilderConfiguration(LeaseStoreManager, leaseContainer, monitoredContainerRid, InstanceName, changeFeedLeaseOptions, changeFeedProcessorOptions, monitoredContainer);
+            this.InitializeDefaultOptions();
+            this.applyBuilderConfiguration(this.LeaseStoreManager, this.leaseContainer, this.monitoredContainerRid, this.InstanceName, this.changeFeedLeaseOptions, this.changeFeedProcessorOptions, this.monitoredContainer);
 
-            isBuilt = true;
-            return changeFeedProcessor;
+            this.isBuilt = true;
+            return this.changeFeedProcessor;
         }
 
         private void InitializeDefaultOptions()
         {
-            changeFeedProcessorOptions = changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
+            this.changeFeedProcessorOptions = this.changeFeedProcessorOptions ?? new ChangeFeedProcessorOptions();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosNull cosmosNull && Equals(cosmosNull);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosNull cosmosNull && this.Equals(cosmosNull);
 
         public bool Equals(CosmosNull cosmosNull) => true;
 

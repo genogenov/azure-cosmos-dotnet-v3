@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         private SqlIdentifier(string value)
         {
-            Value = value;
+            this.Value = value;
         }
 
         public string Value { get; }

@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
     {
         public CrossPartitionState(IReadOnlyList<(PartitionKeyRange, TState)> value)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public IReadOnlyList<(PartitionKeyRange, TState)> Value { get; }

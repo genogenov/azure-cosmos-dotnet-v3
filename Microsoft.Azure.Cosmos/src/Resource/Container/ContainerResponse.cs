@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System.Net;
+    using Microsoft.Azure.Documents;
 
     /// <summary>
     /// The cosmos container response
@@ -30,11 +31,11 @@ namespace Microsoft.Azure.Cosmos
             Container container,
             CosmosDiagnostics diagnostics)
         {
-            StatusCode = httpStatusCode;
-            Headers = headers;
-            Resource = containerProperties;
-            Container = container;
-            Diagnostics = diagnostics;
+            this.StatusCode = httpStatusCode;
+            this.Headers = headers;
+            this.Resource = containerProperties;
+            this.Container = container;
+            this.Diagnostics = diagnostics;
         }
 
         /// <summary>
@@ -56,13 +57,13 @@ namespace Microsoft.Azure.Cosmos
         public override CosmosDiagnostics Diagnostics { get; }
 
         /// <inheritdoc/>
-        public override double RequestCharge => Headers?.RequestCharge ?? 0;
+        public override double RequestCharge => this.Headers?.RequestCharge ?? 0;
 
         /// <inheritdoc/>
-        public override string ActivityId => Headers?.ActivityId;
+        public override string ActivityId => this.Headers?.ActivityId;
 
         /// <inheritdoc/>
-        public override string ETag => Headers?.ETag;
+        public override string ETag => this.Headers?.ETag;
 
         /// <summary>
         /// Get <see cref="Cosmos.Container"/> implicitly from <see cref="ContainerResponse"/>

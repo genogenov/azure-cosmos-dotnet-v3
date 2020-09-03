@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
         {
             get
             {
-                return Source.IsDone || takeCount <= 0;
+                return this.Source.IsDone || this.takeCount <= 0;
             }
         }
     }

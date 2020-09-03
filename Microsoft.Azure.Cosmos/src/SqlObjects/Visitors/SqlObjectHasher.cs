@@ -340,7 +340,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             int hashCode = SqlObjectCreateScalarExpressionHashCode;
             foreach (SqlObjectProperty property in sqlObjectCreateScalarExpression.Properties)
             {
-                if (isStrict)
+                if (this.isStrict)
                 {
                     hashCode = CombineHashes(hashCode, property.Accept(this));
                 }
@@ -512,7 +512,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             int hashCode = SqlSelectListSpecHashCode;
             foreach (SqlSelectItem item in sqlSelectListSpec.Items)
             {
-                if (isStrict)
+                if (this.isStrict)
                 {
                     hashCode = CombineHashes(hashCode, item.Accept(this));
                 }

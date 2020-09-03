@@ -23,21 +23,21 @@ namespace Microsoft.Azure.Cosmos.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Utf8Memory(ReadOnlyMemory<byte> utf8Bytes)
         {
-            Memory = utf8Bytes;
+            this.Memory = utf8Bytes;
         }
 
         public ReadOnlyMemory<byte> Memory { get; }
 
-        public Utf8Span Span => Utf8Span.UnsafeFromUtf8BytesNoValidation(Memory.Span);
+        public Utf8Span Span => Utf8Span.UnsafeFromUtf8BytesNoValidation(this.Memory.Span);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Utf8Memory Slice(int start) => new Utf8Memory(Memory.Slice(start));
+        public Utf8Memory Slice(int start) => new Utf8Memory(this.Memory.Slice(start));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Utf8Memory Slice(int start, int length) => new Utf8Memory(Memory.Slice(start, length));
+        public Utf8Memory Slice(int start, int length) => new Utf8Memory(this.Memory.Slice(start, length));
 
-        public bool IsEmpty => Memory.IsEmpty;
-        public int Length => Memory.Length;
+        public bool IsEmpty => this.Memory.IsEmpty;
+        public int Length => this.Memory.Length;
 
         public override bool Equals(object obj)
         {
@@ -46,17 +46,17 @@ namespace Microsoft.Azure.Cosmos.Json
 
         public bool Equals(Utf8Memory utf8Memory)
         {
-            return Memory.Equals(utf8Memory);
+            return this.Memory.Equals(utf8Memory);
         }
 
         public override int GetHashCode()
         {
-            return Memory.GetHashCode();
+            return this.Memory.GetHashCode();
         }
 
         public override string ToString()
         {
-            return Span.ToString();
+            return this.Span.ToString();
         }
 
         public static Utf8Memory Create(ReadOnlyMemory<byte> utf8Bytes)

@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
 
     internal sealed class CatchAllCosmosQueryExecutionContext : CosmosQueryExecutionContext
@@ -21,19 +22,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             this.cosmosQueryExecutionContext = cosmosQueryExecutionContext ?? throw new ArgumentNullException(nameof(cosmosQueryExecutionContext));
         }
 
-        public override bool IsDone => hitException || cosmosQueryExecutionContext.IsDone;
+        public override bool IsDone => this.hitException || this.cosmosQueryExecutionContext.IsDone;
 
         public override void Dispose()
         {
-            cosmosQueryExecutionContext.Dispose();
+            this.cosmosQueryExecutionContext.Dispose();
         }
 
         public override async Task<QueryResponseCore> ExecuteNextAsync(CancellationToken cancellationToken)
         {
-            if (IsDone)
+            if (this.IsDone)
             {
                 throw new InvalidOperationException(
-                    $"Can not {nameof(ExecuteNextAsync)} from a {nameof(CosmosQueryExecutionContext)} where {nameof(IsDone)}.");
+                    $"Can not {nameof(ExecuteNextAsync)} from a {nameof(CosmosQueryExecutionContext)} where {nameof(this.IsDone)}.");
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -41,7 +42,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             QueryResponseCore queryResponseCore;
             try
             {
-                queryResponseCore = await cosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
+                queryResponseCore = await this.cosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -55,7 +56,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
 
             if (!queryResponseCore.IsSuccess)
             {
-                hitException = true;
+                this.hitException = true;
             }
 
             return queryResponseCore;
@@ -63,7 +64,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return cosmosQueryExecutionContext.GetCosmosElementContinuationToken();
+            return this.cosmosQueryExecutionContext.GetCosmosElementContinuationToken();
         }
     }
 }

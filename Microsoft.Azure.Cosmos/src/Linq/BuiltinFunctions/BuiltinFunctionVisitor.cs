@@ -16,13 +16,13 @@ namespace Microsoft.Azure.Cosmos.Linq
     {
         public SqlScalarExpression Visit(MethodCallExpression methodCallExpression, TranslationContext context)
         {
-            SqlScalarExpression result = VisitExplicit(methodCallExpression, context);
+            SqlScalarExpression result = this.VisitExplicit(methodCallExpression, context);
             if (result != null)
             {
                 return result;
             }
 
-            result = VisitImplicit(methodCallExpression, context);
+            result = this.VisitImplicit(methodCallExpression, context);
             if (result != null)
             {
                 return result;

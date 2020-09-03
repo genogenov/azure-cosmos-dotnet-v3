@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            Expressions = expressions;
+            this.Expressions = expressions;
         }
 
         public ImmutableArray<SqlScalarExpression> Expressions { get; }

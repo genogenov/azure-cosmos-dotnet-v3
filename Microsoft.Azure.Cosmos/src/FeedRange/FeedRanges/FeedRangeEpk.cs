@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Cosmos
 
         public FeedRangeEpk(Documents.Routing.Range<string> range)
         {
-            Range = range ?? throw new ArgumentNullException(nameof(range));
+            this.Range = range ?? throw new ArgumentNullException(nameof(range));
         }
 
         public Documents.Routing.Range<string> Range { get; }
@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Cosmos
         public override Task<List<Documents.Routing.Range<string>>> GetEffectiveRangesAsync(
             IRoutingMapProvider routingMapProvider,
             string containerRid,
-            Documents.PartitionKeyDefinition partitionKeyDefinition) => Task.FromResult(new List<Documents.Routing.Range<string>>() { Range });
+            Documents.PartitionKeyDefinition partitionKeyDefinition) => Task.FromResult(new List<Documents.Routing.Range<string>>() { this.Range });
 
         public override async Task<IEnumerable<string>> GetPartitionKeyRangesAsync(
             IRoutingMapProvider routingMapProvider,
@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
             Documents.PartitionKeyDefinition partitionKeyDefinition,
             CancellationToken cancellationToken)
         {
-            IReadOnlyList<Documents.PartitionKeyRange> partitionKeyRanges = await routingMapProvider.TryGetOverlappingRangesAsync(containerRid, Range, forceRefresh: false);
+            IReadOnlyList<Documents.PartitionKeyRange> partitionKeyRanges = await routingMapProvider.TryGetOverlappingRangesAsync(containerRid, this.Range, forceRefresh: false);
             return partitionKeyRanges.Select(partitionKeyRange => partitionKeyRange.Id);
         }
 
@@ -50,6 +50,6 @@ namespace Microsoft.Azure.Cosmos
             IFeedRangeAsyncVisitor<TResult> visitor,
             CancellationToken cancellationToken = default) => visitor.VisitAsync(this, cancellationToken);
 
-        public override string ToString() => Range.ToString();
+        public override string ToString() => this.Range.ToString();
     }
 }

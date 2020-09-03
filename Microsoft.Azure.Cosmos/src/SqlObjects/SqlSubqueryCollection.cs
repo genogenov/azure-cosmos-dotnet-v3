@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlSubqueryCollection(SqlQuery query)
         {
-            Query = query ?? throw new ArgumentNullException(nameof(query));
+            this.Query = query ?? throw new ArgumentNullException(nameof(query));
         }
 
         public SqlQuery Query { get; }

@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Query runtime execution times in the Azure Cosmos DB service.
@@ -33,9 +34,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             TimeSpan systemFunctionExecutionTime,
             TimeSpan userDefinedFunctionExecutionTime)
         {
-            QueryEngineExecutionTime = queryEngineExecutionTime;
-            SystemFunctionExecutionTime = systemFunctionExecutionTime;
-            UserDefinedFunctionExecutionTime = userDefinedFunctionExecutionTime;
+            this.QueryEngineExecutionTime = queryEngineExecutionTime;
+            this.SystemFunctionExecutionTime = systemFunctionExecutionTime;
+            this.UserDefinedFunctionExecutionTime = userDefinedFunctionExecutionTime;
         }
 
         /// <summary>
@@ -57,9 +58,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             public Accumulator(TimeSpan queryEngineExecutionTime, TimeSpan systemFunctionExecutionTime, TimeSpan userDefinedFunctionExecutionTimes)
             {
-                QueryEngineExecutionTime = queryEngineExecutionTime;
-                SystemFunctionExecutionTime = systemFunctionExecutionTime;
-                UserDefinedFunctionExecutionTime = userDefinedFunctionExecutionTimes;
+                this.QueryEngineExecutionTime = queryEngineExecutionTime;
+                this.SystemFunctionExecutionTime = systemFunctionExecutionTime;
+                this.UserDefinedFunctionExecutionTime = userDefinedFunctionExecutionTimes;
             }
 
             public TimeSpan QueryEngineExecutionTime { get; set; }
@@ -74,9 +75,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 }
 
                 return new Accumulator(
-                    queryEngineExecutionTime: QueryEngineExecutionTime + runtimeExecutionTimes.QueryEngineExecutionTime,
-                    systemFunctionExecutionTime: SystemFunctionExecutionTime + runtimeExecutionTimes.SystemFunctionExecutionTime,
-                    userDefinedFunctionExecutionTimes: UserDefinedFunctionExecutionTime + runtimeExecutionTimes.UserDefinedFunctionExecutionTime);
+                    queryEngineExecutionTime: this.QueryEngineExecutionTime + runtimeExecutionTimes.QueryEngineExecutionTime,
+                    systemFunctionExecutionTime: this.SystemFunctionExecutionTime + runtimeExecutionTimes.SystemFunctionExecutionTime,
+                    userDefinedFunctionExecutionTimes: this.UserDefinedFunctionExecutionTime + runtimeExecutionTimes.UserDefinedFunctionExecutionTime);
             }
 
             public static RuntimeExecutionTimes ToRuntimeExecutionTimes(Accumulator accumulator)

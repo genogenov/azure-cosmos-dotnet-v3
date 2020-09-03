@@ -20,14 +20,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         public AutoCheckpointer(CheckpointFrequency checkpointFrequency, ChangeFeedObserver<T> observer)
         {
             if (checkpointFrequency == null)
-            {
                 throw new ArgumentNullException(nameof(checkpointFrequency));
-            }
-
             if (observer == null)
-            {
                 throw new ArgumentNullException(nameof(observer));
-            }
 
             this.checkpointFrequency = checkpointFrequency;
             this.observer = observer;
@@ -35,44 +30,40 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         public override Task OpenAsync(ChangeFeedObserverContext context)
         {
-            return observer.OpenAsync(context);
+            return this.observer.OpenAsync(context);
         }
 
         public override Task CloseAsync(ChangeFeedObserverContext context, ChangeFeedObserverCloseReason reason)
         {
-            return observer.CloseAsync(context, reason);
+            return this.observer.CloseAsync(context, reason);
         }
 
         public override async Task ProcessChangesAsync(ChangeFeedObserverContext context, IReadOnlyCollection<T> docs, CancellationToken cancellationToken)
         {
-            await observer.ProcessChangesAsync(context, docs, cancellationToken).ConfigureAwait(false);
-            processedDocCount += docs.Count;
+            await this.observer.ProcessChangesAsync(context, docs, cancellationToken).ConfigureAwait(false);
+            this.processedDocCount += docs.Count;
 
-            if (IsCheckpointNeeded())
+            if (this.IsCheckpointNeeded())
             {
                 await context.CheckpointAsync().ConfigureAwait(false);
-                processedDocCount = 0;
-                lastCheckpointTime = DateTime.UtcNow;
+                this.processedDocCount = 0;
+                this.lastCheckpointTime = DateTime.UtcNow;
             }
         }
 
         private bool IsCheckpointNeeded()
         {
-            if (!checkpointFrequency.ProcessedDocumentCount.HasValue && !checkpointFrequency.TimeInterval.HasValue)
+            if (!this.checkpointFrequency.ProcessedDocumentCount.HasValue && !this.checkpointFrequency.TimeInterval.HasValue)
             {
                 return true;
             }
 
-            if (processedDocCount >= checkpointFrequency.ProcessedDocumentCount)
-            {
+            if (this.processedDocCount >= this.checkpointFrequency.ProcessedDocumentCount)
                 return true;
-            }
 
-            TimeSpan delta = DateTime.UtcNow - lastCheckpointTime;
-            if (delta >= checkpointFrequency.TimeInterval)
-            {
+            TimeSpan delta = DateTime.UtcNow - this.lastCheckpointTime;
+            if (delta >= this.checkpointFrequency.TimeInterval)
                 return true;
-            }
 
             return false;
         }

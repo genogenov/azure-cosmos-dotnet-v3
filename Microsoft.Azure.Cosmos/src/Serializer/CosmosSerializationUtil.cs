@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Cosmos
 
     internal static class CosmosSerializationUtil
     {
-        private static readonly CamelCaseNamingStrategy camelCaseNamingStrategy = new CamelCaseNamingStrategy();
+        private static CamelCaseNamingStrategy camelCaseNamingStrategy = new CamelCaseNamingStrategy();
 
         internal static string ToCamelCase(string name)
         {

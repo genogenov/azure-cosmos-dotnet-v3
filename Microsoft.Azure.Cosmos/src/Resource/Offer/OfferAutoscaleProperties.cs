@@ -21,14 +21,14 @@ namespace Microsoft.Azure.Cosmos
             int startingMaxThroughput,
             int? autoUpgradeMaxThroughputIncrementPercentage)
         {
-            MaxThroughput = startingMaxThroughput;
+            this.MaxThroughput = startingMaxThroughput;
             if (autoUpgradeMaxThroughputIncrementPercentage.HasValue)
             {
-                AutoscaleAutoUpgradeProperties = new OfferAutoscaleAutoUpgradeProperties(autoUpgradeMaxThroughputIncrementPercentage.Value);
+                this.AutoscaleAutoUpgradeProperties = new OfferAutoscaleAutoUpgradeProperties(autoUpgradeMaxThroughputIncrementPercentage.Value);
             }
             else
             {
-                AutoscaleAutoUpgradeProperties = null;
+                this.AutoscaleAutoUpgradeProperties = null;
             }
         }
 

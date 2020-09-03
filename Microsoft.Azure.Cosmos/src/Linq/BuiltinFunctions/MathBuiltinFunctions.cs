@@ -16,11 +16,10 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         static MathBuiltinFunctions()
         {
-            MathBuiltinFunctionDefinitions = new Dictionary<string, BuiltinFunctionVisitor>
-            {
-                {
-                    "Abs",
-                    new SqlBuiltinFunctionVisitor("ABS",
+            MathBuiltinFunctionDefinitions = new Dictionary<string, BuiltinFunctionVisitor>();
+
+            MathBuiltinFunctionDefinitions.Add("Abs",
+                new SqlBuiltinFunctionVisitor("ABS",
                     true,
                     new List<Type[]>()
                     {
@@ -31,136 +30,110 @@ namespace Microsoft.Azure.Cosmos.Linq
                         new Type[]{typeof(long)},
                         new Type[]{typeof(sbyte)},
                         new Type[]{typeof(short)},
-                    })
-                },
+                    }));
 
-                {
-                    "Acos",
-                    new SqlBuiltinFunctionVisitor("ACOS",
+            MathBuiltinFunctionDefinitions.Add("Acos",
+                new SqlBuiltinFunctionVisitor("ACOS",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Asin",
-                    new SqlBuiltinFunctionVisitor("ASIN",
+            MathBuiltinFunctionDefinitions.Add("Asin",
+                new SqlBuiltinFunctionVisitor("ASIN",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Atan",
-                    new SqlBuiltinFunctionVisitor("ATAN",
+            MathBuiltinFunctionDefinitions.Add("Atan",
+                new SqlBuiltinFunctionVisitor("ATAN",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Atan2",
-                    new SqlBuiltinFunctionVisitor("ATN2",
+            MathBuiltinFunctionDefinitions.Add("Atan2",
+                new SqlBuiltinFunctionVisitor("ATN2",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double), typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Ceiling",
-                    new SqlBuiltinFunctionVisitor("CEILING",
+            MathBuiltinFunctionDefinitions.Add("Ceiling",
+                new SqlBuiltinFunctionVisitor("CEILING",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(decimal)},
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Cos",
-                    new SqlBuiltinFunctionVisitor("COS",
+            MathBuiltinFunctionDefinitions.Add("Cos",
+                new SqlBuiltinFunctionVisitor("COS",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Exp",
-                    new SqlBuiltinFunctionVisitor("EXP",
+            MathBuiltinFunctionDefinitions.Add("Exp",
+                new SqlBuiltinFunctionVisitor("EXP",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Floor",
-                    new SqlBuiltinFunctionVisitor("FLOOR",
+            MathBuiltinFunctionDefinitions.Add("Floor",
+                new SqlBuiltinFunctionVisitor("FLOOR",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(decimal)},
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Log",
-                    new SqlBuiltinFunctionVisitor("LOG",
+            MathBuiltinFunctionDefinitions.Add("Log",
+                new SqlBuiltinFunctionVisitor("LOG",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)},
                         new Type[]{typeof(double), typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Log10",
-                    new SqlBuiltinFunctionVisitor("LOG10",
+            MathBuiltinFunctionDefinitions.Add("Log10",
+                new SqlBuiltinFunctionVisitor("LOG10",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Pow",
-                    new SqlBuiltinFunctionVisitor("POWER",
+            MathBuiltinFunctionDefinitions.Add("Pow",
+                new SqlBuiltinFunctionVisitor("POWER",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double), typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Round",
-                    new SqlBuiltinFunctionVisitor("ROUND",
+            MathBuiltinFunctionDefinitions.Add("Round",
+                new SqlBuiltinFunctionVisitor("ROUND",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(decimal)},
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Sign",
-                    new SqlBuiltinFunctionVisitor("SIGN",
+            MathBuiltinFunctionDefinitions.Add("Sign",
+                new SqlBuiltinFunctionVisitor("SIGN",
                     true,
                     new List<Type[]>()
                     {
@@ -171,55 +144,46 @@ namespace Microsoft.Azure.Cosmos.Linq
                         new Type[]{typeof(long)},
                         new Type[]{typeof(sbyte)},
                         new Type[]{typeof(short)},
-                    })
-                },
+                    }));
 
-                {
-                    "Sin",
-                    new SqlBuiltinFunctionVisitor("SIN",
+            MathBuiltinFunctionDefinitions.Add("Sin",
+                new SqlBuiltinFunctionVisitor("SIN",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Sqrt",
-                    new SqlBuiltinFunctionVisitor("SQRT",
+            MathBuiltinFunctionDefinitions.Add("Sqrt",
+                new SqlBuiltinFunctionVisitor("SQRT",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Tan",
-                    new SqlBuiltinFunctionVisitor("TAN",
+            MathBuiltinFunctionDefinitions.Add("Tan",
+                new SqlBuiltinFunctionVisitor("TAN",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(double)}
-                    })
-                },
+                    }));
 
-                {
-                    "Truncate",
-                    new SqlBuiltinFunctionVisitor("TRUNC",
+            MathBuiltinFunctionDefinitions.Add("Truncate",
+                new SqlBuiltinFunctionVisitor("TRUNC",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(decimal)},
                         new Type[]{typeof(double)}
-                    })
-                }
-            };
+                    }));
         }
 
         public static SqlScalarExpression Visit(MethodCallExpression methodCallExpression, TranslationContext context)
         {
-            if (MathBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out BuiltinFunctionVisitor visitor))
+            BuiltinFunctionVisitor visitor = null;
+            if (MathBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out visitor))
             {
                 return visitor.Visit(methodCallExpression, context);
             }

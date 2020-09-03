@@ -28,7 +28,7 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="id">The Id of the resource in the Azure Cosmos service.</param>
         public UserProperties(string id)
         {
-            Id = id;
+            this.Id = id;
         }
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace Microsoft.Azure.Cosmos
         [JsonProperty(PropertyName = Constants.Properties.Id)]
         public string Id
         {
-            get => id;
-            set => id = value ?? throw new ArgumentNullException(nameof(Id));
+            get => this.id;
+            set => this.id = value ?? throw new ArgumentNullException(nameof(this.Id));
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                return $"{SelfLink?.TrimEnd('/')}/{ Permissions}";
+                return $"{this.SelfLink?.TrimEnd('/')}/{ this.Permissions}";
             }
         }
     }

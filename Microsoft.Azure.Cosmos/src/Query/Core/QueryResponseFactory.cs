@@ -5,6 +5,8 @@
 namespace Microsoft.Azure.Cosmos.Query.Core
 {
     using System;
+    using System.Diagnostics;
+    using System.Runtime.CompilerServices;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;

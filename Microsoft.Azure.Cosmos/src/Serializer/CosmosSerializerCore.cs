@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.QueryPlan;
@@ -28,16 +29,16 @@ namespace Microsoft.Azure.Cosmos
             if (customSerializer == null)
             {
                 this.customSerializer = null;
-                sqlQuerySpecSerializer = null;
-                patchOperationSerializer = null;
+                this.sqlQuerySpecSerializer = null;
+                this.patchOperationSerializer = null;
             }
             else
             {
                 this.customSerializer = new CosmosJsonSerializerWrapper(customSerializer);
-                sqlQuerySpecSerializer = CosmosSqlQuerySpecJsonConverter.CreateSqlQuerySpecSerializer(
+                this.sqlQuerySpecSerializer = CosmosSqlQuerySpecJsonConverter.CreateSqlQuerySpecSerializer(
                     cosmosSerializer: this.customSerializer,
                     propertiesSerializer: CosmosSerializerCore.propertiesSerializer);
-                patchOperationSerializer = PatchOperationsJsonConverter.CreatePatchOperationsSerializer(
+                this.patchOperationSerializer = PatchOperationsJsonConverter.CreatePatchOperationsSerializer(
                     cosmosSerializer: this.customSerializer,
                     propertiesSerializer: CosmosSerializerCore.propertiesSerializer);
             }
@@ -62,19 +63,19 @@ namespace Microsoft.Azure.Cosmos
 
         internal T FromStream<T>(Stream stream)
         {
-            CosmosSerializer serializer = GetSerializer<T>();
+            CosmosSerializer serializer = this.GetSerializer<T>();
             return serializer.FromStream<T>(stream);
         }
 
         internal T[] FromFeedStream<T>(Stream stream)
         {
-            CosmosSerializer serializer = GetSerializer<T>();
+            CosmosSerializer serializer = this.GetSerializer<T>();
             return serializer.FromStream<T[]>(stream);
         }
 
         internal Stream ToStream<T>(T input)
         {
-            CosmosSerializer serializer = GetSerializer<T>();
+            CosmosSerializer serializer = this.GetSerializer<T>();
             return serializer.ToStream<T>(input);
         }
 
@@ -84,7 +85,7 @@ namespace Microsoft.Azure.Cosmos
 
             // All the public types that support query use the custom serializer
             // Internal types like offers will use the default serializer.
-            if (customSerializer != null &&
+            if (this.customSerializer != null &&
                 (resourceType == ResourceType.Database ||
                 resourceType == ResourceType.Collection ||
                 resourceType == ResourceType.Document ||
@@ -95,7 +96,7 @@ namespace Microsoft.Azure.Cosmos
                 resourceType == ResourceType.User ||
                 resourceType == ResourceType.Conflict))
             {
-                serializer = sqlQuerySpecSerializer;
+                serializer = this.sqlQuerySpecSerializer;
             }
 
             return serializer.ToStream<SqlQuerySpec>(input);
@@ -103,9 +104,9 @@ namespace Microsoft.Azure.Cosmos
 
         internal CosmosSerializer GetCustomOrDefaultSerializer()
         {
-            if (customSerializer != null)
+            if (this.customSerializer != null)
             {
-                return customSerializer;
+                return this.customSerializer;
             }
 
             return CosmosSerializerCore.propertiesSerializer;
@@ -113,7 +114,7 @@ namespace Microsoft.Azure.Cosmos
 
         private CosmosSerializer GetSerializer<T>()
         {
-            if (customSerializer == null)
+            if (this.customSerializer == null)
             {
                 return CosmosSerializerCore.propertiesSerializer;
             }
@@ -136,7 +137,7 @@ namespace Microsoft.Azure.Cosmos
             }
             else if (inputType.IsGenericType && inputType.GetGenericArguments()[0] == typeof(PatchOperation))
             {
-                return patchOperationSerializer;
+                return this.patchOperationSerializer;
             }
 
             if (inputType == typeof(SqlQuerySpec))
@@ -158,7 +159,7 @@ namespace Microsoft.Azure.Cosmos
             }
 #endif
 
-            return customSerializer;
+            return this.customSerializer;
         }
     }
 }

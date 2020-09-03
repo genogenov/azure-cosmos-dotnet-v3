@@ -9,16 +9,16 @@ namespace Microsoft.Azure.Cosmos
     {
         public CosmosOfferResult(int? throughput)
         {
-            Throughput = throughput;
-            StatusCode = throughput.HasValue ? HttpStatusCode.OK : HttpStatusCode.NotFound;
+            this.Throughput = throughput;
+            this.StatusCode = throughput.HasValue ? HttpStatusCode.OK : HttpStatusCode.NotFound;
         }
 
         public CosmosOfferResult(
             HttpStatusCode statusCode,
             CosmosException cosmosRequestException)
         {
-            StatusCode = statusCode;
-            CosmosException = cosmosRequestException;
+            this.StatusCode = statusCode;
+            this.CosmosException = cosmosRequestException;
         }
 
         public CosmosException CosmosException { get; }

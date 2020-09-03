@@ -73,7 +73,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 throw new ArgumentException($"{nameof(value)} must not be null, empty, or whitespace.");
             }
 
-            Value = value;
+            this.Value = value;
         }
 
         public string Value { get; }

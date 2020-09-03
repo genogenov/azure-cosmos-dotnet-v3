@@ -7,6 +7,7 @@ namespace Microsoft.Azure.Cosmos.Json
     using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using System.Text;
+    using Microsoft.Azure.Cosmos.Json.Interop;
 
     /// <summary>
     /// Partial class that wraps the private JsonTextNavigator
@@ -100,7 +101,7 @@ namespace Microsoft.Azure.Cosmos.Json
             /// <inheritdoc />
             public override IJsonNavigatorNode GetRootNode()
             {
-                return rootNode;
+                return this.rootNode;
             }
 
             /// <inheritdoc />
@@ -359,7 +360,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 foreach (ObjectProperty property in objectNode.Properties)
                 {
-                    if (!TryGetBufferedStringValue(property.NameNode, out Utf8Memory candidate))
+                    if (!this.TryGetBufferedStringValue(property.NameNode, out Utf8Memory candidate))
                     {
                         throw new InvalidOperationException("Failed to get property name buffered value.");
                     }
@@ -872,8 +873,8 @@ namespace Microsoft.Azure.Cosmos.Json
                     IReadOnlyList<JsonTextNavigatorNode> items,
                     ReadOnlyMemory<byte> bufferedValue)
                 {
-                    Items = items;
-                    BufferedValue = bufferedValue;
+                    this.Items = items;
+                    this.BufferedValue = bufferedValue;
                 }
 
                 public IReadOnlyList<JsonTextNavigatorNode> Items { get; }
@@ -957,7 +958,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 private NumberNode(ReadOnlyMemory<byte> bufferedToken)
                 {
-                    BufferedToken = bufferedToken;
+                    this.BufferedToken = bufferedToken;
                 }
 
                 private NumberNode(int value)
@@ -1004,8 +1005,8 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 private ObjectNode(IReadOnlyList<ObjectProperty> properties, ReadOnlyMemory<byte> bufferedValue)
                 {
-                    Properties = properties;
-                    BufferedValue = bufferedValue;
+                    this.Properties = properties;
+                    this.BufferedValue = bufferedValue;
                 }
 
                 public IReadOnlyList<ObjectProperty> Properties { get; }
@@ -1046,7 +1047,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 protected StringNodeBase(
                     Utf8Memory bufferedValue)
                 {
-                    BufferedValue = bufferedValue;
+                    this.BufferedValue = bufferedValue;
                 }
 
                 public Utf8Memory BufferedValue { get; }
@@ -1072,7 +1073,7 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 protected IntegerNode(ReadOnlyMemory<byte> bufferedToken)
                 {
-                    BufferedToken = bufferedToken;
+                    this.BufferedToken = bufferedToken;
                 }
 
                 public ReadOnlyMemory<byte> BufferedToken { get; }
@@ -1142,7 +1143,7 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 protected FloatNode(ReadOnlyMemory<byte> bufferedToken)
                 {
-                    BufferedToken = bufferedToken;
+                    this.BufferedToken = bufferedToken;
                 }
 
                 public ReadOnlyMemory<byte> BufferedToken { get; }
@@ -1176,7 +1177,7 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 private GuidNode(ReadOnlyMemory<byte> bufferedToken)
                 {
-                    BufferedToken = bufferedToken;
+                    this.BufferedToken = bufferedToken;
                 }
 
                 public ReadOnlyMemory<byte> BufferedToken { get; }
@@ -1190,7 +1191,7 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 private BinaryNode(ReadOnlyMemory<byte> bufferedToken)
                 {
-                    BufferedToken = bufferedToken;
+                    this.BufferedToken = bufferedToken;
                 }
 
                 public ReadOnlyMemory<byte> BufferedToken { get; }
@@ -1209,12 +1210,12 @@ namespace Microsoft.Azure.Cosmos.Json
                     ReadOnlyMemory<byte> bufferedValue)
                 {
                     this.lazyNode = lazyNode;
-                    BufferedValue = bufferedValue;
+                    this.BufferedValue = bufferedValue;
                 }
 
                 public ReadOnlyMemory<byte> BufferedValue { get; }
 
-                public JsonTextNavigatorNode Value => lazyNode.Value;
+                public JsonTextNavigatorNode Value => this.lazyNode.Value;
             }
 
             private sealed class LazyArrayNode : LazyNode

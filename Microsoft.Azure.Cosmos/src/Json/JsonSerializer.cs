@@ -262,7 +262,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     return TryCatch<object>.FromException(Visitor.Exceptions.ExpectedBinary);
                 }
 
-                return TryCatch<object>.FromResult(cosmosBinary.Value);
+                return TryCatch<object>.FromResult((object)cosmosBinary.Value);
             }
 
             public TryCatch<object> Visit(CosmosBoolean cosmosBoolean, Type type)
@@ -282,7 +282,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     return TryCatch<object>.FromException(Visitor.Exceptions.ExpectedGuid);
                 }
 
-                return TryCatch<object>.FromResult(cosmosGuid.Value);
+                return TryCatch<object>.FromResult((object)cosmosGuid.Value);
             }
 
             public TryCatch<object> Visit(CosmosNull cosmosNull, Type type)
@@ -299,7 +299,7 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 if (type == typeof(Number64))
                 {
-                    return TryCatch<object>.FromResult(cosmosNumber.Value);
+                    return TryCatch<object>.FromResult((object)cosmosNumber.Value);
                 }
 
                 switch (Type.GetTypeCode(type))
@@ -319,7 +319,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for byte."));
                             }
 
-                            return TryCatch<object>.FromResult((byte)value);
+                            return TryCatch<object>.FromResult((object)(byte)value);
                         }
 
                     case TypeCode.Decimal:
@@ -334,7 +334,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                 value = Number64.ToLong(cosmosNumber.Value);
                             }
 
-                            return TryCatch<object>.FromResult(value);
+                            return TryCatch<object>.FromResult((object)value);
                         }
 
                     case TypeCode.Double:
@@ -346,7 +346,7 @@ namespace Microsoft.Azure.Cosmos.Json
                             }
 
                             double value = Number64.ToDouble(cosmosNumber.Value);
-                            return TryCatch<object>.FromResult(value);
+                            return TryCatch<object>.FromResult((object)value);
                         }
 
                     case TypeCode.Int16:
@@ -364,7 +364,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for short."));
                             }
 
-                            return TryCatch<object>.FromResult((short)value);
+                            return TryCatch<object>.FromResult((object)(short)value);
                         }
 
                     case TypeCode.Int32:
@@ -382,7 +382,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for int."));
                             }
 
-                            return TryCatch<object>.FromResult((int)value);
+                            return TryCatch<object>.FromResult((object)(int)value);
                         }
 
                     case TypeCode.Int64:
@@ -394,7 +394,7 @@ namespace Microsoft.Azure.Cosmos.Json
                             }
 
                             long value = Number64.ToLong(cosmosNumber.Value);
-                            return TryCatch<object>.FromResult(value);
+                            return TryCatch<object>.FromResult((object)(long)value);
                         }
 
                     case TypeCode.SByte:
@@ -412,7 +412,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for sbyte."));
                             }
 
-                            return TryCatch<object>.FromResult((sbyte)value);
+                            return TryCatch<object>.FromResult((object)(sbyte)value);
                         }
 
                     case TypeCode.Single:
@@ -430,7 +430,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for float."));
                             }
 
-                            return TryCatch<object>.FromResult((float)value);
+                            return TryCatch<object>.FromResult((object)(float)value);
                         }
 
                     case TypeCode.UInt16:
@@ -448,7 +448,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for ushort."));
                             }
 
-                            return TryCatch<object>.FromResult((ushort)value);
+                            return TryCatch<object>.FromResult((object)(ushort)value);
                         }
 
                     case TypeCode.UInt32:
@@ -466,7 +466,7 @@ namespace Microsoft.Azure.Cosmos.Json
                                     new OverflowException($"{value} was out of range for uint."));
                             }
 
-                            return TryCatch<object>.FromResult((uint)value);
+                            return TryCatch<object>.FromResult((object)(uint)value);
                         }
 
                     case TypeCode.UInt64:
@@ -478,7 +478,7 @@ namespace Microsoft.Azure.Cosmos.Json
                             }
 
                             long value = Number64.ToLong(cosmosNumber.Value);
-                            return TryCatch<object>.FromResult((ulong)value);
+                            return TryCatch<object>.FromResult((object)(ulong)value);
                         }
 
                     default:
@@ -544,7 +544,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     return TryCatch<object>.FromException(Visitor.Exceptions.ExpectedString);
                 }
 
-                return TryCatch<object>.FromResult(cosmosString.Value);
+                return TryCatch<object>.FromResult((object)cosmosString.Value);
             }
         }
 
@@ -557,18 +557,18 @@ namespace Microsoft.Azure.Cosmos.Json
                 this.list = list ?? throw new ArgumentNullException(nameof(list));
             }
 
-            public T this[int index] => list[index];
+            public T this[int index] => this.list[index];
 
-            public int Count => list.Count;
+            public int Count => this.list.Count;
 
             public IEnumerator<T> GetEnumerator()
             {
-                return list.GetEnumerator();
+                return this.list.GetEnumerator();
             }
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return list.GetEnumerator();
+                return this.list.GetEnumerator();
             }
         }
     }

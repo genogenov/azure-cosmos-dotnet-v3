@@ -30,10 +30,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         public ChangeFeedProcessorCore(ChangeFeedObserverFactory<T> observerFactory)
         {
-            if (observerFactory == null)
-            {
-                throw new ArgumentNullException(nameof(observerFactory));
-            }
+            if (observerFactory == null) throw new ArgumentNullException(nameof(observerFactory));
 
             this.observerFactory = observerFactory;
         }
@@ -47,22 +44,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangeFeedProcessorOptions changeFeedProcessorOptions,
             ContainerInternal monitoredContainer)
         {
-            if (monitoredContainer == null)
-            {
-                throw new ArgumentNullException(nameof(monitoredContainer));
-            }
+            if (monitoredContainer == null) throw new ArgumentNullException(nameof(monitoredContainer));
+            if (customDocumentServiceLeaseStoreManager == null && leaseContainer == null) throw new ArgumentNullException(nameof(leaseContainer));
+            if (instanceName == null) throw new ArgumentNullException("InstanceName is required for the processor to initialize.");
 
-            if (customDocumentServiceLeaseStoreManager == null && leaseContainer == null)
-            {
-                throw new ArgumentNullException(nameof(leaseContainer));
-            }
-
-            if (instanceName == null)
-            {
-                throw new ArgumentNullException("InstanceName is required for the processor to initialize.");
-            }
-
-            documentServiceLeaseStoreManager = customDocumentServiceLeaseStoreManager;
+            this.documentServiceLeaseStoreManager = customDocumentServiceLeaseStoreManager;
             this.leaseContainer = leaseContainer;
             this.monitoredContainerRid = monitoredContainerRid;
             this.instanceName = instanceName;
@@ -73,30 +59,30 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         public override async Task StartAsync()
         {
-            if (!initialized)
+            if (!this.initialized)
             {
-                await InitializeAsync().ConfigureAwait(false);
+                await this.InitializeAsync().ConfigureAwait(false);
             }
 
             DefaultTrace.TraceInformation("Starting processor...");
-            await partitionManager.StartAsync().ConfigureAwait(false);
+            await this.partitionManager.StartAsync().ConfigureAwait(false);
             DefaultTrace.TraceInformation("Processor started.");
         }
 
         public override async Task StopAsync()
         {
             DefaultTrace.TraceInformation("Stopping processor...");
-            await partitionManager.StopAsync().ConfigureAwait(false);
+            await this.partitionManager.StopAsync().ConfigureAwait(false);
             DefaultTrace.TraceInformation("Processor stopped.");
         }
 
         private async Task InitializeAsync()
         {
-            string monitoredContainerRid = await monitoredContainer.GetMonitoredContainerRidAsync(this.monitoredContainerRid);
-            this.monitoredContainerRid = monitoredContainer.GetLeasePrefix(changeFeedLeaseOptions, monitoredContainerRid);
-            documentServiceLeaseStoreManager = await ChangeFeedProcessorCore<T>.InitializeLeaseStoreManagerAsync(documentServiceLeaseStoreManager, leaseContainer, this.monitoredContainerRid, instanceName).ConfigureAwait(false);
-            partitionManager = BuildPartitionManager();
-            initialized = true;
+            string monitoredContainerRid = await this.monitoredContainer.GetMonitoredContainerRidAsync(this.monitoredContainerRid);
+            this.monitoredContainerRid = this.monitoredContainer.GetLeasePrefix(this.changeFeedLeaseOptions, monitoredContainerRid);
+            this.documentServiceLeaseStoreManager = await ChangeFeedProcessorCore<T>.InitializeLeaseStoreManagerAsync(this.documentServiceLeaseStoreManager, this.leaseContainer, this.monitoredContainerRid, this.instanceName).ConfigureAwait(false);
+            this.partitionManager = this.BuildPartitionManager();
+            this.initialized = true;
         }
 
         internal static async Task<DocumentServiceLeaseStoreManager> InitializeLeaseStoreManagerAsync(
@@ -123,7 +109,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                 }
 
                 RequestOptionsFactory requestOptionsFactory = isPartitioned && !isMigratedFixed ?
-                    new PartitionedByIdCollectionRequestOptionsFactory() :
+                    (RequestOptionsFactory)new PartitionedByIdCollectionRequestOptionsFactory() :
                     (RequestOptionsFactory)new SinglePartitionRequestOptionsFactory();
 
                 DocumentServiceLeaseStoreManagerBuilder leaseStoreManagerBuilder = new DocumentServiceLeaseStoreManagerBuilder()
@@ -140,34 +126,34 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         internal PartitionManager BuildPartitionManager()
         {
-            CheckpointerObserverFactory<T> factory = new CheckpointerObserverFactory<T>(observerFactory, changeFeedProcessorOptions.CheckpointFrequency);
+            CheckpointerObserverFactory<T> factory = new CheckpointerObserverFactory<T>(this.observerFactory, this.changeFeedProcessorOptions.CheckpointFrequency);
             PartitionSynchronizerCore synchronizer = new PartitionSynchronizerCore(
-                monitoredContainer,
-                documentServiceLeaseStoreManager.LeaseContainer,
-                documentServiceLeaseStoreManager.LeaseManager,
+                this.monitoredContainer,
+                this.documentServiceLeaseStoreManager.LeaseContainer,
+                this.documentServiceLeaseStoreManager.LeaseManager,
                 PartitionSynchronizerCore.DefaultDegreeOfParallelism,
-                changeFeedProcessorOptions.QueryFeedMaxBatchSize);
-            BootstrapperCore bootstrapper = new BootstrapperCore(synchronizer, documentServiceLeaseStoreManager.LeaseStore, BootstrapperCore.DefaultLockTime, BootstrapperCore.DefaultSleepTime);
+                this.changeFeedProcessorOptions.QueryFeedMaxBatchSize);
+            BootstrapperCore bootstrapper = new BootstrapperCore(synchronizer, this.documentServiceLeaseStoreManager.LeaseStore, BootstrapperCore.DefaultLockTime, BootstrapperCore.DefaultSleepTime);
             PartitionSupervisorFactoryCore<T> partitionSuperviserFactory = new PartitionSupervisorFactoryCore<T>(
                 factory,
-                documentServiceLeaseStoreManager.LeaseManager,
-                new FeedProcessorFactoryCore<T>(monitoredContainer, changeFeedProcessorOptions, documentServiceLeaseStoreManager.LeaseCheckpointer, monitoredContainer.ClientContext.SerializerCore),
-                changeFeedLeaseOptions);
+                this.documentServiceLeaseStoreManager.LeaseManager,
+                new FeedProcessorFactoryCore<T>(this.monitoredContainer, this.changeFeedProcessorOptions, this.documentServiceLeaseStoreManager.LeaseCheckpointer, this.monitoredContainer.ClientContext.SerializerCore),
+                this.changeFeedLeaseOptions);
 
             EqualPartitionsBalancingStrategy loadBalancingStrategy = new EqualPartitionsBalancingStrategy(
-                    instanceName,
+                    this.instanceName,
                     EqualPartitionsBalancingStrategy.DefaultMinLeaseCount,
                     EqualPartitionsBalancingStrategy.DefaultMaxLeaseCount,
-                    changeFeedLeaseOptions.LeaseExpirationInterval);
+                    this.changeFeedLeaseOptions.LeaseExpirationInterval);
 
-            PartitionController partitionController = new PartitionControllerCore(documentServiceLeaseStoreManager.LeaseContainer, documentServiceLeaseStoreManager.LeaseManager, partitionSuperviserFactory, synchronizer);
+            PartitionController partitionController = new PartitionControllerCore(this.documentServiceLeaseStoreManager.LeaseContainer, this.documentServiceLeaseStoreManager.LeaseManager, partitionSuperviserFactory, synchronizer);
 
             partitionController = new HealthMonitoringPartitionControllerDecorator(partitionController, new TraceHealthMonitor());
             PartitionLoadBalancerCore partitionLoadBalancer = new PartitionLoadBalancerCore(
                 partitionController,
-                documentServiceLeaseStoreManager.LeaseContainer,
+                this.documentServiceLeaseStoreManager.LeaseContainer,
                 loadBalancingStrategy,
-                changeFeedLeaseOptions.LeaseAcquireInterval);
+                this.changeFeedLeaseOptions.LeaseAcquireInterval);
             return new PartitionManagerCore(bootstrapper, partitionController, partitionLoadBalancer);
         }
     }

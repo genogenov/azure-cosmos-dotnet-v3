@@ -12,7 +12,7 @@ namespace Microsoft.Azure.Cosmos.Linq
     /// </summary> 
     internal sealed class SubtreeEvaluator : ExpressionVisitor
     {
-        private readonly HashSet<Expression> candidates;
+        private HashSet<Expression> candidates;
 
         public SubtreeEvaluator(HashSet<Expression> candidates)
         {
@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public Expression Evaluate(Expression expression)
         {
-            return Visit(expression);
+            return this.Visit(expression);
         }
 
         public override Expression Visit(Expression expression)
@@ -30,9 +30,9 @@ namespace Microsoft.Azure.Cosmos.Linq
             {
                 return null;
             }
-            if (candidates.Contains(expression))
+            if (this.candidates.Contains(expression))
             {
-                return EvaluateConstant(expression);
+                return this.EvaluateConstant(expression);
             }
             return base.Visit(expression);
         }

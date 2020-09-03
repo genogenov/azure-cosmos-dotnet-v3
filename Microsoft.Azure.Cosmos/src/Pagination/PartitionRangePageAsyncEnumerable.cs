@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            return createPartitionRangeEnumerator(range, state);
+            return this.createPartitionRangeEnumerator(this.range, this.state);
         }
     }
 }

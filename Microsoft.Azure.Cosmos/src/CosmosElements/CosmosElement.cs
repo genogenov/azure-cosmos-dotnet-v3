@@ -36,20 +36,20 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         public override string ToString()
         {
             IJsonWriter jsonWriter = JsonWriter.Create(JsonSerializationFormat.Text);
-            WriteTo(jsonWriter);
+            this.WriteTo(jsonWriter);
 
             return Utf8StringHelpers.ToString(jsonWriter.GetResult());
         }
 
-        public override bool Equals(object obj) => obj is CosmosElement cosmosElement && Equals(cosmosElement);
+        public override bool Equals(object obj) => obj is CosmosElement cosmosElement && this.Equals(cosmosElement);
 
         public abstract bool Equals(CosmosElement cosmosElement);
 
-        public abstract override int GetHashCode();
+        public override abstract int GetHashCode();
 
         public int CompareTo(CosmosElement other)
         {
-            int thisTypeOrder = Accept(CosmosElementToTypeOrder.Singleton);
+            int thisTypeOrder = this.Accept(CosmosElementToTypeOrder.Singleton);
             int otherTypeOrder = other.Accept(CosmosElementToTypeOrder.Singleton);
 
             if (thisTypeOrder != otherTypeOrder)
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             }
 
             // The types are the same so dispatch to each compare operator
-            return Accept(CosmosElementWithinTypeComparer.Singleton, other);
+            return this.Accept(CosmosElementWithinTypeComparer.Singleton, other);
         }
 
         public abstract void WriteTo(IJsonWriter jsonWriter);
@@ -71,7 +71,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public virtual T Materialize<T>()
         {
-            Cosmos.Json.IJsonReader cosmosJsonReader = CreateReader();
+            Cosmos.Json.IJsonReader cosmosJsonReader = this.CreateReader();
             Newtonsoft.Json.JsonReader newtonsoftReader = new CosmosDBToNewtonsoftReader(cosmosJsonReader);
 
             return DefaultSerializer.Deserialize<T>(newtonsoftReader);
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         public virtual IJsonReader CreateReader()
         {
             IJsonWriter jsonWriter = JsonWriter.Create(JsonSerializationFormat.Binary);
-            WriteTo(jsonWriter);
+            this.WriteTo(jsonWriter);
 
             ReadOnlyMemory<byte> buffer = jsonWriter.GetResult();
 

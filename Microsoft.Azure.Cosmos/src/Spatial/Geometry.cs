@@ -37,19 +37,19 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("geometryParams");
             }
 
-            Type = type;
+            this.Type = type;
 
             if (geometryParams.Crs == null || geometryParams.Crs.Equals(Crs.Default))
             {
-                CrsForSerialization = null;
+                this.CrsForSerialization = null;
             }
             else
             {
-                CrsForSerialization = geometryParams.Crs;
+                this.CrsForSerialization = geometryParams.Crs;
             }
 
-            BoundingBox = geometryParams.BoundingBox;
-            AdditionalProperties = geometryParams.AdditionalProperties ?? new Dictionary<string, object>();
+            this.BoundingBox = geometryParams.BoundingBox;
+            this.AdditionalProperties = geometryParams.AdditionalProperties ?? new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             get
             {
-                return CrsForSerialization ?? Crs.Default;
+                return this.CrsForSerialization ?? Crs.Default;
             }
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return Equals(obj as Geometry);
+            return this.Equals(obj as Geometry);
         }
 
         /// <summary>
@@ -130,10 +130,10 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                int hashCode = Crs.GetHashCode();
-                hashCode = (hashCode * 397) ^ (int)Type;
-                hashCode = (hashCode * 397) ^ (BoundingBox != null ? BoundingBox.GetHashCode() : 0);
-                hashCode = AdditionalProperties.Aggregate(
+                int hashCode = this.Crs.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int)this.Type;
+                hashCode = (hashCode * 397) ^ (this.BoundingBox != null ? this.BoundingBox.GetHashCode() : 0);
+                hashCode = this.AdditionalProperties.Aggregate(
                     hashCode,
                     (current, value) => (current * 397) ^ value.GetHashCode());
 
@@ -284,9 +284,9 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return Crs.Equals(other.Crs) && Type == other.Type
-                   && object.Equals(BoundingBox, other.BoundingBox)
-                   && AdditionalProperties.SequenceEqual(other.AdditionalProperties);
+            return this.Crs.Equals(other.Crs) && this.Type == other.Type
+                   && object.Equals(this.BoundingBox, other.BoundingBox)
+                   && this.AdditionalProperties.SequenceEqual(other.AdditionalProperties);
         }
     }
 }

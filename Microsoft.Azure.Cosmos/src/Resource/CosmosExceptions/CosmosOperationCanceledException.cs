@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections;
+    using System.Threading;
 
     /// <summary>
     /// The exception that is thrown in a thread upon cancellation of an operation that
@@ -46,24 +47,24 @@ namespace Microsoft.Azure.Cosmos
             }
 
             this.originalException = originalException;
-            Diagnostics = diagnostics;
+            this.Diagnostics = diagnostics;
         }
 
         /// <inheritdoc/>
         public override string Source
         {
-            get => originalException.Source;
-            set => originalException.Source = value;
+            get => this.originalException.Source;
+            set => this.originalException.Source = value;
         }
 
         /// <inheritdoc/>
-        public override string Message => originalException.Message;
+        public override string Message => this.originalException.Message;
 
         /// <inheritdoc/>
-        public override string StackTrace => originalException.StackTrace;
+        public override string StackTrace => this.originalException.StackTrace;
 
         /// <inheritdoc/>
-        public override IDictionary Data => originalException.Data;
+        public override IDictionary Data => this.originalException.Data;
 
         /// <summary>
         /// Gets the diagnostics for the request
@@ -73,20 +74,20 @@ namespace Microsoft.Azure.Cosmos
         /// <inheritdoc/>
         public override string HelpLink
         {
-            get => originalException.HelpLink;
-            set => originalException.HelpLink = value;
+            get => this.originalException.HelpLink;
+            set => this.originalException.HelpLink = value;
         }
 
         /// <inheritdoc/>
         public override Exception GetBaseException()
         {
-            return originalException.GetBaseException();
+            return this.originalException.GetBaseException();
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{originalException.ToString()} {Environment.NewLine}CosmosDiagnostics: {Diagnostics.ToString()}";
+            return $"{this.originalException.ToString()} {Environment.NewLine}CosmosDiagnostics: {this.Diagnostics.ToString()}";
         }
     }
 }

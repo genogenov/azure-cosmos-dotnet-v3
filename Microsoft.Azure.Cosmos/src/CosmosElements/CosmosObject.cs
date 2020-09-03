@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         public bool TryGetValue<TCosmosElement>(string key, out TCosmosElement typedCosmosElement)
             where TCosmosElement : CosmosElement
         {
-            if (!TryGetValue(key, out CosmosElement cosmosElement))
+            if (!this.TryGetValue(key, out CosmosElement cosmosElement))
             {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
                 typedCosmosElement = default;
@@ -74,13 +74,13 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public abstract IEnumerator<KeyValuePair<string, CosmosElement>> GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosObject cosmosObject && Equals(cosmosObject);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosObject cosmosObject && this.Equals(cosmosObject);
 
         public bool Equals(CosmosObject cosmosObject)
         {
-            if (Count != cosmosObject.Count)
+            if (this.Count != cosmosObject.Count)
             {
                 return false;
             }

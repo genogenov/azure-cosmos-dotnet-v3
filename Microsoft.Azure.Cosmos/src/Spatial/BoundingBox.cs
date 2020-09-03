@@ -42,8 +42,8 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentException("Max and min must have same cardinality.");
             }
 
-            Max = max;
-            Min = min;
+            this.Max = max;
+            this.Min = min;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return Min.Equals(other.Min) && Max.Equals(other.Max);
+            return this.Min.Equals(other.Min) && this.Max.Equals(other.Max);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return Equals(obj as BoundingBox);
+            return this.Equals(obj as BoundingBox);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return (Min.GetHashCode() * 397) ^ Max.GetHashCode();
+                return (this.Min.GetHashCode() * 397) ^ this.Max.GetHashCode();
             }
         }
     }

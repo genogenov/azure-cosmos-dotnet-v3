@@ -67,22 +67,22 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="request">The <see cref="RequestMessage"/></param>
         internal virtual void PopulateRequestOptions(RequestMessage request)
         {
-            if (Properties != null)
+            if (this.Properties != null)
             {
-                foreach (KeyValuePair<string, object> property in Properties)
+                foreach (KeyValuePair<string, object> property in this.Properties)
                 {
                     request.Properties[property.Key] = property.Value;
                 }
             }
 
-            if (IfMatchEtag != null)
+            if (this.IfMatchEtag != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.IfMatch, IfMatchEtag);
+                request.Headers.Add(HttpConstants.HttpHeaders.IfMatch, this.IfMatchEtag);
             }
 
-            if (IfNoneMatchEtag != null)
+            if (this.IfNoneMatchEtag != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.IfNoneMatch, IfNoneMatchEtag);
+                request.Headers.Add(HttpConstants.HttpHeaders.IfNoneMatch, this.IfNoneMatchEtag);
             }
         }
 
@@ -93,7 +93,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>True if the object exists in the request options. False if the value was not passed in as a request option</returns>
         internal bool TryGetResourceUri(out Uri resourceUri)
         {
-            if (Properties != null && Properties.TryGetValue(HandlerConstants.ResourceUri, out object requestOptesourceUri))
+            if (this.Properties != null && this.Properties.TryGetValue(HandlerConstants.ResourceUri, out object requestOptesourceUri))
             {
                 Uri uri = requestOptesourceUri as Uri;
                 if (uri == null || uri.IsAbsoluteUri)

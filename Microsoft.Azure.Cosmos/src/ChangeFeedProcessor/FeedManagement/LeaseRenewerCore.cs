@@ -28,23 +28,23 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             try
             {
-                DefaultTrace.TraceInformation("Lease with token {0}: renewer task started.", lease.CurrentLeaseToken);
-                await Task.Delay(TimeSpan.FromTicks(leaseRenewInterval.Ticks / 2), cancellationToken).ConfigureAwait(false);
+                DefaultTrace.TraceInformation("Lease with token {0}: renewer task started.", this.lease.CurrentLeaseToken);
+                await Task.Delay(TimeSpan.FromTicks(this.leaseRenewInterval.Ticks / 2), cancellationToken).ConfigureAwait(false);
 
                 while (true)
                 {
-                    await RenewAsync().ConfigureAwait(false);
-                    await Task.Delay(leaseRenewInterval, cancellationToken).ConfigureAwait(false);
+                    await this.RenewAsync().ConfigureAwait(false);
+                    await Task.Delay(this.leaseRenewInterval, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                DefaultTrace.TraceInformation("Lease with token {0}: renewer task stopped.", lease.CurrentLeaseToken);
+                DefaultTrace.TraceInformation("Lease with token {0}: renewer task stopped.", this.lease.CurrentLeaseToken);
             }
             catch (Exception ex)
             {
                 Extensions.TraceException(ex);
-                DefaultTrace.TraceCritical("Lease with token {0}: renew lease loop failed", lease.CurrentLeaseToken);
+                DefaultTrace.TraceCritical("Lease with token {0}: renew lease loop failed", this.lease.CurrentLeaseToken);
                 throw;
             }
         }
@@ -53,24 +53,21 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             try
             {
-                DocumentServiceLease renewedLease = await leaseManager.RenewAsync(lease).ConfigureAwait(false);
-                if (renewedLease != null)
-                {
-                    lease = renewedLease;
-                }
+                var renewedLease = await this.leaseManager.RenewAsync(this.lease).ConfigureAwait(false);
+                if (renewedLease != null) this.lease = renewedLease;
 
-                DefaultTrace.TraceInformation("Lease with token {0}: renewed lease with result {1}", lease.CurrentLeaseToken, renewedLease != null);
+                DefaultTrace.TraceInformation("Lease with token {0}: renewed lease with result {1}", this.lease.CurrentLeaseToken, renewedLease != null);
             }
             catch (LeaseLostException leaseLostException)
             {
                 Extensions.TraceException(leaseLostException);
-                DefaultTrace.TraceError("Lease with token {0}: lost lease on renew.", lease.CurrentLeaseToken);
+                DefaultTrace.TraceError("Lease with token {0}: lost lease on renew.", this.lease.CurrentLeaseToken);
                 throw;
             }
             catch (Exception ex)
             {
                 Extensions.TraceException(ex);
-                DefaultTrace.TraceError("Lease with token {0}: failed to renew lease.", lease.CurrentLeaseToken);
+                DefaultTrace.TraceError("Lease with token {0}: failed to renew lease.", this.lease.CurrentLeaseToken);
             }
         }
     }

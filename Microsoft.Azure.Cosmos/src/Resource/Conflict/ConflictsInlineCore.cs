@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Cosmos
             PartitionKey partitionKey,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return ClientContext.OperationHelperAsync(
+            return this.ClientContext.OperationHelperAsync(
                 operationName: nameof(DeleteAsync),
                 requestOptions: null,
                 task: (diagnostics) => base.DeleteAsync(diagnostics, conflict, partitionKey, cancellationToken));
@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Cosmos
             PartitionKey partitionKey,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return ClientContext.OperationHelperAsync(
+            return this.ClientContext.OperationHelperAsync(
                 operationName: nameof(ReadCurrentAsync),
                 requestOptions: null,
                 task: (diagnostics) => base.ReadCurrentAsync<T>(diagnostics, cosmosConflict, partitionKey, cancellationToken));

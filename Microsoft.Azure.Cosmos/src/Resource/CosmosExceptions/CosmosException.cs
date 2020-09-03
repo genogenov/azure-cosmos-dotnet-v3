@@ -34,18 +34,18 @@ namespace Microsoft.Azure.Cosmos
                 message,
                 activityId), innerException)
         {
-            ResponseBody = message;
+            this.ResponseBody = message;
             this.stackTrace = stackTrace;
-            ActivityId = activityId;
-            StatusCode = statusCodes;
-            SubStatusCode = subStatusCode;
-            RetryAfter = retryAfter;
-            RequestCharge = requestCharge;
-            Headers = headers;
-            Error = error;
+            this.ActivityId = activityId;
+            this.StatusCode = statusCodes;
+            this.SubStatusCode = subStatusCode;
+            this.RetryAfter = retryAfter;
+            this.RequestCharge = requestCharge;
+            this.Headers = headers;
+            this.Error = error;
 
             // Always have a diagnostic context. A new diagnostic will have useful info like user agent
-            DiagnosticsContext = diagnosticsContext ?? new CosmosDiagnosticsContextCore();
+            this.DiagnosticsContext = diagnosticsContext ?? new CosmosDiagnosticsContextCore();
         }
 
         /// <summary>
@@ -64,13 +64,13 @@ namespace Microsoft.Azure.Cosmos
             double requestCharge)
             : base(message)
         {
-            stackTrace = null;
-            SubStatusCode = subStatusCode;
-            StatusCode = statusCode;
-            RequestCharge = requestCharge;
-            ActivityId = activityId;
-            Headers = new Headers();
-            DiagnosticsContext = new CosmosDiagnosticsContextCore();
+            this.stackTrace = null;
+            this.SubStatusCode = subStatusCode;
+            this.StatusCode = statusCode;
+            this.RequestCharge = requestCharge;
+            this.ActivityId = activityId;
+            this.Headers = new Headers();
+            this.DiagnosticsContext = new CosmosDiagnosticsContextCore();
         }
 
         /// <summary>
@@ -119,16 +119,16 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the diagnostics for the request
         /// </summary>
-        public virtual CosmosDiagnostics Diagnostics => DiagnosticsContext.Diagnostics;
+        public virtual CosmosDiagnostics Diagnostics => this.DiagnosticsContext.Diagnostics;
 
         /// <inheritdoc/>
         public override string StackTrace
         {
             get
             {
-                if (stackTrace != null)
+                if (this.stackTrace != null)
                 {
-                    return stackTrace;
+                    return this.stackTrace;
                 }
                 else
                 {
@@ -152,13 +152,13 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>A value indicating if the header was read.</returns>
         public virtual bool TryGetHeader(string headerName, out string value)
         {
-            if (Headers == null)
+            if (this.Headers == null)
             {
                 value = null;
                 return false;
             }
 
-            return Headers.TryGetValue(headerName, out value);
+            return this.Headers.TryGetValue(headerName, out value);
         }
 
         /// <summary>
@@ -168,10 +168,10 @@ namespace Microsoft.Azure.Cosmos
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(GetType().FullName);
+            stringBuilder.Append(this.GetType().FullName);
             stringBuilder.Append(" : ");
 
-            ToStringHelper(stringBuilder);
+            this.ToStringHelper(stringBuilder);
 
             return stringBuilder.ToString();
         }
@@ -179,11 +179,11 @@ namespace Microsoft.Azure.Cosmos
         internal ResponseMessage ToCosmosResponseMessage(RequestMessage request)
         {
             return new ResponseMessage(
-                 headers: Headers,
+                 headers: this.Headers,
                  requestMessage: request,
                  cosmosException: this,
-                 statusCode: StatusCode,
-                 diagnostics: DiagnosticsContext);
+                 statusCode: this.StatusCode,
+                 diagnostics: this.DiagnosticsContext);
         }
 
         private static string GetMessageHelper(
@@ -215,29 +215,29 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(stringBuilder));
             }
 
-            stringBuilder.Append(Message);
+            stringBuilder.Append(this.Message);
             stringBuilder.AppendLine();
 
-            if (InnerException != null)
+            if (this.InnerException != null)
             {
                 stringBuilder.Append(" ---> ");
-                stringBuilder.Append(InnerException);
+                stringBuilder.Append(this.InnerException);
                 stringBuilder.AppendLine();
                 stringBuilder.Append("   ");
                 stringBuilder.Append("--- End of inner exception stack trace ---");
                 stringBuilder.AppendLine();
             }
 
-            if (StackTrace != null)
+            if (this.StackTrace != null)
             {
-                stringBuilder.Append(StackTrace);
+                stringBuilder.Append(this.StackTrace);
                 stringBuilder.AppendLine();
             }
 
-            if (Diagnostics != null)
+            if (this.Diagnostics != null)
             {
                 stringBuilder.Append("--- Cosmos Diagnostics ---");
-                stringBuilder.Append(Diagnostics);
+                stringBuilder.Append(this.Diagnostics);
             }
 
             return stringBuilder.ToString();

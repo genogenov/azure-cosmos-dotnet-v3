@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos
             }
             else
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentUICulture, "Unsupported resource type {0}", value.ToString()));
+                throw new ArgumentException(String.Format(CultureInfo.CurrentUICulture, "Unsupported resource type {0}", value.ToString()));
             }
 
             writer.WriteValue(resourceType);

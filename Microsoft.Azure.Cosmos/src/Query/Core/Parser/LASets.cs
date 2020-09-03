@@ -45,27 +45,27 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
 
         public IntervalSet Compute(Parser parser, CommonTokenStream token_stream, int line, int col)
         {
-            input = new List<IToken>();
+            this.input = new List<IToken>();
             this.parser = parser;
-            tokenStream = token_stream;
-            stopStates = new HashSet<ATNState>();
+            this.tokenStream = token_stream;
+            this.stopStates = new HashSet<ATNState>();
             foreach (ATNState s in parser.Atn.ruleToStopState.Select(t => parser.Atn.states[t.stateNumber]))
             {
-                stopStates.Add(s);
+                this.stopStates.Add(s);
             }
-            startStates = new HashSet<ATNState>();
+            this.startStates = new HashSet<ATNState>();
             foreach (ATNState s in parser.Atn.ruleToStartState.Select(t => parser.Atn.states[t.stateNumber]))
             {
-                startStates.Add(s);
+                this.startStates.Add(s);
             }
-            int currentIndex = tokenStream.Index;
-            tokenStream.Seek(0);
+            int currentIndex = this.tokenStream.Index;
+            this.tokenStream.Seek(0);
             int offset = 1;
             while (true)
             {
-                IToken token = tokenStream.LT(offset++);
-                input.Add(token);
-                cursor = token.TokenIndex;
+                IToken token = this.tokenStream.LT(offset++);
+                this.input.Add(token);
+                this.cursor = token.TokenIndex;
                 if (token.Type == TokenConstants.EOF)
                 {
                     break;
@@ -75,9 +75,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                     break;
                 }
             }
-            tokenStream.Seek(currentIndex);
+            this.tokenStream.Seek(currentIndex);
 
-            List<List<Edge>> all_parses = EnterState(new Edge()
+            List<List<Edge>> all_parses = this.EnterState(new Edge()
             {
                 index = 0,
                 indexAtTransition = 0,
@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                 type = TransitionType.EPSILON
             });
             // Remove last token on input.
-            input.RemoveAt(input.Count - 1);
+            this.input.RemoveAt(this.input.Count - 1);
             // Eliminate all paths that don't consume all input.
             List<List<Edge>> temp = new List<List<Edge>>();
             if (all_parses != null)
@@ -93,18 +93,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                 foreach (List<Edge> p in all_parses)
                 {
                     //System.Console.Error.WriteLine(PrintSingle(p));
-                    if (Validate(p, input))
+                    if (this.Validate(p, this.input))
                     {
                         temp.Add(p);
                     }
                 }
             }
             all_parses = temp;
-            if (all_parses != null && logClosure)
+            if (all_parses != null && this.logClosure)
             {
                 foreach (List<Edge> p in all_parses)
                 {
-                    System.Console.Error.WriteLine("Path " + PrintSingle(p));
+                    System.Console.Error.WriteLine("Path " + this.PrintSingle(p));
                 }
             }
             IntervalSet result = new IntervalSet();
@@ -112,8 +112,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             {
                 foreach (List<Edge> p in all_parses)
                 {
-                    HashSet<ATNState> set = ComputeSingle(p);
-                    if (logClosure)
+                    HashSet<ATNState> set = this.ComputeSingle(p);
+                    if (this.logClosure)
                     {
                         System.Console.Error.WriteLine("All states for path "
                                                        + string.Join(" ", set.ToList()));
@@ -151,7 +151,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
 
         private bool CheckPredicate(PredicateTransition transition)
         {
-            return transition.Predicate.Eval(parser, ParserRuleContext.EmptyContext);
+            return transition.Predicate.Eval(this.parser, ParserRuleContext.EmptyContext);
         }
 
         private int entryValue;
@@ -160,13 +160,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         // Returns a list of transitions leading to a state that accepts input.
         private List<List<Edge>> EnterState(Edge t)
         {
-            int here = ++entryValue;
+            int here = ++this.entryValue;
             int index_on_transition = t.indexAtTransition;
             int token_index = t.index;
             ATNState state = t.to;
-            IToken input_token = input[token_index];
+            IToken input_token = this.input[token_index];
 
-            if (logParse)
+            if (this.logParse)
             {
                 System.Console.Error.WriteLine("Entry " + here
                                     + " State " + state
@@ -175,45 +175,45 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             }
 
             // Upon reaching the cursor, return match.
-            bool at_match = input_token.TokenIndex >= cursor;
+            bool at_match = input_token.TokenIndex >= this.cursor;
             if (at_match)
             {
-                if (logParse)
+                if (this.logParse)
                 {
                     System.Console.Error.Write("Entry " + here
                                          + " return ");
                 }
 
                 List<List<Edge>> res = new List<List<Edge>>() { new List<Edge>() { t } };
-                if (logParse)
+                if (this.logParse)
                 {
-                    string str = PrintResult(res);
+                    string str = this.PrintResult(res);
                     System.Console.Error.WriteLine(str);
                 }
                 return res;
             }
 
-            if (visited.ContainsKey(new Pair<ATNState, int>(state, token_index)))
+            if (this.visited.ContainsKey(new Pair<ATNState, int>(state, token_index)))
             {
                 return null;
             }
 
-            visited[new Pair<ATNState, int>(state, token_index)] = true;
+            this.visited[new Pair<ATNState, int>(state, token_index)] = true;
 
             List<List<Edge>> result = new List<List<Edge>>();
 
-            if (stopStates.Contains(state))
+            if (this.stopStates.Contains(state))
             {
-                if (logParse)
+                if (this.logParse)
                 {
                     System.Console.Error.Write("Entry " + here
                                               + " return ");
                 }
 
                 List<List<Edge>> res = new List<List<Edge>>() { new List<Edge>() { t } };
-                if (logParse)
+                if (this.logParse)
                 {
-                    string str = PrintResult(res);
+                    string str = this.PrintResult(res);
                     System.Console.Error.WriteLine(str);
                 }
                 return res;
@@ -229,7 +229,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         {
                             RuleTransition rule = (RuleTransition)transition;
                             ATNState sub_state = rule.target;
-                            matches = EnterState(new Edge()
+                            matches = this.EnterState(new Edge()
                             {
                                 from = state,
                                 to = rule.target,
@@ -251,15 +251,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                                 {
                                     Edge f = match.First(); // "to" is possibly final state of submachine.
                                     Edge l = match.Last(); // "to" is start state of submachine.
-                                    bool is_final = stopStates.Contains(f.to);
-                                    bool is_at_caret = f.index >= cursor;
+                                    bool is_final = this.stopStates.Contains(f.to);
+                                    bool is_at_caret = f.index >= this.cursor;
                                     if (!is_final)
                                     {
                                         new_matches.Add(match);
                                     }
                                     else
                                     {
-                                        List<List<Edge>> xxx = EnterState(new Edge()
+                                        List<List<Edge>> xxx = this.EnterState(new Edge()
                                         {
                                             from = f.to,
                                             to = rule.followState,
@@ -294,9 +294,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         break;
 
                     case TransitionType.PREDICATE:
-                        if (CheckPredicate((PredicateTransition)transition))
+                        if (this.CheckPredicate((PredicateTransition)transition))
                         {
-                            matches = EnterState(new Edge()
+                            matches = this.EnterState(new Edge()
                             {
                                 from = state,
                                 to = transition.target,
@@ -313,7 +313,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         break;
 
                     case TransitionType.WILDCARD:
-                        matches = EnterState(new Edge()
+                        matches = this.EnterState(new Edge()
                         {
                             from = state,
                             to = transition.target,
@@ -332,7 +332,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                     default:
                         if (transition.IsEpsilon)
                         {
-                            matches = EnterState(new Edge()
+                            matches = this.EnterState(new Edge()
                             {
                                 from = state,
                                 to = transition.target,
@@ -353,12 +353,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                             {
                                 if (transition.TransitionType == TransitionType.NOT_SET)
                                 {
-                                    set = set.Complement(IntervalSet.Of(TokenConstants.MinUserTokenType, parser.Atn.maxTokenType));
+                                    set = set.Complement(IntervalSet.Of(TokenConstants.MinUserTokenType, this.parser.Atn.maxTokenType));
                                 }
 
                                 if (set.Contains(input_token.Type))
                                 {
-                                    matches = EnterState(new Edge()
+                                    matches = this.EnterState(new Edge()
                                     {
                                         from = state,
                                         to = transition.target,
@@ -393,7 +393,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                                 {
                                     if (prev.from != ff)
                                     {
-                                        System.Console.Error.WriteLine("Fail " + PrintSingle(x));
+                                        System.Console.Error.WriteLine("Fail " + this.PrintSingle(x));
                                         Debug.Assert(false);
                                     }
                                 }
@@ -410,11 +410,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                 return null;
             }
 
-            if (logParse)
+            if (this.logParse)
             {
                 System.Console.Error.Write("Entry " + here
                                               + " return ");
-                string str = PrintResult(result);
+                string str = this.PrintResult(result);
                 System.Console.Error.WriteLine(str);
             }
             return result;
@@ -447,10 +447,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                             {
                                 RuleTransition rule = (RuleTransition)transition;
                                 ATNState sub_state = rule.target;
-                                HashSet<ATNState> cl = closure(sub_state);
-                                if (cl.Where(s => stopStates.Contains(s) && s.atn == sub_state.atn).Any())
+                                HashSet<ATNState> cl = this.closure(sub_state);
+                                if (cl.Where(s => this.stopStates.Contains(s) && s.atn == sub_state.atn).Any())
                                 {
-                                    HashSet<ATNState> cl2 = closure(rule.followState);
+                                    HashSet<ATNState> cl2 = this.closure(rule.followState);
                                     cl.UnionWith(cl2);
                                 }
                                 foreach (ATNState c in cl)
@@ -461,7 +461,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                             break;
 
                         case TransitionType.PREDICATE:
-                            if (CheckPredicate((PredicateTransition)transition))
+                            if (this.CheckPredicate((PredicateTransition)transition))
                             {
                                 if (transition.target == null)
                                 {
@@ -496,10 +496,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             List<Edge> copy = parse.ToList();
             HashSet<ATNState> result = new HashSet<ATNState>();
-            if (logClosure)
+            if (this.logClosure)
             {
                 System.Console.Error.WriteLine("Computing closure for the following parse:");
-                System.Console.Error.Write(PrintSingle(parse));
+                System.Console.Error.Write(this.PrintSingle(parse));
                 System.Console.Error.WriteLine();
             }
 
@@ -522,12 +522,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
 
             for (; ; )
             {
-                if (logClosure)
+                if (this.logClosure)
                 {
                     System.Console.Error.WriteLine("Getting closure of " + current_state.stateNumber);
                 }
-                HashSet<ATNState> c = closure(current_state);
-                if (logClosure)
+                HashSet<ATNState> c = this.closure(current_state);
+                if (this.logClosure)
                 {
                     System.Console.Error.WriteLine("closure " + string.Join(" ", c.Select(s => s.stateNumber)));
                 }
@@ -609,7 +609,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             List<Edge> q = parse.ToList();
             q.Reverse();
-            List<IToken>.Enumerator ei = input.GetEnumerator();
+            List<IToken>.Enumerator ei = this.input.GetEnumerator();
             List<Edge>.Enumerator eq = q.GetEnumerator();
             bool fei = false;
             bool feq = false;
@@ -700,7 +700,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                     case TransitionType.NOT_SET:
                         {
                             IntervalSet set = w.label;
-                            set = set.Complement(IntervalSet.Of(TokenConstants.MinUserTokenType, parser.Atn.maxTokenType));
+                            set = set.Complement(IntervalSet.Of(TokenConstants.MinUserTokenType, this.parser.Atn.maxTokenType));
                             if (set != null && set.Count > 0)
                             {
                                 if (!set.Contains(v.Type))
@@ -748,7 +748,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         sym = "on action (eps)";
                         break;
                     case TransitionType.ATOM:
-                        sym = "on " + t.label.ToString() + " ('" + input[t.indexAtTransition].Text + "')";
+                        sym = "on " + t.label.ToString() + " ('" + this.input[t.indexAtTransition].Text + "')";
                         break;
                     case TransitionType.EPSILON:
                         sym = "on eps";
@@ -766,16 +766,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         sym = "on pred (eps)";
                         break;
                     case TransitionType.RANGE:
-                        sym = "on " + t.label.ToString() + " ('" + input[t.indexAtTransition].Text + "')";
+                        sym = "on " + t.label.ToString() + " ('" + this.input[t.indexAtTransition].Text + "')";
                         break;
                     case TransitionType.RULE:
-                        sym = "on " + parser.RuleNames[t.to.ruleIndex] + " (eps)";
+                        sym = "on " + this.parser.RuleNames[t.to.ruleIndex] + " (eps)";
                         break;
                     case TransitionType.SET:
-                        sym = "on " + t.label.ToString() + " ('" + input[t.indexAtTransition].Text + "')";
+                        sym = "on " + t.label.ToString() + " ('" + this.input[t.indexAtTransition].Text + "')";
                         break;
                     case TransitionType.WILDCARD:
-                        sym = "on wildcard ('" + input[t.indexAtTransition].Text + "')";
+                        sym = "on wildcard ('" + this.input[t.indexAtTransition].Text + "')";
                         break;
                     default:
                         break;
@@ -790,7 +790,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             StringBuilder sb = new StringBuilder();
             foreach (List<Edge> p in all_parses)
             {
-                sb.Append("||| " + PrintSingle(p));
+                sb.Append("||| " + this.PrintSingle(p));
             }
             return sb.ToString();
         }

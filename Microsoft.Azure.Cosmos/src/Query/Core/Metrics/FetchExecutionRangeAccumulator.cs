@@ -31,10 +31,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public FetchExecutionRangeAccumulator()
         {
-            constructionTime = DateTime.UtcNow;
+            this.constructionTime = DateTime.UtcNow;
             // This stopwatch is always running and is only used to calculate deltas that are synchronized with the construction time.
-            stopwatch = Stopwatch.StartNew();
-            fetchExecutionRanges = new List<FetchExecutionRange>();
+            this.stopwatch = Stopwatch.StartNew();
+            this.fetchExecutionRanges = new List<FetchExecutionRange>();
         }
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>the SchedulingMetricsResult.</returns>
         public IEnumerable<FetchExecutionRange> GetExecutionRanges()
         {
-            IEnumerable<FetchExecutionRange> returnValue = fetchExecutionRanges;
-            fetchExecutionRanges = new List<FetchExecutionRange>();
+            IEnumerable<FetchExecutionRange> returnValue = this.fetchExecutionRanges;
+            this.fetchExecutionRanges = new List<FetchExecutionRange>();
             return returnValue;
         }
 
@@ -53,11 +53,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public void BeginFetchRange()
         {
-            if (!isFetching)
+            if (!this.isFetching)
             {
                 // Calculating the start time as the construction time and the stopwatch as a delta.
-                startTime = constructionTime.Add(stopwatch.Elapsed);
-                isFetching = true;
+                this.startTime = this.constructionTime.Add(this.stopwatch.Elapsed);
+                this.isFetching = true;
             }
         }
 
@@ -70,19 +70,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <param name="retryCount">The number of times we retried for this fetch execution range.</param>
         public void EndFetchRange(string partitionIdentifier, string activityId, long numberOfDocuments, long retryCount)
         {
-            if (isFetching)
+            if (this.isFetching)
             {
                 // Calculating the end time as the construction time and the stopwatch as a delta.
-                endTime = constructionTime.Add(stopwatch.Elapsed);
+                this.endTime = this.constructionTime.Add(this.stopwatch.Elapsed);
                 FetchExecutionRange fetchExecutionRange = new FetchExecutionRange(
                     partitionIdentifier,
                     activityId,
-                    startTime,
-                    endTime,
+                    this.startTime,
+                    this.endTime,
                     numberOfDocuments,
                     retryCount);
-                fetchExecutionRanges.Add(fetchExecutionRange);
-                isFetching = false;
+                this.fetchExecutionRanges.Add(fetchExecutionRange);
+                this.isFetching = false;
             }
         }
     }

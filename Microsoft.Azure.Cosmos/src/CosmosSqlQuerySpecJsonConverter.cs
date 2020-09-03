@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos
 
         internal CosmosSqlQuerySpecJsonConverter(CosmosSerializer userSerializer)
         {
-            UserSerializer = userSerializer ?? throw new ArgumentNullException(nameof(userSerializer));
+            this.UserSerializer = userSerializer ?? throw new ArgumentNullException(nameof(userSerializer));
         }
 
         public override bool CanConvert(Type objectType)
@@ -42,7 +42,7 @@ namespace Microsoft.Azure.Cosmos
             writer.WritePropertyName("value");
 
             // Use the user serializer for the parameter values so custom conversions are correctly handled
-            using (Stream str = UserSerializer.ToStream(sqlParameter.Value))
+            using (Stream str = this.UserSerializer.ToStream(sqlParameter.Value))
             {
                 using (StreamReader streamReader = new StreamReader(str))
                 {

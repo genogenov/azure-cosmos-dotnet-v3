@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         {
             get
             {
-                if (!cosmosObject.TryGetValue("_rid", out CosmosElement cosmosElement))
+                if (!this.cosmosObject.TryGetValue("_rid", out CosmosElement cosmosElement))
                 {
                     throw new InvalidOperationException($"Underlying object does not have an '_rid' field.");
                 }
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         {
             get
             {
-                if (!cosmosObject.TryGetValue("orderByItems", out CosmosElement cosmosElement))
+                if (!this.cosmosObject.TryGetValue("orderByItems", out CosmosElement cosmosElement))
                 {
                     throw new InvalidOperationException($"Underlying object does not have an 'orderByItems' field.");
                 }
@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         {
             get
             {
-                if (!cosmosObject.TryGetValue("payload", out CosmosElement cosmosElement))
+                if (!this.cosmosObject.TryGetValue("payload", out CosmosElement cosmosElement))
                 {
                     throw new InvalidOperationException($"Underlying object does not have an 'payload' field.");
                 }

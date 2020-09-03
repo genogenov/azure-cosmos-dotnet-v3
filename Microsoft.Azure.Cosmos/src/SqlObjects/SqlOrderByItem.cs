@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression expression,
             bool isDescending)
         {
-            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            IsDescending = isDescending;
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            this.IsDescending = isDescending;
         }
 
         public SqlScalarExpression Expression { get; }

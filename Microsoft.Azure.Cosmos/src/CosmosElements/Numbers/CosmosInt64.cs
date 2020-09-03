@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
         {
         }
 
-        public override Number64 Value => GetValue();
+        public override Number64 Value => this.GetValue();
 
         public abstract long GetValue();
 
@@ -36,15 +36,15 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
 
         public override TOutput Accept<TArg, TOutput>(ICosmosNumberVisitor<TArg, TOutput> cosmosNumberVisitor, TArg input) => cosmosNumberVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosNumber cosmosNumber) => cosmosNumber is CosmosInt64 cosmosInt64 && Equals(cosmosInt64);
+        public override bool Equals(CosmosNumber cosmosNumber) => cosmosNumber is CosmosInt64 cosmosInt64 && this.Equals(cosmosInt64);
 
-        public bool Equals(CosmosInt64 cosmosInt64) => GetValue() == cosmosInt64.GetValue();
+        public bool Equals(CosmosInt64 cosmosInt64) => this.GetValue() == cosmosInt64.GetValue();
 
-        public override int GetHashCode() => (int)MurmurHash3.Hash32(GetValue(), 2562566505);
+        public override int GetHashCode() => (int)MurmurHash3.Hash32(this.GetValue(), 2562566505);
 
-        public int CompareTo(CosmosInt64 cosmosInt64) => GetValue().CompareTo(cosmosInt64.GetValue());
+        public int CompareTo(CosmosInt64 cosmosInt64) => this.GetValue().CompareTo(cosmosInt64.GetValue());
 
-        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteInt64Value(GetValue());
+        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteInt64Value(this.GetValue());
 
         public static CosmosInt64 Create(
             IJsonNavigator jsonNavigator,

@@ -8,6 +8,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Diagnostics;
+    using Microsoft.Azure.Cosmos.Json;
+    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggregators;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
@@ -72,9 +75,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
 
                 double requestCharge = 0;
                 long responseLengthBytes = 0;
-                while (!Source.IsDone)
+                while (!this.Source.IsDone)
                 {
-                    QueryResponseCore sourceResponse = await Source.DrainAsync(int.MaxValue, cancellationToken);
+                    QueryResponseCore sourceResponse = await this.Source.DrainAsync(int.MaxValue, cancellationToken);
                     if (!sourceResponse.IsSuccess)
                     {
                         return sourceResponse;
@@ -86,14 +89,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate
                     foreach (CosmosElement element in sourceResponse.CosmosElements)
                     {
                         RewrittenAggregateProjections rewrittenAggregateProjections = new RewrittenAggregateProjections(
-                            isValueAggregateQuery,
+                            this.isValueAggregateQuery,
                             element);
-                        singleGroupAggregator.AddValues(rewrittenAggregateProjections.Payload);
+                        this.singleGroupAggregator.AddValues(rewrittenAggregateProjections.Payload);
                     }
                 }
 
                 List<CosmosElement> finalResult = new List<CosmosElement>();
-                CosmosElement aggregationResult = singleGroupAggregator.GetResult();
+                CosmosElement aggregationResult = this.singleGroupAggregator.GetResult();
                 if (aggregationResult != null)
                 {
                     finalResult.Add(aggregationResult);

@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
              SqlPropertyName name,
              SqlScalarExpression value)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public SqlPropertyName Name { get; }

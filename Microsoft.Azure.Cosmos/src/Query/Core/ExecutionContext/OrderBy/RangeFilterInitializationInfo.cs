@@ -29,9 +29,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             int startIndex,
             int endIndex)
         {
-            Filter = filter ?? throw new ArgumentNullException("filter");
-            StartIndex = startIndex;
-            EndIndex = endIndex;
+            this.Filter = filter ?? throw new ArgumentNullException("filter");
+            this.StartIndex = startIndex;
+            this.EndIndex = endIndex;
         }
 
         /// <summary>

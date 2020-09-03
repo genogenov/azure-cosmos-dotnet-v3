@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public LeaseLostException(DocumentServiceLease lease)
             : base(DefaultMessage)
         {
-            Lease = lease;
+            this.Lease = lease;
         }
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public LeaseLostException(DocumentServiceLease lease, bool isGone)
             : base(DefaultMessage)
         {
-            Lease = lease;
-            IsGone = isGone;
+            this.Lease = lease;
+            this.IsGone = isGone;
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public LeaseLostException(DocumentServiceLease lease, Exception innerException, bool isGone)
             : base(DefaultMessage, innerException)
         {
-            Lease = lease;
-            IsGone = isGone;
+            this.Lease = lease;
+            this.IsGone = isGone;
         }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         protected LeaseLostException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            Lease = (DocumentServiceLease)info.GetValue("Lease", typeof(DocumentServiceLease));
-            IsGone = (bool)info.GetValue("IsGone", typeof(bool));
+            this.Lease = (DocumentServiceLease)info.GetValue("Lease", typeof(DocumentServiceLease));
+            this.IsGone = (bool)info.GetValue("IsGone", typeof(bool));
         }
 
         /// <summary>
@@ -107,8 +107,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue("Lease", Lease);
-            info.AddValue("IsGone", IsGone);
+            info.AddValue("Lease", this.Lease);
+            info.AddValue("IsGone", this.IsGone);
         }
     }
 }

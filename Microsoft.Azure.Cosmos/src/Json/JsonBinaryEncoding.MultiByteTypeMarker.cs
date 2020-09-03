@@ -4,6 +4,10 @@
 
 namespace Microsoft.Azure.Cosmos.Json
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     internal static partial class JsonBinaryEncoding
     {
         /// <summary>
@@ -32,14 +36,14 @@ namespace Microsoft.Azure.Cosmos.Json
                 byte six = 0,
                 byte seven = 0)
             {
-                Length = length;
-                One = one;
-                Two = two;
-                Three = three;
-                Four = four;
-                Five = five;
-                Six = six;
-                Seven = seven;
+                this.Length = length;
+                this.One = one;
+                this.Two = two;
+                this.Three = three;
+                this.Four = four;
+                this.Five = five;
+                this.Six = six;
+                this.Seven = seven;
             }
 
             public byte Length

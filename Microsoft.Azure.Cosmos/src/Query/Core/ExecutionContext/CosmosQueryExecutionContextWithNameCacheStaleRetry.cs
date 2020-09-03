@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
 
     internal sealed class CosmosQueryExecutionContextWithNameCacheStaleRetry : CosmosQueryExecutionContext
@@ -23,14 +24,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         {
             this.cosmosQueryContext = cosmosQueryContext ?? throw new ArgumentNullException(nameof(cosmosQueryContext));
             this.cosmosQueryExecutionContextFactory = cosmosQueryExecutionContextFactory ?? throw new ArgumentNullException(nameof(cosmosQueryExecutionContextFactory));
-            currentCosmosQueryExecutionContext = cosmosQueryExecutionContextFactory();
+            this.currentCosmosQueryExecutionContext = cosmosQueryExecutionContextFactory();
         }
 
-        public override bool IsDone => currentCosmosQueryExecutionContext.IsDone;
+        public override bool IsDone => this.currentCosmosQueryExecutionContext.IsDone;
 
         public override void Dispose()
         {
-            currentCosmosQueryExecutionContext.Dispose();
+            this.currentCosmosQueryExecutionContext.Dispose();
         }
 
         public override async Task<QueryResponseCore> ExecuteNextAsync(CancellationToken cancellationToken)
@@ -42,19 +43,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             // If results have already been pulled,
             // then an error should be returned to the user,
             // since it's not possible to combine query results from multiple containers.
-            QueryResponseCore queryResponse = await currentCosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
+            QueryResponseCore queryResponse = await this.currentCosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
             if (
                 (queryResponse.StatusCode == System.Net.HttpStatusCode.Gone) &&
                 (queryResponse.SubStatusCode == Documents.SubStatusCodes.NameCacheIsStale) &&
-                !alreadyRetried)
+                !this.alreadyRetried)
             {
-                await cosmosQueryContext.QueryClient.ForceRefreshCollectionCacheAsync(
-                        cosmosQueryContext.ResourceLink,
+                await this.cosmosQueryContext.QueryClient.ForceRefreshCollectionCacheAsync(
+                        this.cosmosQueryContext.ResourceLink,
                         cancellationToken);
-                alreadyRetried = true;
-                currentCosmosQueryExecutionContext.Dispose();
-                currentCosmosQueryExecutionContext = cosmosQueryExecutionContextFactory();
-                return await ExecuteNextAsync(cancellationToken);
+                this.alreadyRetried = true;
+                this.currentCosmosQueryExecutionContext.Dispose();
+                this.currentCosmosQueryExecutionContext = this.cosmosQueryExecutionContextFactory();
+                return await this.ExecuteNextAsync(cancellationToken);
             }
 
             return queryResponse;
@@ -62,7 +63,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return currentCosmosQueryExecutionContext.GetCosmosElementContinuationToken();
+            return this.currentCosmosQueryExecutionContext.GetCosmosElementContinuationToken();
         }
     }
 }

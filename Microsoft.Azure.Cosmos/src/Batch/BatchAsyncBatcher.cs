@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Cosmos
         private long currentSize = 0;
         private bool dispatched = false;
 
-        public bool IsEmpty => batchOperations.Count == 0;
+        public bool IsEmpty => this.batchOperations.Count == 0;
 
         public BatchAsyncBatcher(
             int maxBatchOperationCount,
@@ -71,7 +71,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(serializerCore));
             }
 
-            batchOperations = new List<ItemBatchOperation>(maxBatchOperationCount);
+            this.batchOperations = new List<ItemBatchOperation>(maxBatchOperationCount);
             this.executor = executor;
             this.retrier = retrier;
             this.maxBatchByteSize = maxBatchByteSize;
@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Cosmos
 
         public virtual bool TryAdd(ItemBatchOperation operation)
         {
-            if (dispatched)
+            if (this.dispatched)
             {
                 DefaultTrace.TraceCritical($"Add operation attempted on dispatched batch.");
                 return false;
@@ -97,26 +97,26 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(operation.Context));
             }
 
-            if (batchOperations.Count == maxBatchOperationCount)
+            if (this.batchOperations.Count == this.maxBatchOperationCount)
             {
-                DefaultTrace.TraceInformation($"Batch is full - Max operation count {maxBatchOperationCount} reached.");
+                DefaultTrace.TraceInformation($"Batch is full - Max operation count {this.maxBatchOperationCount} reached.");
                 return false;
             }
 
             int itemByteSize = operation.GetApproximateSerializedLength();
 
-            if (batchOperations.Count > 0 && itemByteSize + currentSize > maxBatchByteSize)
+            if (this.batchOperations.Count > 0 && itemByteSize + this.currentSize > this.maxBatchByteSize)
             {
-                DefaultTrace.TraceInformation($"Batch is full - Max byte size {maxBatchByteSize} reached.");
+                DefaultTrace.TraceInformation($"Batch is full - Max byte size {this.maxBatchByteSize} reached.");
                 return false;
             }
 
-            currentSize += itemByteSize;
+            this.currentSize += itemByteSize;
 
             // Operation index is in the scope of the current batch
-            operation.OperationIndex = batchOperations.Count;
+            operation.OperationIndex = this.batchOperations.Count;
             operation.Context.CurrentBatcher = this;
-            batchOperations.Add(operation);
+            this.batchOperations.Add(operation);
             return true;
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Azure.Cosmos
             BatchPartitionMetric partitionMetric,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            interlockIncrementCheck.EnterLockCheck();
+            this.interlockIncrementCheck.EnterLockCheck();
 
             PartitionKeyRangeServerBatchRequest serverRequest = null;
             ArraySegment<ItemBatchOperation> pendingOperations;
@@ -134,19 +134,19 @@ namespace Microsoft.Azure.Cosmos
                 try
                 {
                     // HybridRow serialization might leave some pending operations out of the batch
-                    Tuple<PartitionKeyRangeServerBatchRequest, ArraySegment<ItemBatchOperation>> createRequestResponse = await CreateServerRequestAsync(cancellationToken);
+                    Tuple<PartitionKeyRangeServerBatchRequest, ArraySegment<ItemBatchOperation>> createRequestResponse = await this.CreateServerRequestAsync(cancellationToken);
                     serverRequest = createRequestResponse.Item1;
                     pendingOperations = createRequestResponse.Item2;
                     // Any overflow goes to a new batch
                     foreach (ItemBatchOperation operation in pendingOperations)
                     {
-                        await retrier(operation, cancellationToken);
+                        await this.retrier(operation, cancellationToken);
                     }
                 }
                 catch (Exception ex)
                 {
                     // Exceptions happening during request creation, fail the entire list
-                    foreach (ItemBatchOperation itemBatchOperation in batchOperations)
+                    foreach (ItemBatchOperation itemBatchOperation in this.batchOperations)
                     {
                         itemBatchOperation.Context.Fail(this, ex);
                     }
@@ -158,7 +158,7 @@ namespace Microsoft.Azure.Cosmos
                 {
                     Stopwatch stopwatch = Stopwatch.StartNew();
 
-                    PartitionKeyRangeBatchExecutionResult result = await executor(serverRequest, cancellationToken);
+                    PartitionKeyRangeBatchExecutionResult result = await this.executor(serverRequest, cancellationToken);
 
                     int numThrottle = result.ServerResponse.Any(r => r.StatusCode == (System.Net.HttpStatusCode)StatusCodes.TooManyRequests) ? 1 : 0;
                     partitionMetric.Add(
@@ -166,7 +166,7 @@ namespace Microsoft.Azure.Cosmos
                         timeTakenInMilliseconds: stopwatch.ElapsedMilliseconds,
                         numberOfThrottles: numThrottle);
 
-                    using (PartitionKeyRangeBatchResponse batchResponse = new PartitionKeyRangeBatchResponse(serverRequest.Operations.Count, result.ServerResponse, serializerCore))
+                    using (PartitionKeyRangeBatchResponse batchResponse = new PartitionKeyRangeBatchResponse(serverRequest.Operations.Count, result.ServerResponse, this.serializerCore))
                     {
                         foreach (ItemBatchOperation itemBatchOperation in batchResponse.Operations)
                         {
@@ -183,13 +183,13 @@ namespace Microsoft.Azure.Cosmos
                             {
                                 response.DiagnosticsContext = batchResponse.DiagnosticsContext;
                             }
-
+                            
                             if (!response.IsSuccessStatusCode)
                             {
                                 Documents.ShouldRetryResult shouldRetry = await itemBatchOperation.Context.ShouldRetryAsync(response, cancellationToken);
                                 if (shouldRetry.ShouldRetry)
                                 {
-                                    await retrier(itemBatchOperation, cancellationToken);
+                                    await this.retrier(itemBatchOperation, cancellationToken);
                                     continue;
                                 }
                             }
@@ -216,24 +216,24 @@ namespace Microsoft.Azure.Cosmos
             }
             finally
             {
-                batchOperations.Clear();
-                dispatched = true;
+                this.batchOperations.Clear();
+                this.dispatched = true;
             }
         }
 
         internal virtual async Task<Tuple<PartitionKeyRangeServerBatchRequest, ArraySegment<ItemBatchOperation>>> CreateServerRequestAsync(CancellationToken cancellationToken)
         {
             // All operations should be for the same PKRange
-            string partitionKeyRangeId = batchOperations[0].Context.PartitionKeyRangeId;
+            string partitionKeyRangeId = this.batchOperations[0].Context.PartitionKeyRangeId;
 
-            ArraySegment<ItemBatchOperation> operationsArraySegment = new ArraySegment<ItemBatchOperation>(batchOperations.ToArray());
+            ArraySegment<ItemBatchOperation> operationsArraySegment = new ArraySegment<ItemBatchOperation>(this.batchOperations.ToArray());
             return await PartitionKeyRangeServerBatchRequest.CreateAsync(
                   partitionKeyRangeId,
                   operationsArraySegment,
-                  maxBatchByteSize,
-                  maxBatchOperationCount,
+                  this.maxBatchByteSize,
+                  this.maxBatchOperationCount,
                   ensureContinuousOperationIndexes: false,
-                  serializerCore: serializerCore,
+                  serializerCore: this.serializerCore,
                   cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }

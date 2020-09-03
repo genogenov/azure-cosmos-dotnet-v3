@@ -4,6 +4,7 @@
 
 namespace Microsoft.Azure.Cosmos
 {
+    using System;
     using System.Net;
     using Microsoft.Azure.Documents;
 
@@ -30,10 +31,10 @@ namespace Microsoft.Azure.Cosmos
             ThroughputProperties throughputProperties,
             CosmosDiagnostics diagnostics)
         {
-            StatusCode = httpStatusCode;
-            Headers = headers;
-            Resource = throughputProperties;
-            Diagnostics = diagnostics;
+            this.StatusCode = httpStatusCode;
+            this.Headers = headers;
+            this.Resource = throughputProperties;
+            this.Diagnostics = diagnostics;
         }
 
         /// <inheritdoc/>
@@ -49,13 +50,13 @@ namespace Microsoft.Azure.Cosmos
         public override CosmosDiagnostics Diagnostics { get; }
 
         /// <inheritdoc/>
-        public override double RequestCharge => Headers?.RequestCharge ?? 0;
+        public override double RequestCharge => this.Headers?.RequestCharge ?? 0;
 
         /// <inheritdoc/>
-        public override string ActivityId => Headers?.ActivityId;
+        public override string ActivityId => this.Headers?.ActivityId;
 
         /// <inheritdoc/>
-        public override string ETag => Headers?.ETag;
+        public override string ETag => this.Headers?.ETag;
 
         /// <summary>
         /// Gets minimum throughput in measurement of request units per second in the Azure Cosmos service.
@@ -64,9 +65,9 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (Headers?.GetHeaderValue<string>(WFConstants.BackendHeaders.MinimumRUsForOffer) != null)
+                if (this.Headers?.GetHeaderValue<string>(WFConstants.BackendHeaders.MinimumRUsForOffer) != null)
                 {
-                    return int.Parse(Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.MinimumRUsForOffer));
+                    return int.Parse(this.Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.MinimumRUsForOffer));
                 }
                 return null;
             }
@@ -79,9 +80,9 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.OfferReplacePending) != null)
+                if (this.Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.OfferReplacePending) != null)
                 {
-                    return bool.Parse(Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.OfferReplacePending));
+                    return Boolean.Parse(this.Headers.GetHeaderValue<string>(WFConstants.BackendHeaders.OfferReplacePending));
                 }
                 return null;
             }

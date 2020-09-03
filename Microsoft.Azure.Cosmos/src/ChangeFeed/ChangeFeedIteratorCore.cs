@@ -36,13 +36,13 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangeFeedRequestOptions changeFeedRequestOptions)
         {
             this.container = container ?? throw new ArgumentNullException(nameof(container));
-            clientContext = container.ClientContext;
-            changeFeedOptions = changeFeedRequestOptions ?? new ChangeFeedRequestOptions();
-            lazyContainerRid = new AsyncLazy<TryCatch<string>>(valueFactory: (innerCancellationToken) =>
+            this.clientContext = container.ClientContext;
+            this.changeFeedOptions = changeFeedRequestOptions ?? new ChangeFeedRequestOptions();
+            this.lazyContainerRid = new AsyncLazy<TryCatch<string>>(valueFactory: (innerCancellationToken) =>
             {
-                return TryInitializeContainerRIdAsync(innerCancellationToken);
+                return this.TryInitializeContainerRIdAsync(innerCancellationToken);
             });
-            hasMoreResults = true;
+            this.hasMoreResults = true;
 
             this.changeFeedStartFrom = changeFeedStartFrom;
             if (this.changeFeedStartFrom is ChangeFeedStartFromContinuation startFromContinuation)
@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                     throw new ArgumentException(string.Format(ClientResources.FeedToken_UnknownFormat, startFromContinuation.Continuation));
                 }
 
-                FeedRangeContinuation = feedRangeContinuation;
+                this.FeedRangeContinuation = feedRangeContinuation;
                 FeedRange feedRange = feedRangeContinuation.GetFeedRange();
                 string etag = feedRangeContinuation.GetContinuation();
 
@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             }
         }
 
-        public override bool HasMoreResults => hasMoreResults;
+        public override bool HasMoreResults => this.hasMoreResults;
 
         /// <summary>
         /// Get the next set of results from the cosmos service
@@ -69,17 +69,17 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         /// <returns>A query response from cosmos service</returns>
         public override async Task<ResponseMessage> ReadNextAsync(CancellationToken cancellationToken = default)
         {
-            CosmosDiagnosticsContext diagnostics = CosmosDiagnosticsContext.Create(changeFeedOptions);
+            CosmosDiagnosticsContext diagnostics = CosmosDiagnosticsContext.Create(this.changeFeedOptions);
             using (diagnostics.GetOverallScope())
             {
                 diagnostics.AddDiagnosticsInternal(
                     new FeedRangeStatistics(
-                        changeFeedStartFrom.Accept(ChangeFeedRangeExtractor.Singleton)));
-                if (!lazyContainerRid.ValueInitialized)
+                        this.changeFeedStartFrom.Accept(ChangeFeedRangeExtractor.Singleton)));
+                if (!this.lazyContainerRid.ValueInitialized)
                 {
                     using (diagnostics.CreateScope("InitializeContainerResourceId"))
                     {
-                        TryCatch<string> tryInitializeContainerRId = await lazyContainerRid.GetValueAsync(cancellationToken);
+                        TryCatch<string> tryInitializeContainerRId = await this.lazyContainerRid.GetValueAsync(cancellationToken);
                         if (!tryInitializeContainerRId.Succeeded)
                         {
                             if (!(tryInitializeContainerRId.Exception.InnerException is CosmosException cosmosException))
@@ -97,10 +97,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
                     using (diagnostics.CreateScope("InitializeContinuation"))
                     {
-                        await InitializeFeedContinuationAsync(cancellationToken);
+                        await this.InitializeFeedContinuationAsync(cancellationToken);
                     }
 
-                    TryCatch validateContainer = FeedRangeContinuation.ValidateContainer(lazyContainerRid.Result.Result);
+                    TryCatch validateContainer = this.FeedRangeContinuation.ValidateContainer(this.lazyContainerRid.Result.Result);
                     if (!validateContainer.Succeeded)
                     {
                         return CosmosExceptionFactory
@@ -116,11 +116,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                     }
                 }
 
-                return await ReadNextInternalAsync(diagnostics, cancellationToken);
+                return await this.ReadNextInternalAsync(diagnostics, cancellationToken);
             }
         }
 
-        public override CosmosElement GetCosmosElementContinuationToken() => CosmosElement.Parse(FeedRangeContinuation.ToString());
+        public override CosmosElement GetCosmosElementContinuationToken() => CosmosElement.Parse(this.FeedRangeContinuation.ToString());
 
         private async Task<ResponseMessage> ReadNextInternalAsync(
             CosmosDiagnosticsContext diagnosticsScope,
@@ -128,49 +128,49 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            ResponseMessage responseMessage = await clientContext.ProcessResourceOperationStreamAsync(
-                resourceUri: container.LinkUri,
+            ResponseMessage responseMessage = await this.clientContext.ProcessResourceOperationStreamAsync(
+                resourceUri: this.container.LinkUri,
                 resourceType: ResourceType.Document,
                 operationType: OperationType.ReadFeed,
-                requestOptions: changeFeedOptions,
-                cosmosContainerCore: container,
+                requestOptions: this.changeFeedOptions,
+                cosmosContainerCore: this.container,
                 requestEnricher: (request) =>
                 {
                     ChangeFeedStartFromRequestOptionPopulator visitor = new ChangeFeedStartFromRequestOptionPopulator(request);
-                    changeFeedStartFrom.Accept(visitor);
+                    this.changeFeedStartFrom.Accept(visitor);
                 },
                 partitionKey: default,
                 streamPayload: default,
                 diagnosticsContext: diagnosticsScope,
                 cancellationToken: cancellationToken);
 
-            if (await ShouldRetryAsync(responseMessage, cancellationToken))
+            if (await this.ShouldRetryAsync(responseMessage, cancellationToken))
             {
-                string etag = FeedRangeContinuation.GetContinuation();
-                FeedRange feedRange = FeedRangeContinuation.GetFeedRange();
-                changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(etag, (FeedRangeInternal)feedRange);
+                string etag = this.FeedRangeContinuation.GetContinuation();
+                FeedRange feedRange = this.FeedRangeContinuation.GetFeedRange();
+                this.changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(etag, (FeedRangeInternal)feedRange);
 
-                return await ReadNextInternalAsync(diagnosticsScope, cancellationToken);
+                return await this.ReadNextInternalAsync(diagnosticsScope, cancellationToken);
             }
 
             if (responseMessage.IsSuccessStatusCode
                 || (responseMessage.StatusCode == HttpStatusCode.NotModified))
             {
                 // Change Feed read uses Etag for continuation
-                hasMoreResults = responseMessage.IsSuccessStatusCode;
-                FeedRangeContinuation.ReplaceContinuation(responseMessage.Headers.ETag);
+                this.hasMoreResults = responseMessage.IsSuccessStatusCode;
+                this.FeedRangeContinuation.ReplaceContinuation(responseMessage.Headers.ETag);
 
-                string etag = FeedRangeContinuation.GetContinuation();
-                FeedRange feedRange = FeedRangeContinuation.GetFeedRange();
-                changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(etag, (FeedRangeInternal)feedRange);
+                string etag = this.FeedRangeContinuation.GetContinuation();
+                FeedRange feedRange = this.FeedRangeContinuation.GetFeedRange();
+                this.changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(etag, (FeedRangeInternal)feedRange);
 
                 return FeedRangeResponse.CreateSuccess(
                     responseMessage,
-                    FeedRangeContinuation);
+                    this.FeedRangeContinuation);
             }
             else
             {
-                hasMoreResults = false;
+                this.hasMoreResults = false;
                 return FeedRangeResponse.CreateFailure(responseMessage);
             }
         }
@@ -179,13 +179,13 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ResponseMessage responseMessage,
             CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetryOnNotModified = FeedRangeContinuation.HandleChangeFeedNotModified(responseMessage);
+            ShouldRetryResult shouldRetryOnNotModified = this.FeedRangeContinuation.HandleChangeFeedNotModified(responseMessage);
             if (shouldRetryOnNotModified.ShouldRetry)
             {
                 return true;
             }
 
-            ShouldRetryResult shouldRetryOnSplit = await FeedRangeContinuation.HandleSplitAsync(container, responseMessage, cancellationToken);
+            ShouldRetryResult shouldRetryOnSplit = await this.FeedRangeContinuation.HandleSplitAsync(this.container, responseMessage, cancellationToken);
             if (shouldRetryOnSplit.ShouldRetry)
             {
                 return true;
@@ -198,7 +198,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         {
             try
             {
-                string containerRId = await container.GetRIDAsync(cancellationToken);
+                string containerRId = await this.container.GetRIDAsync(cancellationToken);
                 return TryCatch<string>.FromResult(containerRId);
             }
             catch (CosmosException cosmosException)
@@ -210,34 +210,34 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         private async Task InitializeFeedContinuationAsync(CancellationToken cancellationToken)
         {
             // Initializing FeedRangeContinuation (double init pattern, since async needs to be deffered until the first read).
-            if (FeedRangeContinuation == null)
+            if (this.FeedRangeContinuation == null)
             {
-                FeedRangePartitionKeyRangeExtractor feedRangePartitionKeyRangeExtractor = new FeedRangePartitionKeyRangeExtractor(container);
+                FeedRangePartitionKeyRangeExtractor feedRangePartitionKeyRangeExtractor = new FeedRangePartitionKeyRangeExtractor(this.container);
 
-                FeedRange feedRange = changeFeedStartFrom.Accept(ChangeFeedRangeExtractor.Singleton);
+                FeedRange feedRange = this.changeFeedStartFrom.Accept(ChangeFeedRangeExtractor.Singleton);
                 IReadOnlyList<Documents.Routing.Range<string>> ranges = await ((FeedRangeInternal)feedRange).AcceptAsync(
                     feedRangePartitionKeyRangeExtractor,
                     cancellationToken);
 
-                FeedRangeContinuation = new FeedRangeCompositeContinuation(
-                    containerRid: lazyContainerRid.Result.Result,
+                this.FeedRangeContinuation = new FeedRangeCompositeContinuation(
+                    containerRid: this.lazyContainerRid.Result.Result,
                     feedRange: (FeedRangeInternal)feedRange,
                     ranges: ranges);
             }
-            else if (FeedRangeContinuation?.FeedRange is FeedRangePartitionKeyRange feedRangePartitionKeyRange)
+            else if (this.FeedRangeContinuation?.FeedRange is FeedRangePartitionKeyRange feedRangePartitionKeyRange)
             {
                 // Migration from PKRangeId scenario
-                FeedRangePartitionKeyRangeExtractor feedRangePartitionKeyRangeExtractor = new FeedRangePartitionKeyRangeExtractor(container);
+                FeedRangePartitionKeyRangeExtractor feedRangePartitionKeyRangeExtractor = new FeedRangePartitionKeyRangeExtractor(this.container);
 
                 IReadOnlyList<Documents.Routing.Range<string>> ranges = await feedRangePartitionKeyRange.AcceptAsync(
                     feedRangePartitionKeyRangeExtractor,
                     cancellationToken);
 
-                FeedRangeContinuation = new FeedRangeCompositeContinuation(
-                    containerRid: lazyContainerRid.Result.Result,
+                this.FeedRangeContinuation = new FeedRangeCompositeContinuation(
+                    containerRid: this.lazyContainerRid.Result.Result,
                     feedRange: new FeedRangeEpk(ranges[0]),
                     ranges: ranges,
-                    continuation: FeedRangeContinuation.GetContinuation());
+                    continuation: this.FeedRangeContinuation.GetContinuation());
             }
         }
     }

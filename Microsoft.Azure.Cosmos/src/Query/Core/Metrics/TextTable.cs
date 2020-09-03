@@ -47,17 +47,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
             // Building the table header
             string headerFormatString = TextTable.BuildLineFormatString("{{{0},-{1}}}", columns);
-            Header = string.Format(
+            this.Header = string.Format(
                 headerFormatString,
                 columns.Select(textTableColumn => textTableColumn.ColumnName).ToArray());
 
             // building the different lines
-            TopLine = TextTable.BuildLine(CellLeftTop, CellRightTop, CellHorizontalJointTop, columns);
-            MiddleLine = TextTable.BuildLine(CellVerticalJointLeft, CellVerticalJointRight, CellTJoint, columns);
-            BottomLine = TextTable.BuildLine(CellLeftBottom, CellRightBottom, CellHorizontalJointBottom, columns);
+            this.TopLine = TextTable.BuildLine(CellLeftTop, CellRightTop, CellHorizontalJointTop, columns);
+            this.MiddleLine = TextTable.BuildLine(CellVerticalJointLeft, CellVerticalJointRight, CellTJoint, columns);
+            this.BottomLine = TextTable.BuildLine(CellLeftBottom, CellRightBottom, CellHorizontalJointBottom, columns);
 
             // building the row format string
-            rowFormatString = TextTable.BuildLineFormatString("{{{0},{1}}}", columns);
+            this.rowFormatString = TextTable.BuildLineFormatString("{{{0},{1}}}", columns);
         }
 
         public string Header { get; }
@@ -70,12 +70,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         public string GetRow(params object[] cells)
         {
-            if (cells.Length != columns.Count)
+            if (cells.Length != this.columns.Count)
             {
                 throw new ArgumentException("Cells in a row needs to have exactly 1 element per column");
             }
 
-            return string.Format(rowFormatString, cells);
+            return string.Format(this.rowFormatString, cells);
         }
 
         private static string BuildLine(char firstChar, char lastChar, char seperator, IEnumerable<Column> columns)
@@ -125,8 +125,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
             public Column(string columnName, int columnWidth)
             {
-                ColumnName = columnName;
-                ColumnWidth = columnWidth;
+                this.ColumnName = columnName;
+                this.ColumnWidth = columnWidth;
             }
         }
     }

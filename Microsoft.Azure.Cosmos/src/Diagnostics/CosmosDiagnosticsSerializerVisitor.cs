@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Rntbd;
     using Newtonsoft.Json;
 
@@ -18,297 +19,297 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
 
         public CosmosDiagnosticsSerializerVisitor(TextWriter textWriter)
         {
-            jsonWriter = new JsonTextWriter(textWriter ?? throw new ArgumentNullException(nameof(textWriter)));
+            this.jsonWriter = new JsonTextWriter(textWriter ?? throw new ArgumentNullException(nameof(textWriter)));
         }
 
         public override void Visit(PointOperationStatistics pointOperationStatistics)
         {
-            jsonWriter.WriteStartObject();
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue("PointOperationStatistics");
+            this.jsonWriter.WriteStartObject();
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue("PointOperationStatistics");
 
-            jsonWriter.WritePropertyName("ActivityId");
-            jsonWriter.WriteValue(pointOperationStatistics.ActivityId);
+            this.jsonWriter.WritePropertyName("ActivityId");
+            this.jsonWriter.WriteValue(pointOperationStatistics.ActivityId);
 
-            jsonWriter.WritePropertyName("ResponseTimeUtc");
-            jsonWriter.WriteValue(pointOperationStatistics.ResponseTimeUtc.ToString("o", CultureInfo.InvariantCulture));
+            this.jsonWriter.WritePropertyName("ResponseTimeUtc");
+            this.jsonWriter.WriteValue(pointOperationStatistics.ResponseTimeUtc.ToString("o", CultureInfo.InvariantCulture));
 
-            jsonWriter.WritePropertyName("StatusCode");
-            jsonWriter.WriteValue((int)pointOperationStatistics.StatusCode);
+            this.jsonWriter.WritePropertyName("StatusCode");
+            this.jsonWriter.WriteValue((int)pointOperationStatistics.StatusCode);
 
-            jsonWriter.WritePropertyName("SubStatusCode");
-            jsonWriter.WriteValue((int)pointOperationStatistics.SubStatusCode);
+            this.jsonWriter.WritePropertyName("SubStatusCode");
+            this.jsonWriter.WriteValue((int)pointOperationStatistics.SubStatusCode);
 
-            jsonWriter.WritePropertyName("RequestCharge");
-            jsonWriter.WriteValue(pointOperationStatistics.RequestCharge);
+            this.jsonWriter.WritePropertyName("RequestCharge");
+            this.jsonWriter.WriteValue(pointOperationStatistics.RequestCharge);
 
-            jsonWriter.WritePropertyName("RequestUri");
-            jsonWriter.WriteValue(pointOperationStatistics.RequestUri);
+            this.jsonWriter.WritePropertyName("RequestUri");
+            this.jsonWriter.WriteValue(pointOperationStatistics.RequestUri);
 
             if (!string.IsNullOrEmpty(pointOperationStatistics.ErrorMessage))
             {
-                jsonWriter.WritePropertyName("ErrorMessage");
-                jsonWriter.WriteValue(pointOperationStatistics.ErrorMessage);
+                this.jsonWriter.WritePropertyName("ErrorMessage");
+                this.jsonWriter.WriteValue(pointOperationStatistics.ErrorMessage);
             }
 
-            jsonWriter.WritePropertyName("RequestSessionToken");
-            jsonWriter.WriteValue(pointOperationStatistics.RequestSessionToken);
+            this.jsonWriter.WritePropertyName("RequestSessionToken");
+            this.jsonWriter.WriteValue(pointOperationStatistics.RequestSessionToken);
 
-            jsonWriter.WritePropertyName("ResponseSessionToken");
-            jsonWriter.WriteValue(pointOperationStatistics.ResponseSessionToken);
+            this.jsonWriter.WritePropertyName("ResponseSessionToken");
+            this.jsonWriter.WriteValue(pointOperationStatistics.ResponseSessionToken);
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(CosmosDiagnosticsContext cosmosDiagnosticsContext)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("DiagnosticVersion");
-            jsonWriter.WriteValue(DiagnosticsVersion);
+            this.jsonWriter.WritePropertyName("DiagnosticVersion");
+            this.jsonWriter.WriteValue(DiagnosticsVersion);
 
-            jsonWriter.WritePropertyName("Summary");
-            jsonWriter.WriteStartObject();
-            jsonWriter.WritePropertyName("StartUtc");
-            jsonWriter.WriteValue(cosmosDiagnosticsContext.StartUtc.ToString("o", CultureInfo.InvariantCulture));
+            this.jsonWriter.WritePropertyName("Summary");
+            this.jsonWriter.WriteStartObject();
+            this.jsonWriter.WritePropertyName("StartUtc");
+            this.jsonWriter.WriteValue(cosmosDiagnosticsContext.StartUtc.ToString("o", CultureInfo.InvariantCulture));
 
             if (cosmosDiagnosticsContext.TryGetTotalElapsedTime(out TimeSpan totalElapsedTime))
             {
-                jsonWriter.WritePropertyName("TotalElapsedTimeInMs");
-                jsonWriter.WriteValue(totalElapsedTime.TotalMilliseconds);
+                this.jsonWriter.WritePropertyName("TotalElapsedTimeInMs");
+                this.jsonWriter.WriteValue(totalElapsedTime.TotalMilliseconds);
             }
             else
             {
-                jsonWriter.WritePropertyName("RunningElapsedTimeInMs");
-                jsonWriter.WriteValue(cosmosDiagnosticsContext.GetRunningElapsedTime().TotalMilliseconds);
+                this.jsonWriter.WritePropertyName("RunningElapsedTimeInMs");
+                this.jsonWriter.WriteValue(cosmosDiagnosticsContext.GetRunningElapsedTime().TotalMilliseconds);
             }
+            
+            this.jsonWriter.WritePropertyName("UserAgent");
+            this.jsonWriter.WriteValue(cosmosDiagnosticsContext.UserAgent);
 
-            jsonWriter.WritePropertyName("UserAgent");
-            jsonWriter.WriteValue(cosmosDiagnosticsContext.UserAgent);
+            this.jsonWriter.WritePropertyName("TotalRequestCount");
+            this.jsonWriter.WriteValue(cosmosDiagnosticsContext.GetTotalRequestCount());
 
-            jsonWriter.WritePropertyName("TotalRequestCount");
-            jsonWriter.WriteValue(cosmosDiagnosticsContext.GetTotalRequestCount());
+            this.jsonWriter.WritePropertyName("FailedRequestCount");
+            this.jsonWriter.WriteValue(cosmosDiagnosticsContext.GetFailedRequestCount());
 
-            jsonWriter.WritePropertyName("FailedRequestCount");
-            jsonWriter.WriteValue(cosmosDiagnosticsContext.GetFailedRequestCount());
+            this.jsonWriter.WriteEndObject();
 
-            jsonWriter.WriteEndObject();
-
-            jsonWriter.WritePropertyName("Context");
-            jsonWriter.WriteStartArray();
+            this.jsonWriter.WritePropertyName("Context");
+            this.jsonWriter.WriteStartArray();
 
             foreach (CosmosDiagnosticsInternal cosmosDiagnosticsInternal in cosmosDiagnosticsContext)
             {
                 cosmosDiagnosticsInternal.Accept(this);
             }
 
-            jsonWriter.WriteEndArray();
+            this.jsonWriter.WriteEndArray();
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(CosmosDiagnosticScope cosmosDiagnosticScope)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue(cosmosDiagnosticScope.Id);
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue(cosmosDiagnosticScope.Id);
 
             if (cosmosDiagnosticScope.IsComplete())
             {
-                jsonWriter.WritePropertyName("ElapsedTimeInMs");
+                this.jsonWriter.WritePropertyName("ElapsedTimeInMs");
             }
             else
             {
-                jsonWriter.WritePropertyName("RunningElapsedTimeInMs");
+                this.jsonWriter.WritePropertyName("RunningElapsedTimeInMs");
             }
 
-            jsonWriter.WriteValue(cosmosDiagnosticScope.GetElapsedTime().TotalMilliseconds);
+            this.jsonWriter.WriteValue(cosmosDiagnosticScope.GetElapsedTime().TotalMilliseconds);
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(QueryPageDiagnostics queryPageDiagnostics)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("PKRangeId");
-            jsonWriter.WriteValue(queryPageDiagnostics.PartitionKeyRangeId);
+            this.jsonWriter.WritePropertyName("PKRangeId");
+            this.jsonWriter.WriteValue(queryPageDiagnostics.PartitionKeyRangeId);
 
-            jsonWriter.WritePropertyName("StartUtc");
-            jsonWriter.WriteValue(queryPageDiagnostics.DiagnosticsContext.StartUtc.ToString("o", CultureInfo.InvariantCulture));
+            this.jsonWriter.WritePropertyName("StartUtc");
+            this.jsonWriter.WriteValue(queryPageDiagnostics.DiagnosticsContext.StartUtc.ToString("o", CultureInfo.InvariantCulture));
 
-            jsonWriter.WritePropertyName("QueryMetric");
-            jsonWriter.WriteValue(queryPageDiagnostics.QueryMetricText);
+            this.jsonWriter.WritePropertyName("QueryMetric");
+            this.jsonWriter.WriteValue(queryPageDiagnostics.QueryMetricText);
 
-            jsonWriter.WritePropertyName("IndexUtilization");
-            jsonWriter.WriteValue(queryPageDiagnostics.IndexUtilizationText);
+            this.jsonWriter.WritePropertyName("IndexUtilization");
+            this.jsonWriter.WriteValue(queryPageDiagnostics.IndexUtilizationText);
 
-            jsonWriter.WritePropertyName("ClientCorrelationId");
-            jsonWriter.WriteValue(queryPageDiagnostics.ClientCorrelationId);
+            this.jsonWriter.WritePropertyName("ClientCorrelationId");
+            this.jsonWriter.WriteValue(queryPageDiagnostics.ClientCorrelationId);
 
-            jsonWriter.WritePropertyName("Context");
-            jsonWriter.WriteStartArray();
+            this.jsonWriter.WritePropertyName("Context");
+            this.jsonWriter.WriteStartArray();
 
             foreach (CosmosDiagnosticsInternal cosmosDiagnosticsInternal in queryPageDiagnostics.DiagnosticsContext)
             {
                 cosmosDiagnosticsInternal.Accept(this);
             }
 
-            jsonWriter.WriteEndArray();
+            this.jsonWriter.WriteEndArray();
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(AddressResolutionStatistics addressResolutionStatistics)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue("AddressResolutionStatistics");
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue("AddressResolutionStatistics");
 
-            jsonWriter.WritePropertyName("StartTimeUtc");
-            jsonWriter.WriteValue(addressResolutionStatistics.StartTime.ToString("o", CultureInfo.InvariantCulture));
+            this.jsonWriter.WritePropertyName("StartTimeUtc");
+            this.jsonWriter.WriteValue(addressResolutionStatistics.StartTime.ToString("o", CultureInfo.InvariantCulture));
 
-            jsonWriter.WritePropertyName("EndTimeUtc");
+            this.jsonWriter.WritePropertyName("EndTimeUtc");
             if (addressResolutionStatistics.EndTime.HasValue)
             {
-                jsonWriter.WriteValue(addressResolutionStatistics.EndTime.Value.ToString("o", CultureInfo.InvariantCulture));
+                this.jsonWriter.WriteValue(addressResolutionStatistics.EndTime.Value.ToString("o", CultureInfo.InvariantCulture));
 
-                jsonWriter.WritePropertyName("ElapsedTimeInMs");
+                this.jsonWriter.WritePropertyName("ElapsedTimeInMs");
                 TimeSpan totaltime = addressResolutionStatistics.EndTime.Value - addressResolutionStatistics.StartTime;
-                jsonWriter.WriteValue(totaltime.TotalMilliseconds);
+                this.jsonWriter.WriteValue(totaltime.TotalMilliseconds);
             }
             else
             {
-                jsonWriter.WriteValue("EndTime Never Set.");
+                this.jsonWriter.WriteValue("EndTime Never Set.");
             }
 
-            jsonWriter.WritePropertyName("TargetEndpoint");
-            jsonWriter.WriteValue(addressResolutionStatistics.TargetEndpoint);
+            this.jsonWriter.WritePropertyName("TargetEndpoint");
+            this.jsonWriter.WriteValue(addressResolutionStatistics.TargetEndpoint);
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(StoreResponseStatistics storeResponseStatistics)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue("StoreResponseStatistics");
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue("StoreResponseStatistics");
 
-            jsonWriter.WritePropertyName("StartTimeUtc");
+            this.jsonWriter.WritePropertyName("StartTimeUtc");
             if (storeResponseStatistics.RequestStartTime.HasValue)
             {
-                jsonWriter.WriteValue(storeResponseStatistics.RequestStartTime.Value.ToString("o", CultureInfo.InvariantCulture));
+                this.jsonWriter.WriteValue(storeResponseStatistics.RequestStartTime.Value.ToString("o", CultureInfo.InvariantCulture));
             }
             else
             {
-                jsonWriter.WriteValue("Start time never set");
+                this.jsonWriter.WriteValue("Start time never set");
             }
 
-            jsonWriter.WritePropertyName("ResponseTimeUtc");
-            jsonWriter.WriteValue(storeResponseStatistics.RequestResponseTime.ToString("o", CultureInfo.InvariantCulture));
+            this.jsonWriter.WritePropertyName("ResponseTimeUtc");
+            this.jsonWriter.WriteValue(storeResponseStatistics.RequestResponseTime.ToString("o", CultureInfo.InvariantCulture));
 
             if (storeResponseStatistics.RequestStartTime.HasValue)
             {
-                jsonWriter.WritePropertyName("ElapsedTimeInMs");
+                this.jsonWriter.WritePropertyName("ElapsedTimeInMs");
                 TimeSpan totaltime = storeResponseStatistics.RequestResponseTime - storeResponseStatistics.RequestStartTime.Value;
-                jsonWriter.WriteValue(totaltime.TotalMilliseconds);
+                this.jsonWriter.WriteValue(totaltime.TotalMilliseconds);
             }
 
-            jsonWriter.WritePropertyName("ResourceType");
-            jsonWriter.WriteValue(storeResponseStatistics.RequestResourceType.ToString());
+            this.jsonWriter.WritePropertyName("ResourceType");
+            this.jsonWriter.WriteValue(storeResponseStatistics.RequestResourceType.ToString());
 
-            jsonWriter.WritePropertyName("OperationType");
-            jsonWriter.WriteValue(storeResponseStatistics.RequestOperationType.ToString());
+            this.jsonWriter.WritePropertyName("OperationType");
+            this.jsonWriter.WriteValue(storeResponseStatistics.RequestOperationType.ToString());
 
-            jsonWriter.WritePropertyName("LocationEndpoint");
-            jsonWriter.WriteValue(storeResponseStatistics.LocationEndpoint);
+            this.jsonWriter.WritePropertyName("LocationEndpoint");
+            this.jsonWriter.WriteValue(storeResponseStatistics.LocationEndpoint);
 
             if (storeResponseStatistics.StoreResult != null)
             {
-                jsonWriter.WritePropertyName("ActivityId");
-                jsonWriter.WriteValue(storeResponseStatistics.StoreResult.ActivityId);
+                this.jsonWriter.WritePropertyName("ActivityId");
+                this.jsonWriter.WriteValue(storeResponseStatistics.StoreResult.ActivityId);
 
-                jsonWriter.WritePropertyName("StoreResult");
-                jsonWriter.WriteValue(storeResponseStatistics.StoreResult.ToString());
+                this.jsonWriter.WritePropertyName("StoreResult");
+                this.jsonWriter.WriteValue(storeResponseStatistics.StoreResult.ToString());
             }
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(CosmosClientSideRequestStatistics clientSideRequestStatistics)
         {
-            jsonWriter.WriteStartObject();
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue("AggregatedClientSideRequestStatistics");
+            this.jsonWriter.WriteStartObject();
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue("AggregatedClientSideRequestStatistics");
 
-            WriteJsonUriArrayWithDuplicatesCounted("ContactedReplicas", clientSideRequestStatistics.ContactedReplicas);
+            this.WriteJsonUriArrayWithDuplicatesCounted("ContactedReplicas", clientSideRequestStatistics.ContactedReplicas);
 
-            WriteJsonUriArray("RegionsContacted", clientSideRequestStatistics.RegionsContacted);
-            WriteJsonUriArray("FailedReplicas", clientSideRequestStatistics.FailedReplicas);
+            this.WriteJsonUriArray("RegionsContacted", clientSideRequestStatistics.RegionsContacted);
+            this.WriteJsonUriArray("FailedReplicas", clientSideRequestStatistics.FailedReplicas);
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(FeedRangeStatistics feedRangeStatistics)
         {
-            jsonWriter.WriteStartObject();
-            jsonWriter.WritePropertyName("FeedRange");
-            jsonWriter.WriteValue(feedRangeStatistics.FeedRange.ToString());
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteStartObject();
+            this.jsonWriter.WritePropertyName("FeedRange");
+            this.jsonWriter.WriteValue(feedRangeStatistics.FeedRange.ToString());
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(RequestHandlerScope requestHandlerScope)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue(requestHandlerScope.Id);
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue(requestHandlerScope.Id);
 
             if (requestHandlerScope.TryGetTotalElapsedTime(out TimeSpan handlerOnlyElapsedTime))
             {
-                jsonWriter.WritePropertyName("HandlerElapsedTimeInMs");
-                jsonWriter.WriteValue(handlerOnlyElapsedTime.TotalMilliseconds);
+                this.jsonWriter.WritePropertyName("HandlerElapsedTimeInMs");
+                this.jsonWriter.WriteValue(handlerOnlyElapsedTime.TotalMilliseconds);
             }
             else
             {
-                jsonWriter.WritePropertyName("HandlerRunningElapsedTimeInMs");
-                jsonWriter.WriteValue(requestHandlerScope.GetCurrentElapsedTime());
+                this.jsonWriter.WritePropertyName("HandlerRunningElapsedTimeInMs");
+                this.jsonWriter.WriteValue(requestHandlerScope.GetCurrentElapsedTime());
             }
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         public override void Visit(CosmosSystemInfo processInfo)
         {
-            jsonWriter.WriteStartObject();
+            this.jsonWriter.WriteStartObject();
 
-            jsonWriter.WritePropertyName("Id");
-            jsonWriter.WriteValue("SystemInfo");
+            this.jsonWriter.WritePropertyName("Id");
+            this.jsonWriter.WriteValue("SystemInfo");
 
-            jsonWriter.WritePropertyName("CpuHistory");
+            this.jsonWriter.WritePropertyName("CpuHistory");
             CpuLoadHistory cpuLoadHistory = processInfo.CpuLoadHistory;
-            jsonWriter.WriteValue(cpuLoadHistory.ToString());
+            this.jsonWriter.WriteValue(cpuLoadHistory.ToString());
 
-            jsonWriter.WriteEndObject();
+            this.jsonWriter.WriteEndObject();
         }
 
         private void WriteJsonUriArray(string propertyName, IEnumerable<Uri> uris)
         {
-            jsonWriter.WritePropertyName(propertyName);
-            jsonWriter.WriteStartArray();
+            this.jsonWriter.WritePropertyName(propertyName);
+            this.jsonWriter.WriteStartArray();
 
             if (uris != null)
             {
                 foreach (Uri contactedReplica in uris)
                 {
-                    jsonWriter.WriteValue(contactedReplica);
+                    this.jsonWriter.WriteValue(contactedReplica);
                 }
             }
 
-            jsonWriter.WriteEndArray();
+            this.jsonWriter.WriteEndArray();
         }
 
         /// <summary>
@@ -318,8 +319,8 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
         /// </summary>
         private void WriteJsonUriArrayWithDuplicatesCounted(string propertyName, List<Uri> uris)
         {
-            jsonWriter.WritePropertyName(propertyName);
-            jsonWriter.WriteStartArray();
+            this.jsonWriter.WritePropertyName(propertyName);
+            this.jsonWriter.WriteStartArray();
 
             if (uris != null)
             {
@@ -344,12 +345,12 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
                     // Then update them to the new URI and count
                     if (previous != null)
                     {
-                        jsonWriter.WriteStartObject();
-                        jsonWriter.WritePropertyName("Count");
-                        jsonWriter.WriteValue(duplicateCount);
-                        jsonWriter.WritePropertyName("Uri");
-                        jsonWriter.WriteValue(contactedReplica);
-                        jsonWriter.WriteEndObject();
+                        this.jsonWriter.WriteStartObject();
+                        this.jsonWriter.WritePropertyName("Count");
+                        this.jsonWriter.WriteValue(duplicateCount);
+                        this.jsonWriter.WritePropertyName("Uri");
+                        this.jsonWriter.WriteValue(contactedReplica);
+                        this.jsonWriter.WriteEndObject();
                     }
 
                     previous = contactedReplica;
@@ -357,7 +358,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
                 }
             }
 
-            jsonWriter.WriteEndArray();
+            this.jsonWriter.WriteEndArray();
         }
     }
 }

@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             OrderByQueryResult result2 = new OrderByQueryResult(producer2.Current);
 
             // First compare the documents based on the sort order of the query.
-            int cmp = CompareOrderByItems(result1.OrderByItems, result2.OrderByItems);
+            int cmp = this.CompareOrderByItems(result1.OrderByItems, result2.OrderByItems);
             if (cmp != 0)
             {
                 // If there is no tie just return that.
@@ -121,10 +121,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                 "OrderByResult instances should have at least 1 order-by item.");
 
             Debug.Assert(
-                sortOrders.Count == items1.Count,
+                this.sortOrders.Count == items1.Count,
                 "SortOrders must match size of order-by items.");
 
-            for (int i = 0; i < sortOrders.Count; ++i)
+            for (int i = 0; i < this.sortOrders.Count; ++i)
             {
                 int cmp = ItemComparer.Instance.Compare(
                     items1[i].Item,
@@ -132,7 +132,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
 
                 if (cmp != 0)
                 {
-                    return sortOrders[i] != SortOrder.Descending ? cmp : -cmp;
+                    return this.sortOrders[i] != SortOrder.Descending ? cmp : -cmp;
                 }
             }
 

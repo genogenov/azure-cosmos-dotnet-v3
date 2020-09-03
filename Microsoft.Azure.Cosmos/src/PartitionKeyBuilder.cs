@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Routing;
@@ -25,7 +26,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public PartitionKeyBuilder()
         {
-            partitionKeyValues = new List<object>();
+            this.partitionKeyValues = new List<object>();
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="PartitionKeyBuilder"/> to use. </returns>
         public PartitionKeyBuilder Add(string val)
         {
-            partitionKeyValues.Add(val);
+            this.partitionKeyValues.Add(val);
             return this;
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="PartitionKeyBuilder"/> to use. </returns>
         public PartitionKeyBuilder Add(double val)
         {
-            partitionKeyValues.Add(val);
+            this.partitionKeyValues.Add(val);
             return this;
         }
 
@@ -57,7 +58,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="PartitionKeyBuilder"/> to use. </returns>
         public PartitionKeyBuilder Add(bool val)
         {
-            partitionKeyValues.Add(val);
+            this.partitionKeyValues.Add(val);
             return this;
         }
 
@@ -67,7 +68,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="PartitionKeyBuilder"/> to use. </returns>
         public PartitionKeyBuilder AddNullValue()
         {
-            partitionKeyValues.Add(null);
+            this.partitionKeyValues.Add(null);
             return this;
         }
 
@@ -77,7 +78,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An instance of <see cref="PartitionKeyBuilder"/> to use. </returns>
         public PartitionKeyBuilder AddNoneType()
         {
-            partitionKeyValues.Add(PartitionKey.None);
+            this.partitionKeyValues.Add(PartitionKey.None);
             return this;
         }
 
@@ -97,21 +98,21 @@ namespace Microsoft.Azure.Cosmos
             //
             // For collections with multiple path keys, absence of a partition key values is
             // always treated as a PartitionKey.Undefined.
-            if (partitionKeyValues.Count == 0)
+            if (this.partitionKeyValues.Count == 0)
             {
                 throw new ArgumentException($"No partition key value has been specifed");
             }
 
-            if (partitionKeyValues.Count == 1 && PartitionKey.None.Equals(partitionKeyValues[0]))
+            if (this.partitionKeyValues.Count == 1 && PartitionKey.None.Equals(this.partitionKeyValues[0]))
             {
                 return PartitionKey.None;
             }
 
             PartitionKeyInternal partitionKeyInternal;
-            object[] valueArray = new object[partitionKeyValues.Count];
-            for (int i = 0; i < partitionKeyValues.Count; i++)
+            object[] valueArray = new object[this.partitionKeyValues.Count];
+            for (int i = 0; i < this.partitionKeyValues.Count; i++)
             {
-                object val = partitionKeyValues[i];
+                object val = this.partitionKeyValues[i];
                 if (PartitionKey.None.Equals(val))
                 {
                     valueArray[i] = Undefined.Value;

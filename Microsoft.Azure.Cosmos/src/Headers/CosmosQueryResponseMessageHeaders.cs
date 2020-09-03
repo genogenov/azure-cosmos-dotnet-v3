@@ -19,9 +19,9 @@ namespace Microsoft.Azure.Cosmos
             string containerRid)
         {
             base.ContinuationToken = continauationToken;
-            DisallowContinuationTokenMessage = disallowContinuationTokenMessage;
-            ResourceType = resourceType;
-            ContainerRid = containerRid;
+            this.DisallowContinuationTokenMessage = disallowContinuationTokenMessage;
+            this.ResourceType = resourceType;
+            this.ContainerRid = containerRid;
         }
 
         internal string DisallowContinuationTokenMessage { get; }
@@ -30,9 +30,9 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (DisallowContinuationTokenMessage != null)
+                if (this.DisallowContinuationTokenMessage != null)
                 {
-                    throw new ArgumentException(DisallowContinuationTokenMessage);
+                    throw new ArgumentException(this.DisallowContinuationTokenMessage);
                 }
 
                 return base.ContinuationToken;
@@ -52,9 +52,9 @@ namespace Microsoft.Azure.Cosmos
 
         internal CosmosQueryResponseMessageHeaders CloneKnownProperties()
         {
-            return CloneKnownProperties(
-                InternalContinuationToken,
-                DisallowContinuationTokenMessage);
+            return this.CloneKnownProperties(
+                this.InternalContinuationToken,
+                this.DisallowContinuationTokenMessage);
         }
 
         internal CosmosQueryResponseMessageHeaders CloneKnownProperties(
@@ -64,17 +64,17 @@ namespace Microsoft.Azure.Cosmos
             return new CosmosQueryResponseMessageHeaders(
                 continauationToken,
                 disallowContinuationTokenMessage,
-                ResourceType,
-                ContainerRid)
+                this.ResourceType,
+                this.ContainerRid)
             {
-                RequestCharge = RequestCharge,
-                ContentLength = ContentLength,
-                ActivityId = ActivityId,
-                ETag = ETag,
-                Location = Location,
-                RetryAfterLiteral = RetryAfterLiteral,
-                SubStatusCodeLiteral = SubStatusCodeLiteral,
-                ContentType = ContentType,
+                RequestCharge = this.RequestCharge,
+                ContentLength = this.ContentLength,
+                ActivityId = this.ActivityId,
+                ETag = this.ETag,
+                Location = this.Location,
+                RetryAfterLiteral = this.RetryAfterLiteral,
+                SubStatusCodeLiteral = this.SubStatusCodeLiteral,
+                ContentType = this.ContentType,
                 QueryMetricsText = QueryMetricsText
             };
         }

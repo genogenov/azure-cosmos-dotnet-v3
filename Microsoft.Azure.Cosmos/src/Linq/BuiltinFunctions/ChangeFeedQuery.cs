@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         private readonly ChangeFeedOptions feedOptions;
         private HttpStatusCode lastStatusCode = HttpStatusCode.OK;
         private string nextIfNoneMatch;
-        private readonly string ifModifiedSince;
+        private string ifModifiedSince;
         #endregion Fields
 
         #region Constructor
@@ -51,19 +51,19 @@ namespace Microsoft.Azure.Cosmos.Linq
             bool canUseStartFromBeginning = true;
             if (feedOptions.RequestContinuation != null)
             {
-                nextIfNoneMatch = feedOptions.RequestContinuation;
+                this.nextIfNoneMatch = feedOptions.RequestContinuation;
                 canUseStartFromBeginning = false;
             }
 
             if (feedOptions.StartTime.HasValue)
             {
-                ifModifiedSince = ConvertToHttpTime(feedOptions.StartTime.Value);
+                this.ifModifiedSince = this.ConvertToHttpTime(feedOptions.StartTime.Value);
                 canUseStartFromBeginning = false;
             }
 
             if (canUseStartFromBeginning && !feedOptions.StartFromBeginning)
             {
-                nextIfNoneMatch = IfNoneMatchAllHeaderValue;
+                this.nextIfNoneMatch = IfNoneMatchAllHeaderValue;
             }
         }
         #endregion Constructor
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             get
             {
-                return lastStatusCode != HttpStatusCode.NotModified;
+                return this.lastStatusCode != HttpStatusCode.NotModified;
             }
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>The Task object for the asynchronous response from query execution.</returns>
         public Task<DocumentFeedResponse<TResult>> ExecuteNextAsync<TResult>(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return ReadDocumentChangeFeedAsync<TResult>(resourceLink, cancellationToken);
+            return this.ReadDocumentChangeFeedAsync<TResult>(this.resourceLink, cancellationToken);
         }
 
         /// <summary>
@@ -105,28 +105,29 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>The Task object for the asynchronous response from query execution.</returns>
         public Task<DocumentFeedResponse<dynamic>> ExecuteNextAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return ExecuteNextAsync<dynamic>(cancellationToken);
+            return this.ExecuteNextAsync<dynamic>(cancellationToken);
         }
         #endregion IDocumentQuery<TResource>
 
         #region Private
         public Task<DocumentFeedResponse<TResult>> ReadDocumentChangeFeedAsync<TResult>(string resourceLink, CancellationToken cancellationToken)
         {
-            IDocumentClientRetryPolicy retryPolicy = client.ResetSessionTokenRetryPolicy.GetRequestPolicy();
+            IDocumentClientRetryPolicy retryPolicy = this.client.ResetSessionTokenRetryPolicy.GetRequestPolicy();
             return TaskHelper.InlineIfPossible(
-                () => ReadDocumentChangeFeedPrivateAsync<TResult>(resourceLink, retryPolicy, cancellationToken), retryPolicy, cancellationToken);
+                () => this.ReadDocumentChangeFeedPrivateAsync<TResult>(resourceLink, retryPolicy, cancellationToken), retryPolicy, cancellationToken);
         }
 
         private async Task<DocumentFeedResponse<TResult>> ReadDocumentChangeFeedPrivateAsync<TResult>(string link, IDocumentClientRetryPolicy retryPolicyInstance, CancellationToken cancellationToken)
         {
-            using (DocumentServiceResponse response = await GetFeedResponseAsync(link, resourceType, retryPolicyInstance, cancellationToken))
+            using (DocumentServiceResponse response = await this.GetFeedResponseAsync(link, this.resourceType, retryPolicyInstance, cancellationToken))
             {
-                lastStatusCode = response.StatusCode;
-                nextIfNoneMatch = response.Headers[HttpConstants.HttpHeaders.ETag];
+                this.lastStatusCode = response.StatusCode;
+                this.nextIfNoneMatch = response.Headers[HttpConstants.HttpHeaders.ETag];
                 if (response.ResponseBody != null && response.ResponseBody.Length > 0)
                 {
                     long responseLengthInBytes = response.ResponseBody.Length;
-                    IEnumerable<dynamic> feedResource = response.GetQueryResponse(typeof(TResource), out int itemCount);
+                    int itemCount = 0;
+                    IEnumerable<dynamic> feedResource = response.GetQueryResponse(typeof(TResource), out itemCount);
                     DocumentFeedResponse<dynamic> feedResponse = new DocumentFeedResponse<dynamic>(
                         feedResource,
                         itemCount,
@@ -154,57 +155,57 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             INameValueCollection headers = new DictionaryNameValueCollection();
 
-            if (feedOptions.MaxItemCount.HasValue)
+            if (this.feedOptions.MaxItemCount.HasValue)
             {
-                headers.Set(HttpConstants.HttpHeaders.PageSize, feedOptions.MaxItemCount.ToString());
+                headers.Set(HttpConstants.HttpHeaders.PageSize, this.feedOptions.MaxItemCount.ToString());
             }
 
-            if (feedOptions.SessionToken != null)
+            if (this.feedOptions.SessionToken != null)
             {
-                headers.Set(HttpConstants.HttpHeaders.SessionToken, feedOptions.SessionToken);
+                headers.Set(HttpConstants.HttpHeaders.SessionToken, this.feedOptions.SessionToken);
             }
 
-            if (resourceType.IsPartitioned() && feedOptions.PartitionKeyRangeId == null && feedOptions.PartitionKey == null)
+            if (resourceType.IsPartitioned() && this.feedOptions.PartitionKeyRangeId == null && this.feedOptions.PartitionKey == null)
             {
                 throw new ForbiddenException(RMResources.PartitionKeyRangeIdOrPartitionKeyMustBeSpecified);
             }
 
             // On REST level, change feed is using IfNoneMatch/ETag instead of continuation.
-            if (nextIfNoneMatch != null)
+            if (this.nextIfNoneMatch != null)
             {
-                headers.Set(HttpConstants.HttpHeaders.IfNoneMatch, nextIfNoneMatch);
+                headers.Set(HttpConstants.HttpHeaders.IfNoneMatch, this.nextIfNoneMatch);
             }
 
-            if (ifModifiedSince != null)
+            if (this.ifModifiedSince != null)
             {
-                headers.Set(HttpConstants.HttpHeaders.IfModifiedSince, ifModifiedSince);
+                headers.Set(HttpConstants.HttpHeaders.IfModifiedSince, this.ifModifiedSince);
             }
 
             headers.Set(HttpConstants.HttpHeaders.A_IM, HttpConstants.A_IMHeaderValues.IncrementalFeed);
 
-            if (feedOptions.PartitionKey != null)
+            if (this.feedOptions.PartitionKey != null)
             {
-                PartitionKeyInternal partitionKey = feedOptions.PartitionKey.InternalKey;
+                PartitionKeyInternal partitionKey = this.feedOptions.PartitionKey.InternalKey;
                 headers.Set(HttpConstants.HttpHeaders.PartitionKey, partitionKey.ToJsonString());
             }
 
-            if (feedOptions.IncludeTentativeWrites)
+            if (this.feedOptions.IncludeTentativeWrites)
             {
                 headers.Set(HttpConstants.HttpHeaders.IncludeTentativeWrites, bool.TrueString);
             }
 
-            using (DocumentServiceRequest request = client.CreateDocumentServiceRequest(
+            using (DocumentServiceRequest request = this.client.CreateDocumentServiceRequest(
                 OperationType.ReadFeed,
                 resourceLink,
                 resourceType,
                 headers))
             {
-                if (resourceType.IsPartitioned() && feedOptions.PartitionKeyRangeId != null)
+                if (resourceType.IsPartitioned() && this.feedOptions.PartitionKeyRangeId != null)
                 {
-                    request.RouteTo(new PartitionKeyRangeIdentity(feedOptions.PartitionKeyRangeId));
+                    request.RouteTo(new PartitionKeyRangeIdentity(this.feedOptions.PartitionKeyRangeId));
                 }
 
-                return await client.ReadFeedAsync(request, retryPolicyInstance, cancellationToken);
+                return await this.client.ReadFeedAsync(request, retryPolicyInstance, cancellationToken);
             }
         }
 

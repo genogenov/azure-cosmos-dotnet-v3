@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("lineStrings");
             }
 
-            LineStrings = new ReadOnlyCollection<LineStringCoordinates>(lineStrings);
+            this.LineStrings = new ReadOnlyCollection<LineStringCoordinates>(lineStrings);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return Equals(obj as MultiLineString);
+            return this.Equals(obj as MultiLineString);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return LineStrings.Aggregate(base.GetHashCode(), (current, value) => (current * 397) ^ value.GetHashCode());
+                return this.LineStrings.Aggregate(base.GetHashCode(), (current, value) => (current * 397) ^ value.GetHashCode());
             }
         }
 
@@ -113,7 +113,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return base.Equals(other) && LineStrings.SequenceEqual(other.LineStrings);
+            return base.Equals(other) && this.LineStrings.SequenceEqual(other.LineStrings);
         }
     }
 }

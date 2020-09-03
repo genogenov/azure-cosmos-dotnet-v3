@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of the current <see cref="PathsDefinition{T}"/>.</returns>
         public PathsDefinition<T> Path(string path)
         {
-            paths.Add(path);
+            this.paths.Add(path);
             return this;
         }
 
@@ -40,8 +40,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of the parent.</returns>
         public T Attach()
         {
-            attachCallback(paths);
-            return parent;
+            this.attachCallback(this.paths);
+            return this.parent;
         }
     }
 }

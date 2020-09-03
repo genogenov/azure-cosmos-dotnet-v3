@@ -9,6 +9,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Json;
+    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggregators;
@@ -55,7 +57,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
             this.groupingTable = groupingTable ?? throw new ArgumentNullException(nameof(groupingTable));
         }
 
-        public override bool IsDone => groupingTable.IsDone;
+        public override bool IsDone => this.groupingTable.IsDone;
 
         public static async Task<TryCatch<IDocumentQueryExecutionComponent>> TryCreateAsync(
             ExecutionEnvironment executionEnvironment,
@@ -104,7 +106,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
             {
                 // Aggregate the values for all groupings across all continuations.
                 RewrittenGroupByProjection groupByItem = new RewrittenGroupByProjection(result);
-                groupingTable.AddPayload(groupByItem);
+                this.groupingTable.AddPayload(groupByItem);
             }
         }
 
@@ -143,7 +145,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
             {
                 get
                 {
-                    if (!cosmosObject.TryGetValue(GroupByItemsPropertyName, out CosmosElement cosmosElement))
+                    if (!this.cosmosObject.TryGetValue(GroupByItemsPropertyName, out CosmosElement cosmosElement))
                     {
                         throw new InvalidOperationException($"Underlying object does not have an 'groupByItems' field.");
                     }
@@ -157,7 +159,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 }
             }
 
-            public bool TryGetPayload(out CosmosElement payload) => cosmosObject.TryGetValue(PayloadPropertyName, out payload);
+            public bool TryGetPayload(out CosmosElement payload) => this.cosmosObject.TryGetValue(PayloadPropertyName, out payload);
         }
 
         protected sealed class GroupingTable : IEnumerable<KeyValuePair<UInt128, SingleGroupAggregator>>
@@ -177,10 +179,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 this.groupByAliasToAggregateType = groupByAliasToAggregateType ?? throw new ArgumentNullException(nameof(groupByAliasToAggregateType));
                 this.orderedAliases = orderedAliases;
                 this.hasSelectValue = hasSelectValue;
-                table = new Dictionary<UInt128, SingleGroupAggregator>();
+                this.table = new Dictionary<UInt128, SingleGroupAggregator>();
             }
 
-            public int Count => table.Count;
+            public int Count => this.table.Count;
 
             public bool IsDone { get; private set; }
 
@@ -191,15 +193,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 {
                     UInt128 groupByKeysHash = DistinctHash.GetHash(rewrittenGroupByProjection.GroupByItems);
 
-                    if (!table.TryGetValue(groupByKeysHash, out SingleGroupAggregator singleGroupAggregator))
+                    if (!this.table.TryGetValue(groupByKeysHash, out SingleGroupAggregator singleGroupAggregator))
                     {
                         singleGroupAggregator = SingleGroupAggregator.TryCreate(
                             EmptyAggregateOperators,
-                            groupByAliasToAggregateType,
-                            orderedAliases,
-                            hasSelectValue,
+                            this.groupByAliasToAggregateType,
+                            this.orderedAliases,
+                            this.hasSelectValue,
                             continuationToken: null).Result;
-                        table[groupByKeysHash] = singleGroupAggregator;
+                        this.table[groupByKeysHash] = singleGroupAggregator;
                     }
 
                     singleGroupAggregator.AddValues(payload);
@@ -208,17 +210,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
 
             public IReadOnlyList<CosmosElement> Drain(int maxItemCount)
             {
-                List<UInt128> keys = table.Keys.Take(maxItemCount).ToList();
+                List<UInt128> keys = this.table.Keys.Take(maxItemCount).ToList();
                 List<SingleGroupAggregator> singleGroupAggregators = new List<SingleGroupAggregator>(keys.Count);
                 foreach (UInt128 key in keys)
                 {
-                    SingleGroupAggregator singleGroupAggregator = table[key];
+                    SingleGroupAggregator singleGroupAggregator = this.table[key];
                     singleGroupAggregators.Add(singleGroupAggregator);
                 }
 
                 foreach (UInt128 key in keys)
                 {
-                    table.Remove(key);
+                    this.table.Remove(key);
                 }
 
                 List<CosmosElement> results = new List<CosmosElement>();
@@ -227,9 +229,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                     results.Add(singleGroupAggregator.GetResult());
                 }
 
-                if (Count == 0)
+                if (this.Count == 0)
                 {
-                    IsDone = true;
+                    this.IsDone = true;
                 }
 
                 return results;
@@ -238,7 +240,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
             public CosmosElement GetCosmosElementContinuationToken()
             {
                 Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>();
-                foreach (KeyValuePair<UInt128, SingleGroupAggregator> kvp in table)
+                foreach (KeyValuePair<UInt128, SingleGroupAggregator> kvp in this.table)
                 {
                     dictionary.Add(kvp.Key.ToString(), kvp.Value.GetCosmosElementContinuationToken());
                 }
@@ -246,7 +248,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 return CosmosObject.Create(dictionary);
             }
 
-            public IEnumerator<KeyValuePair<UInt128, SingleGroupAggregator>> GetEnumerator => table.GetEnumerator();
+            public IEnumerator<KeyValuePair<UInt128, SingleGroupAggregator>> GetEnumerator => this.table.GetEnumerator();
 
             public static TryCatch<GroupingTable> TryCreateFromContinuationToken(
                 IReadOnlyDictionary<string, AggregateOperator?> groupByAliasToAggregateType,
@@ -299,9 +301,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 return TryCatch<GroupingTable>.FromResult(groupingTable);
             }
 
-            IEnumerator<KeyValuePair<UInt128, SingleGroupAggregator>> IEnumerable<KeyValuePair<UInt128, SingleGroupAggregator>>.GetEnumerator() => table.GetEnumerator();
+            IEnumerator<KeyValuePair<UInt128, SingleGroupAggregator>> IEnumerable<KeyValuePair<UInt128, SingleGroupAggregator>>.GetEnumerator() => this.table.GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator() => table.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => this.table.GetEnumerator();
         }
     }
 }

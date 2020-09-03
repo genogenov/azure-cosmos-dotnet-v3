@@ -41,10 +41,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
             string oldOwner = lease.Owner;
 
-            return await leaseUpdater.UpdateLeaseAsync(
+            return await this.leaseUpdater.UpdateLeaseAsync(
                 lease,
                 lease.Id,
-                requestOptionsFactory.GetPartitionKey(lease.Id),
+                this.requestOptionsFactory.GetPartitionKey(lease.Id),
                 serverLease =>
                 {
                     if (serverLease.Owner != oldOwner)
@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                         DefaultTrace.TraceInformation("{0} lease token was taken over by owner '{1}'", lease.CurrentLeaseToken, serverLease.Owner);
                         throw new LeaseLostException(lease);
                     }
-                    serverLease.Owner = options.HostName;
+                    serverLease.Owner = this.options.HostName;
                     serverLease.Properties = lease.Properties;
                     return serverLease;
                 }).ConfigureAwait(false);
@@ -61,11 +61,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         public override async Task<DocumentServiceLease> CreateLeaseIfNotExistAsync(string leaseToken, string continuationToken)
         {
             if (leaseToken == null)
-            {
                 throw new ArgumentNullException(nameof(leaseToken));
-            }
 
-            string leaseDocId = GetDocumentId(leaseToken);
+            string leaseDocId = this.GetDocumentId(leaseToken);
             DocumentServiceLeaseCore documentServiceLease = new DocumentServiceLeaseCore
             {
                 LeaseId = leaseDocId,
@@ -73,8 +71,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 ContinuationToken = continuationToken,
             };
 
-            bool created = await leaseContainer.TryCreateItemAsync<DocumentServiceLeaseCore>(
-                requestOptionsFactory.GetPartitionKey(documentServiceLease.Id),
+            bool created = await this.leaseContainer.TryCreateItemAsync<DocumentServiceLeaseCore>(
+                this.requestOptionsFactory.GetPartitionKey(documentServiceLease.Id),
                 documentServiceLease).ConfigureAwait(false) != null;
             if (created)
             {
@@ -89,21 +87,19 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         public override async Task ReleaseAsync(DocumentServiceLease lease)
         {
             if (lease == null)
-            {
                 throw new ArgumentNullException(nameof(lease));
-            }
 
-            DocumentServiceLeaseCore refreshedLease = await TryGetLeaseAsync(lease).ConfigureAwait(false);
+            DocumentServiceLeaseCore refreshedLease = await this.TryGetLeaseAsync(lease).ConfigureAwait(false);
             if (refreshedLease == null)
             {
                 DefaultTrace.TraceInformation("Lease with token {0} failed to release lease. The lease is gone already.", lease.CurrentLeaseToken);
                 throw new LeaseLostException(lease);
             }
 
-            await leaseUpdater.UpdateLeaseAsync(
+            await this.leaseUpdater.UpdateLeaseAsync(
                 refreshedLease,
                 refreshedLease.Id,
-                requestOptionsFactory.GetPartitionKey(lease.Id),
+                this.requestOptionsFactory.GetPartitionKey(lease.Id),
                 serverLease =>
                 {
                     if (serverLease.Owner != lease.Owner)
@@ -123,31 +119,29 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 throw new ArgumentNullException(nameof(lease));
             }
 
-            await leaseContainer.TryDeleteItemAsync<DocumentServiceLeaseCore>(
-                    requestOptionsFactory.GetPartitionKey(lease.Id),
+            await this.leaseContainer.TryDeleteItemAsync<DocumentServiceLeaseCore>(
+                    this.requestOptionsFactory.GetPartitionKey(lease.Id),
                     lease.Id).ConfigureAwait(false);
         }
 
         public override async Task<DocumentServiceLease> RenewAsync(DocumentServiceLease lease)
         {
             if (lease == null)
-            {
                 throw new ArgumentNullException(nameof(lease));
-            }
 
             // Get fresh lease. The assumption here is that checkpointing is done with higher frequency than lease renewal so almost
             // certainly the lease was updated in between.
-            DocumentServiceLeaseCore refreshedLease = await TryGetLeaseAsync(lease).ConfigureAwait(false);
+            DocumentServiceLeaseCore refreshedLease = await this.TryGetLeaseAsync(lease).ConfigureAwait(false);
             if (refreshedLease == null)
             {
                 DefaultTrace.TraceInformation("Lease with token {0} failed to renew lease. The lease is gone already.", lease.CurrentLeaseToken);
                 throw new LeaseLostException(lease);
             }
 
-            return await leaseUpdater.UpdateLeaseAsync(
+            return await this.leaseUpdater.UpdateLeaseAsync(
                 refreshedLease,
                 refreshedLease.Id,
-                requestOptionsFactory.GetPartitionKey(lease.Id),
+                this.requestOptionsFactory.GetPartitionKey(lease.Id),
                 serverLease =>
                 {
                     if (serverLease.Owner != lease.Owner)
@@ -161,21 +155,18 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override async Task<DocumentServiceLease> UpdatePropertiesAsync(DocumentServiceLease lease)
         {
-            if (lease == null)
-            {
-                throw new ArgumentNullException(nameof(lease));
-            }
+            if (lease == null) throw new ArgumentNullException(nameof(lease));
 
-            if (lease.Owner != options.HostName)
+            if (lease.Owner != this.options.HostName)
             {
                 DefaultTrace.TraceInformation("Lease with token '{0}' was taken over by owner '{1}' before lease properties update", lease.CurrentLeaseToken, lease.Owner);
                 throw new LeaseLostException(lease);
             }
 
-            return await leaseUpdater.UpdateLeaseAsync(
+            return await this.leaseUpdater.UpdateLeaseAsync(
                 lease,
                 lease.Id,
-                requestOptionsFactory.GetPartitionKey(lease.Id),
+                this.requestOptionsFactory.GetPartitionKey(lease.Id),
                 serverLease =>
                 {
                     if (serverLease.Owner != lease.Owner)
@@ -190,12 +181,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         private async Task<DocumentServiceLeaseCore> TryGetLeaseAsync(DocumentServiceLease lease)
         {
-            return await leaseContainer.TryGetItemAsync<DocumentServiceLeaseCore>(requestOptionsFactory.GetPartitionKey(lease.Id), lease.Id).ConfigureAwait(false);
+            return await this.leaseContainer.TryGetItemAsync<DocumentServiceLeaseCore>(this.requestOptionsFactory.GetPartitionKey(lease.Id), lease.Id).ConfigureAwait(false);
         }
 
         private string GetDocumentId(string partitionId)
         {
-            return options.GetPartitionLeasePrefix() + partitionId;
+            return this.options.GetPartitionLeasePrefix() + partitionId;
         }
     }
 }

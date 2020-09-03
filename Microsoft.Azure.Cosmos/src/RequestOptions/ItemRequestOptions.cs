@@ -93,8 +93,8 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public ConsistencyLevel? ConsistencyLevel
         {
-            get => BaseConsistencyLevel;
-            set => BaseConsistencyLevel = value;
+            get => this.BaseConsistencyLevel;
+            set => this.BaseConsistencyLevel = value;
         }
 
         /// <summary>
@@ -145,28 +145,28 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="request">The <see cref="RequestMessage"/></param>
         internal override void PopulateRequestOptions(RequestMessage request)
         {
-            if (PreTriggers != null && PreTriggers.Any())
+            if (this.PreTriggers != null && this.PreTriggers.Any())
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.PreTriggerInclude, PreTriggers);
+                request.Headers.Add(HttpConstants.HttpHeaders.PreTriggerInclude, this.PreTriggers);
             }
 
-            if (PostTriggers != null && PostTriggers.Any())
+            if (this.PostTriggers != null && this.PostTriggers.Any())
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.PostTriggerInclude, PostTriggers);
+                request.Headers.Add(HttpConstants.HttpHeaders.PostTriggerInclude, this.PostTriggers);
             }
 
-            if (IndexingDirective != null && IndexingDirective.HasValue)
+            if (this.IndexingDirective != null && this.IndexingDirective.HasValue)
             {
                 request.Headers.Add(
                     HttpConstants.HttpHeaders.IndexingDirective,
-                    IndexingDirectiveStrings.FromIndexingDirective(IndexingDirective.Value));
+                    IndexingDirectiveStrings.FromIndexingDirective(this.IndexingDirective.Value));
             }
 
-            RequestOptions.SetSessionToken(request, SessionToken);
+            RequestOptions.SetSessionToken(request, this.SessionToken);
 
             if (ItemRequestOptions.ShouldSetNoContentHeader(
-                EnableContentResponseOnWrite,
-                EnableContentResponseOnRead,
+                this.EnableContentResponseOnWrite,
+                this.EnableContentResponseOnRead,
                 request.OperationType))
             {
                 request.Headers.Add(HttpConstants.HttpHeaders.Prefer, HttpConstants.HttpHeaderValues.PreferReturnMinimal);

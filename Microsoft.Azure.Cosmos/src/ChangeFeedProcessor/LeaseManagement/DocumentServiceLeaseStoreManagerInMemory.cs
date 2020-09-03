@@ -37,28 +37,25 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
             DocumentServiceLeaseUpdater leaseUpdater,
             ConcurrentDictionary<string, DocumentServiceLease> container) // For testing purposes only.
         {
-            if (leaseUpdater == null)
-            {
-                throw new ArgumentException(nameof(leaseUpdater));
-            }
+            if (leaseUpdater == null) throw new ArgumentException(nameof(leaseUpdater));
 
-            leaseStore = new DocumentServiceLeaseStoreInMemory();
+            this.leaseStore = new DocumentServiceLeaseStoreInMemory();
 
-            leaseManager = new DocumentServiceLeaseManagerInMemory(leaseUpdater, container);
+            this.leaseManager = new DocumentServiceLeaseManagerInMemory(leaseUpdater, container);
 
-            leaseCheckpointer = new DocumentServiceLeaseCheckpointerCore(
+            this.leaseCheckpointer = new DocumentServiceLeaseCheckpointerCore(
                 leaseUpdater,
                 new PartitionedByIdCollectionRequestOptionsFactory());
 
-            leaseContainer = new DocumentServiceLeaseContainerInMemory(container);
+            this.leaseContainer = new DocumentServiceLeaseContainerInMemory(container);
         }
 
-        public override DocumentServiceLeaseStore LeaseStore => leaseStore;
+        public override DocumentServiceLeaseStore LeaseStore => this.leaseStore;
 
-        public override DocumentServiceLeaseManager LeaseManager => leaseManager;
+        public override DocumentServiceLeaseManager LeaseManager => this.leaseManager;
 
-        public override DocumentServiceLeaseCheckpointer LeaseCheckpointer => leaseCheckpointer;
+        public override DocumentServiceLeaseCheckpointer LeaseCheckpointer => this.leaseCheckpointer;
 
-        public override DocumentServiceLeaseContainer LeaseContainer => leaseContainer;
+        public override DocumentServiceLeaseContainer LeaseContainer => this.leaseContainer;
     }
 }

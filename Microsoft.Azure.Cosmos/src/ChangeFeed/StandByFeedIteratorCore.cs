@@ -34,15 +34,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangeFeedStartFrom changeFeedStartFrom,
             ChangeFeedRequestOptions options)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
+            if (container == null) throw new ArgumentNullException(nameof(container));
 
             this.clientContext = clientContext;
             this.container = container;
             this.changeFeedStartFrom = changeFeedStartFrom ?? throw new ArgumentNullException(nameof(changeFeedStartFrom));
-            changeFeedOptions = options;
+            this.changeFeedOptions = options;
         }
 
         /// <summary>
@@ -65,10 +62,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ResponseMessage response;
             do
             {
-                (currentKeyRangeId, response) = await ReadNextInternalAsync(cancellationToken);
+                (currentKeyRangeId, response) = await this.ReadNextInternalAsync(cancellationToken);
                 // Read only one range at a time - Breath first
-                compositeContinuationToken.MoveToNextToken();
-                (_, nextKeyRangeId) = await compositeContinuationToken.GetCurrentTokenAsync();
+                this.compositeContinuationToken.MoveToNextToken();
+                (_, nextKeyRangeId) = await this.compositeContinuationToken.GetCurrentTokenAsync();
                 if (response.StatusCode != HttpStatusCode.NotModified)
                 {
                     break;
@@ -85,7 +82,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             while (!firstNotModifiedKeyRangeId.Equals(nextKeyRangeId, StringComparison.InvariantCultureIgnoreCase));
 
             // Send to the user the composite state for all ranges
-            response.Headers.ContinuationToken = compositeContinuationToken.ToString();
+            response.Headers.ContinuationToken = this.compositeContinuationToken.ToString();
             return response;
         }
 
@@ -93,52 +90,52 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (compositeContinuationToken == null)
+            if (this.compositeContinuationToken == null)
             {
-                PartitionKeyRangeCache pkRangeCache = await clientContext.DocumentClient.GetPartitionKeyRangeCacheAsync();
-                containerRid = await container.GetRIDAsync(cancellationToken);
+                PartitionKeyRangeCache pkRangeCache = await this.clientContext.DocumentClient.GetPartitionKeyRangeCacheAsync();
+                this.containerRid = await this.container.GetRIDAsync(cancellationToken);
 
-                if (changeFeedStartFrom is ChangeFeedStartFromContinuation startFromContinuation)
+                if (this.changeFeedStartFrom is ChangeFeedStartFromContinuation startFromContinuation)
                 {
-                    compositeContinuationToken = await StandByFeedContinuationToken.CreateAsync(
-                        containerRid,
+                    this.compositeContinuationToken = await StandByFeedContinuationToken.CreateAsync(
+                        this.containerRid,
                         startFromContinuation.Continuation,
                         pkRangeCache.TryGetOverlappingRangesAsync);
-                    (CompositeContinuationToken token, string id) = await compositeContinuationToken.GetCurrentTokenAsync();
+                    (CompositeContinuationToken token, string id) = await this.compositeContinuationToken.GetCurrentTokenAsync();
 
                     if (token.Token != null)
                     {
-                        changeFeedStartFrom = ChangeFeedStartFrom.ContinuationToken(token.Token);
+                        this.changeFeedStartFrom = ChangeFeedStartFrom.ContinuationToken(token.Token);
                     }
                     else
                     {
-                        changeFeedStartFrom = ChangeFeedStartFrom.Beginning();
+                        this.changeFeedStartFrom = ChangeFeedStartFrom.Beginning();
                     }
                 }
                 else
                 {
-                    compositeContinuationToken = await StandByFeedContinuationToken.CreateAsync(
-                        containerRid,
+                    this.compositeContinuationToken = await StandByFeedContinuationToken.CreateAsync(
+                        this.containerRid,
                         initialStandByFeedContinuationToken: null,
                         pkRangeCache.TryGetOverlappingRangesAsync);
                 }
             }
 
-            (CompositeContinuationToken currentRangeToken, string rangeId) = await compositeContinuationToken.GetCurrentTokenAsync();
+            (CompositeContinuationToken currentRangeToken, string rangeId) = await this.compositeContinuationToken.GetCurrentTokenAsync();
             FeedRange feedRange = new FeedRangePartitionKeyRange(rangeId);
             if (currentRangeToken.Token != null)
             {
-                changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(currentRangeToken.Token, (FeedRangeInternal)feedRange);
+                this.changeFeedStartFrom = new ChangeFeedStartFromContinuationAndFeedRange(currentRangeToken.Token, (FeedRangeInternal)feedRange);
             }
             else
             {
-                changeFeedStartFrom = ChangeFeedStartFrom.Beginning(feedRange);
+                this.changeFeedStartFrom = ChangeFeedStartFrom.Beginning(feedRange);
             }
 
-            ResponseMessage response = await NextResultSetDelegateAsync(changeFeedOptions, cancellationToken);
-            if (await ShouldRetryFailureAsync(response, cancellationToken))
+            ResponseMessage response = await this.NextResultSetDelegateAsync(this.changeFeedOptions, cancellationToken);
+            if (await this.ShouldRetryFailureAsync(response, cancellationToken))
             {
-                return await ReadNextInternalAsync(cancellationToken);
+                return await this.ReadNextInternalAsync(cancellationToken);
             }
 
             if (response.IsSuccessStatusCode
@@ -168,7 +165,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             if (partitionSplit)
             {
                 // Forcing stale refresh of Partition Key Ranges Cache
-                await compositeContinuationToken.GetCurrentTokenAsync(forceRefresh: true);
+                await this.compositeContinuationToken.GetCurrentTokenAsync(forceRefresh: true);
                 return true;
             }
 
@@ -179,17 +176,17 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangeFeedRequestOptions options,
             CancellationToken cancellationToken)
         {
-            string resourceUri = container.LinkUri;
-            return clientContext.ProcessResourceOperationAsync<ResponseMessage>(
+            string resourceUri = this.container.LinkUri;
+            return this.clientContext.ProcessResourceOperationAsync<ResponseMessage>(
                 resourceUri: resourceUri,
                 resourceType: Documents.ResourceType.Document,
                 operationType: Documents.OperationType.ReadFeed,
                 requestOptions: options,
-                containerInternal: container,
+                containerInternal: this.container,
                 requestEnricher: (request) =>
                 {
                     ChangeFeedStartFromRequestOptionPopulator visitor = new ChangeFeedStartFromRequestOptionPopulator(request);
-                    changeFeedStartFrom.Accept(visitor);
+                    this.changeFeedStartFrom.Accept(visitor);
                 },
                 responseCreator: response => response,
                 partitionKey: default,

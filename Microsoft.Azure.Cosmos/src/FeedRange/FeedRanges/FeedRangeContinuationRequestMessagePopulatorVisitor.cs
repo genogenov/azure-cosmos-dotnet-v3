@@ -23,13 +23,13 @@ namespace Microsoft.Azure.Cosmos
         public void Visit(FeedRangeCompositeContinuation feedRangeCompositeContinuation)
         {
             // In case EPK has already been set by compute
-            if (!request.Properties.ContainsKey(HandlerConstants.StartEpkString))
+            if (!this.request.Properties.ContainsKey(HandlerConstants.StartEpkString))
             {
-                request.Properties[HandlerConstants.StartEpkString] = feedRangeCompositeContinuation.CurrentToken.Range.Min;
-                request.Properties[HandlerConstants.EndEpkString] = feedRangeCompositeContinuation.CurrentToken.Range.Max;
+                this.request.Properties[HandlerConstants.StartEpkString] = feedRangeCompositeContinuation.CurrentToken.Range.Min;
+                this.request.Properties[HandlerConstants.EndEpkString] = feedRangeCompositeContinuation.CurrentToken.Range.Max;
             }
 
-            fillContinuation(request, feedRangeCompositeContinuation.GetContinuation());
+            this.fillContinuation(this.request, feedRangeCompositeContinuation.GetContinuation());
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
         private SqlStringPathExpression(SqlPathExpression parentPath, SqlStringLiteral value)
             : base(parentPath)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public SqlStringLiteral Value { get; }

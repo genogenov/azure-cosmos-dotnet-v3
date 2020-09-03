@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             this.exception = exception;
         }
 
-        public override bool IsDone => returnedErrorResponse;
+        public override bool IsDone => this.returnedErrorResponse;
 
         public override void Dispose()
         {
@@ -33,8 +33,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
 
         public override Task<QueryResponseCore> ExecuteNextAsync(CancellationToken cancellationToken)
         {
-            QueryResponseCore queryResponse = QueryResponseFactory.CreateFromException(exception);
-            returnedErrorResponse = true;
+            QueryResponseCore queryResponse = QueryResponseFactory.CreateFromException(this.exception);
+            this.returnedErrorResponse = true;
             return Task.FromResult(queryResponse);
         }
 

@@ -74,8 +74,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                     return sourcePage;
                 }
 
-                List<CosmosElement> takedDocuments = sourcePage.CosmosElements.Take(takeCount).ToList();
-                takeCount -= takedDocuments.Count;
+                List<CosmosElement> takedDocuments = sourcePage.CosmosElements.Take(this.takeCount).ToList();
+                this.takeCount -= takedDocuments.Count;
 
                 return QueryResponseCore.CreateSuccess(
                     result: takedDocuments,
@@ -88,14 +88,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                if (IsDone)
+                if (this.IsDone)
                 {
                     return default;
                 }
 
                 TakeContinuationToken takeContinuationToken = new TakeContinuationToken(
-                    takeCount: takeCount,
-                    sourceToken: Source.GetCosmosElementContinuationToken());
+                    takeCount: this.takeCount,
+                    sourceToken: this.Source.GetCosmosElementContinuationToken());
                 return TakeContinuationToken.ToCosmosElement(takeContinuationToken);
             }
 
@@ -114,8 +114,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                         throw new ArgumentException($"{nameof(takeCount)} must be a non negative number.");
                     }
 
-                    TakeCount = (int)takeCount;
-                    SourceToken = sourceToken;
+                    this.TakeCount = (int)takeCount;
+                    this.SourceToken = sourceToken;
                 }
 
                 public int TakeCount { get; }

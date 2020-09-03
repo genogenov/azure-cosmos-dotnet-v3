@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                return startTime;
+                return this.startTime;
             }
 
             set
@@ -101,7 +101,7 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentException(RMResources.ChangeFeedOptionsStartTimeWithUnspecifiedDateTimeKind, "value");
                 }
 
-                startTime = value;
+                this.startTime = value;
             }
         }
 

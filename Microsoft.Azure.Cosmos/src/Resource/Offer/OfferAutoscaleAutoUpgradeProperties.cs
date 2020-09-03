@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos
 
         internal OfferAutoscaleAutoUpgradeProperties(int incrementPercent)
         {
-            ThroughputProperties = new AutoscaleThroughputProperties(incrementPercent);
+            this.ThroughputProperties = new AutoscaleThroughputProperties(incrementPercent);
         }
 
         [JsonProperty(PropertyName = Constants.Properties.AutopilotThroughputPolicy, NullValueHandling = NullValueHandling.Ignore)]
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Cosmos
         {
             public AutoscaleThroughputProperties(int incrementPercent)
             {
-                IncrementPercent = incrementPercent;
+                this.IncrementPercent = incrementPercent;
             }
 
             [JsonProperty(PropertyName = Constants.Properties.AutopilotThroughputPolicyIncrementPercent, NullValueHandling = NullValueHandling.Ignore)]

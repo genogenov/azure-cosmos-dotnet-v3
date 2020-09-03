@@ -19,17 +19,17 @@ namespace Microsoft.Azure.Cosmos
 
         public BatchAsyncBatcher CurrentBatcher { get; set; }
 
-        public Task<TransactionalBatchOperationResult> OperationTask => taskCompletionSource.Task;
+        public Task<TransactionalBatchOperationResult> OperationTask => this.taskCompletionSource.Task;
 
         private readonly IDocumentClientRetryPolicy retryPolicy;
 
-        private readonly TaskCompletionSource<TransactionalBatchOperationResult> taskCompletionSource = new TaskCompletionSource<TransactionalBatchOperationResult>();
+        private TaskCompletionSource<TransactionalBatchOperationResult> taskCompletionSource = new TaskCompletionSource<TransactionalBatchOperationResult>();
 
         public ItemBatchOperationContext(
             string partitionKeyRangeId,
             IDocumentClientRetryPolicy retryPolicy = null)
         {
-            PartitionKeyRangeId = partitionKeyRangeId;
+            this.PartitionKeyRangeId = partitionKeyRangeId;
             this.retryPolicy = retryPolicy;
         }
 
@@ -40,53 +40,53 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchOperationResult batchOperationResult,
             CancellationToken cancellationToken)
         {
-            if (retryPolicy == null
+            if (this.retryPolicy == null
                 || batchOperationResult.IsSuccessStatusCode)
             {
                 return Task.FromResult(ShouldRetryResult.NoRetry());
             }
 
             ResponseMessage responseMessage = batchOperationResult.ToResponseMessage();
-            return retryPolicy.ShouldRetryAsync(responseMessage, cancellationToken);
+            return this.retryPolicy.ShouldRetryAsync(responseMessage, cancellationToken);
         }
 
         public void Complete(
             BatchAsyncBatcher completer,
             TransactionalBatchOperationResult result)
         {
-            if (AssertBatcher(completer))
+            if (this.AssertBatcher(completer))
             {
-                taskCompletionSource.SetResult(result);
+                this.taskCompletionSource.SetResult(result);
             }
 
-            Dispose();
+            this.Dispose();
         }
 
         public void Fail(
             BatchAsyncBatcher completer,
             Exception exception)
         {
-            if (AssertBatcher(completer, exception))
+            if (this.AssertBatcher(completer, exception))
             {
-                taskCompletionSource.SetException(exception);
+                this.taskCompletionSource.SetException(exception);
             }
 
-            Dispose();
+            this.Dispose();
         }
 
         public void Dispose()
         {
-            CurrentBatcher = null;
+            this.CurrentBatcher = null;
         }
 
         private bool AssertBatcher(
             BatchAsyncBatcher completer,
             Exception innerException = null)
         {
-            if (!object.ReferenceEquals(completer, CurrentBatcher))
+            if (!object.ReferenceEquals(completer, this.CurrentBatcher))
             {
                 DefaultTrace.TraceCritical($"Operation was completed by incorrect batcher.");
-                taskCompletionSource.SetException(new Exception($"Operation was completed by incorrect batcher.", innerException));
+                this.taskCompletionSource.SetException(new Exception($"Operation was completed by incorrect batcher.", innerException));
                 return false;
             }
 

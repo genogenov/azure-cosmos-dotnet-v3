@@ -20,75 +20,75 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         public CosmosElementToQueryLiteral(StringBuilder stringBuilder)
         {
             this.stringBuilder = stringBuilder ?? throw new ArgumentNullException(nameof(stringBuilder));
-            cosmosNumberToQueryLiteral = new CosmosNumberToQueryLiteral(stringBuilder);
+            this.cosmosNumberToQueryLiteral = new CosmosNumberToQueryLiteral(stringBuilder);
         }
 
         public void Visit(CosmosArray cosmosArray)
         {
-            stringBuilder.Append("[");
+            this.stringBuilder.Append("[");
 
             for (int i = 0; i < cosmosArray.Count; i++)
             {
                 if (i > 0)
                 {
-                    stringBuilder.Append(",");
+                    this.stringBuilder.Append(",");
                 }
 
                 CosmosElement arrayItem = cosmosArray[i];
                 arrayItem.Accept(this);
             }
 
-            stringBuilder.Append("]");
+            this.stringBuilder.Append("]");
         }
 
         public void Visit(CosmosBinary cosmosBinary)
         {
-            stringBuilder.AppendFormat(
+            this.stringBuilder.AppendFormat(
                 "C_Binary(\"0x{0}\")",
-                PartitionKeyInternal.HexConvert.ToHex(cosmosBinary.Value.ToArray(), start: 0, length: cosmosBinary.Value.Length));
+                PartitionKeyInternal.HexConvert.ToHex(cosmosBinary.Value.ToArray(), start: 0, length: (int)cosmosBinary.Value.Length));
         }
 
         public void Visit(CosmosBoolean cosmosBoolean)
         {
-            stringBuilder.Append(cosmosBoolean.Value ? "true" : "false");
+            this.stringBuilder.Append(cosmosBoolean.Value ? "true" : "false");
         }
 
         public void Visit(CosmosGuid cosmosGuid)
         {
-            stringBuilder.AppendFormat("C_Guid(\"{0}\")", cosmosGuid.Value);
+            this.stringBuilder.AppendFormat("C_Guid(\"{0}\")", cosmosGuid.Value);
         }
 
         public void Visit(CosmosNull cosmosNull)
         {
-            stringBuilder.Append("null");
+            this.stringBuilder.Append("null");
         }
 
         public void Visit(CosmosNumber cosmosNumber)
         {
-            cosmosNumber.Accept(cosmosNumberToQueryLiteral);
+            cosmosNumber.Accept(this.cosmosNumberToQueryLiteral);
         }
 
         public void Visit(CosmosObject cosmosObject)
         {
-            stringBuilder.Append("{");
+            this.stringBuilder.Append("{");
 
             string separator = string.Empty;
             foreach (KeyValuePair<string, CosmosElement> kvp in cosmosObject)
             {
-                stringBuilder.Append(separator);
+                this.stringBuilder.Append(separator);
                 separator = ",";
 
                 CosmosString.Create(kvp.Key).Accept(this);
-                stringBuilder.Append(":");
+                this.stringBuilder.Append(":");
                 kvp.Value.Accept(this);
             }
 
-            stringBuilder.Append("}");
+            this.stringBuilder.Append("}");
         }
 
         public void Visit(CosmosString cosmosString)
         {
-            stringBuilder.Append(JsonConvert.SerializeObject(cosmosString.Value, DefaultJsonSerializationSettings.Value));
+            this.stringBuilder.Append(JsonConvert.SerializeObject(cosmosString.Value, DefaultJsonSerializationSettings.Value));
         }
 
         private sealed class CosmosNumberToQueryLiteral : ICosmosNumberVisitor
@@ -102,42 +102,42 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
 
             public void Visit(CosmosFloat32 cosmosFloat32)
             {
-                stringBuilder.AppendFormat("C_Float32({0:G7})", cosmosFloat32.GetValue());
+                this.stringBuilder.AppendFormat("C_Float32({0:G7})", cosmosFloat32.GetValue());
             }
 
             public void Visit(CosmosFloat64 cosmosFloat64)
             {
-                stringBuilder.AppendFormat("C_Float64({0:R})", cosmosFloat64.GetValue());
+                this.stringBuilder.AppendFormat("C_Float64({0:R})", cosmosFloat64.GetValue());
             }
 
             public void Visit(CosmosInt16 cosmosInt16)
             {
-                stringBuilder.AppendFormat("C_Int16({0})", cosmosInt16.GetValue());
+                this.stringBuilder.AppendFormat("C_Int16({0})", cosmosInt16.GetValue());
             }
 
             public void Visit(CosmosInt32 cosmosInt32)
             {
-                stringBuilder.AppendFormat("C_Int32({0})", cosmosInt32.GetValue());
+                this.stringBuilder.AppendFormat("C_Int32({0})", cosmosInt32.GetValue());
             }
 
             public void Visit(CosmosInt64 cosmosInt64)
             {
-                stringBuilder.AppendFormat("C_Int64({0})", cosmosInt64.GetValue());
+                this.stringBuilder.AppendFormat("C_Int64({0})", cosmosInt64.GetValue());
             }
 
             public void Visit(CosmosInt8 cosmosInt8)
             {
-                stringBuilder.AppendFormat("C_Int8({0})", cosmosInt8.GetValue());
+                this.stringBuilder.AppendFormat("C_Int8({0})", cosmosInt8.GetValue());
             }
 
             public void Visit(CosmosNumber64 cosmosNumber64)
             {
-                stringBuilder.Append(cosmosNumber64.GetValue());
+                this.stringBuilder.Append(cosmosNumber64.GetValue());
             }
 
             public void Visit(CosmosUInt32 cosmosUInt32)
             {
-                stringBuilder.AppendFormat("C_UInt32({0})", cosmosUInt32.GetValue());
+                this.stringBuilder.AppendFormat("C_UInt32({0})", cosmosUInt32.GetValue());
             }
         }
     }

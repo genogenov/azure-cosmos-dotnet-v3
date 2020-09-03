@@ -30,22 +30,22 @@ namespace Microsoft.Azure.Cosmos
             this.retryPolicy = retryPolicy;
             this.sessionContainer = sessionContainer;
             this.collectionCache = collectionCache;
-            request = null;
+            this.request = null;
         }
 
         public void OnBeforeSendRequest(DocumentServiceRequest request)
         {
             this.request = request;
-            retryPolicy.OnBeforeSendRequest(request);
+            this.retryPolicy.OnBeforeSendRequest(request);
         }
 
         public async Task<ShouldRetryResult> ShouldRetryAsync(Exception exception, CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetry = await retryPolicy.ShouldRetryAsync(exception, cancellationToken);
+            ShouldRetryResult shouldRetry = await this.retryPolicy.ShouldRetryAsync(exception, cancellationToken);
 
             DocumentClientException clientException = exception as DocumentClientException;
 
-            return await ShouldRetryInternalAsync(
+            return await this.ShouldRetryInternalAsync(
                 clientException?.StatusCode,
                 clientException?.GetSubStatus(),
                 shouldRetry,
@@ -56,8 +56,8 @@ namespace Microsoft.Azure.Cosmos
             ResponseMessage cosmosResponseMessage,
             CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetryResult = await retryPolicy.ShouldRetryAsync(cosmosResponseMessage, cancellationToken);
-            return await ShouldRetryInternalAsync(
+            ShouldRetryResult shouldRetryResult = await this.retryPolicy.ShouldRetryAsync(cosmosResponseMessage, cancellationToken);
+            return await this.ShouldRetryInternalAsync(
                 cosmosResponseMessage?.StatusCode,
                 cosmosResponseMessage?.Headers.SubStatusCode,
                 shouldRetryResult,
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Cosmos
             ShouldRetryResult shouldRetryResult,
             CancellationToken cancellationToken)
         {
-            if (request == null)
+            if (this.request == null)
             {
                 // someone didn't call OnBeforeSendRequest - nothing we can do
                 DefaultTrace.TraceWarning("Cannot apply RenameCollectionAwareClientRetryPolicy as OnBeforeSendRequest has not been called and there is no DocumentServiceRequest context.");
@@ -78,18 +78,18 @@ namespace Microsoft.Azure.Cosmos
             }
 
             Debug.Assert(shouldRetryResult != null);
-            if (!shouldRetryResult.ShouldRetry && !hasTriggered && statusCode.HasValue && subStatusCode.HasValue)
+            if (!shouldRetryResult.ShouldRetry && !this.hasTriggered && statusCode.HasValue && subStatusCode.HasValue)
             {
-                if (request.IsNameBased &&
+                if (this.request.IsNameBased &&
                     statusCode.Value == HttpStatusCode.NotFound &&
                     subStatusCode.Value == SubStatusCodes.ReadSessionNotAvailable)
                 {
                     // Clear the session token, because the collection name might be reused.
                     DefaultTrace.TraceWarning("Clear the the token for named base request {0}", request.ResourceAddress);
 
-                    sessionContainer.ClearTokenByCollectionFullname(request.ResourceAddress);
+                    this.sessionContainer.ClearTokenByCollectionFullname(request.ResourceAddress);
 
-                    hasTriggered = true;
+                    this.hasTriggered = true;
 
                     string oldCollectionRid = request.RequestContext.ResolvedCollectionRid;
 
@@ -98,7 +98,7 @@ namespace Microsoft.Azure.Cosmos
 
                     try
                     {
-                        ContainerProperties collectionInfo = await collectionCache.ResolveCollectionAsync(request, cancellationToken);
+                        ContainerProperties collectionInfo = await this.collectionCache.ResolveCollectionAsync(request, cancellationToken);
 
                         if (collectionInfo == null)
                         {

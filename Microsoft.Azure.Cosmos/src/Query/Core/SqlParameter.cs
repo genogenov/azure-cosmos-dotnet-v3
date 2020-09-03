@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <remarks>Names of parameters must begin with '@' and be a valid SQL identifier.</remarks>
         public SqlParameter(string name)
         {
-            Name = name;
+            this.Name = name;
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <remarks>Names of parameters must begin with '@' and be a valid SQL identifier. The value gets serialized and passed in as JSON to the document query.</remarks>
         public SqlParameter(string name, object value)
         {
-            Name = name;
-            Value = value;
+            this.Name = name;
+            this.Value = value;
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
                 return true;
             }
 
-            return Name == other.Name && Value == other.Value;
+            return this.Name == other.Name && this.Value == other.Value;
         }
 
         /// <summary>
@@ -91,8 +91,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 233) + (Name == null ? 0 : Name.GetHashCode());
-                hash = (hash * 233) + (Value == null ? 0 : Value.GetHashCode());
+                hash = (hash * 233) + (this.Name == null ? 0 : this.Name.GetHashCode());
+                hash = (hash * 233) + (this.Value == null ? 0 : this.Value.GetHashCode());
                 return hash;
             }
         }

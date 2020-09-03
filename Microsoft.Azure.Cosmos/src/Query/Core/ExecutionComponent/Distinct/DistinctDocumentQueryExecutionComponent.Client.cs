@@ -8,6 +8,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Json;
+    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
@@ -136,7 +138,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
                 foreach (CosmosElement document in sourceResponse.CosmosElements)
                 {
-                    if (distinctMap.Add(document, out UInt128 hash))
+                    if (this.distinctMap.Add(document, out UInt128 hash))
                     {
                         distinctResults.Add(document);
                     }
@@ -144,10 +146,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
                 // For clients we write out the continuation token if it's a streaming query.
                 QueryResponseCore queryResponseCore;
-                if (distinctQueryType == DistinctQueryType.Ordered)
+                if (this.distinctQueryType == DistinctQueryType.Ordered)
                 {
                     string updatedContinuationToken;
-                    if (IsDone)
+                    if (this.IsDone)
                     {
                         updatedContinuationToken = null;
                     }
@@ -155,7 +157,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
                     {
                         updatedContinuationToken = new DistinctContinuationToken(
                             sourceToken: sourceResponse.ContinuationToken,
-                            distinctMapToken: distinctMap.GetContinuationToken()).ToString();
+                            distinctMapToken: this.distinctMap.GetContinuationToken()).ToString();
                     }
 
                     queryResponseCore = QueryResponseCore.CreateSuccess(
@@ -198,8 +200,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
                 public DistinctContinuationToken(string sourceToken, string distinctMapToken)
                 {
-                    SourceToken = sourceToken;
-                    DistinctMapToken = distinctMapToken;
+                    this.SourceToken = sourceToken;
+                    this.DistinctMapToken = distinctMapToken;
                 }
 
                 public string SourceToken { get; }

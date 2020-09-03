@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression left,
             SqlScalarExpression right)
         {
-            Left = left ?? throw new ArgumentNullException(nameof(left));
-            Right = right ?? throw new ArgumentNullException(nameof(right));
+            this.Left = left ?? throw new ArgumentNullException(nameof(left));
+            this.Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
         public SqlScalarExpression Left { get; }

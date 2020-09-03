@@ -31,10 +31,10 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchResponse serverResponse,
             CosmosSerializerCore serializerCore)
         {
-            StatusCode = serverResponse.StatusCode;
+            this.StatusCode = serverResponse.StatusCode;
 
             this.serverResponse = serverResponse;
-            resultsByOperationIndex = new TransactionalBatchOperationResult[originalOperationsCount];
+            this.resultsByOperationIndex = new TransactionalBatchOperationResult[originalOperationsCount];
 
             StringBuilder errorMessageBuilder = new StringBuilder();
             List<ItemBatchOperation> itemBatchOperations = new List<ItemBatchOperation>();
@@ -42,45 +42,45 @@ namespace Microsoft.Azure.Cosmos
             for (int index = 0; index < serverResponse.Operations.Count; index++)
             {
                 int operationIndex = serverResponse.Operations[index].OperationIndex;
-                if (resultsByOperationIndex[operationIndex] == null
-                    || resultsByOperationIndex[operationIndex].StatusCode == (HttpStatusCode)StatusCodes.TooManyRequests)
+                if (this.resultsByOperationIndex[operationIndex] == null
+                    || this.resultsByOperationIndex[operationIndex].StatusCode == (HttpStatusCode)StatusCodes.TooManyRequests)
                 {
-                    resultsByOperationIndex[operationIndex] = serverResponse[index];
+                    this.resultsByOperationIndex[operationIndex] = serverResponse[index];
                 }
             }
 
             itemBatchOperations.AddRange(serverResponse.Operations);
-            Headers = serverResponse.Headers;
+            this.Headers = serverResponse.Headers;
 
             if (!string.IsNullOrEmpty(serverResponse.ErrorMessage))
             {
                 errorMessageBuilder.AppendFormat("{0}; ", serverResponse.ErrorMessage);
             }
 
-            ErrorMessage = errorMessageBuilder.Length > 2 ? errorMessageBuilder.ToString(0, errorMessageBuilder.Length - 2) : null;
-            Operations = itemBatchOperations;
-            SerializerCore = serializerCore;
+            this.ErrorMessage = errorMessageBuilder.Length > 2 ? errorMessageBuilder.ToString(0, errorMessageBuilder.Length - 2) : null;
+            this.Operations = itemBatchOperations;
+            this.SerializerCore = serializerCore;
         }
 
         /// <summary>
         /// Gets the ActivityId that identifies the server request made to execute the batch request.
         /// </summary>
-        public override string ActivityId => serverResponse.ActivityId;
+        public override string ActivityId => this.serverResponse.ActivityId;
 
         /// <inheritdoc />
-        public override CosmosDiagnostics Diagnostics => serverResponse.Diagnostics;
+        public override CosmosDiagnostics Diagnostics => this.serverResponse.Diagnostics;
 
-        internal override CosmosDiagnosticsContext DiagnosticsContext => serverResponse.DiagnosticsContext;
+        internal override CosmosDiagnosticsContext DiagnosticsContext => this.serverResponse.DiagnosticsContext;
 
         internal override CosmosSerializerCore SerializerCore { get; }
 
         /// <summary>
         /// Gets the number of operation results.
         /// </summary>
-        public override int Count => resultsByOperationIndex.Length;
+        public override int Count => this.resultsByOperationIndex.Length;
 
         /// <inheritdoc />
-        public override TransactionalBatchOperationResult this[int index] => resultsByOperationIndex[index];
+        public override TransactionalBatchOperationResult this[int index] => this.resultsByOperationIndex[index];
 
         /// <summary>
         /// Gets the result of the operation at the provided index in the batch - the returned result has a Resource of provided type.
@@ -90,17 +90,17 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>Result of batch operation that contains a Resource deserialized to specified type.</returns>
         public override TransactionalBatchOperationResult<T> GetOperationResultAtIndex<T>(int index)
         {
-            if (index >= Count)
+            if (index >= this.Count)
             {
                 throw new IndexOutOfRangeException();
             }
 
-            TransactionalBatchOperationResult result = resultsByOperationIndex[index];
+            TransactionalBatchOperationResult result = this.resultsByOperationIndex[index];
 
             T resource = default(T);
             if (result.ResourceStream != null)
             {
-                resource = SerializerCore.FromStream<T>(result.ResourceStream);
+                resource = this.SerializerCore.FromStream<T>(result.ResourceStream);
             }
 
             return new TransactionalBatchOperationResult<T>(result, resource);
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>Enumerator over the operation results.</returns>
         public override IEnumerator<TransactionalBatchOperationResult> GetEnumerator()
         {
-            foreach (TransactionalBatchOperationResult result in resultsByOperationIndex)
+            foreach (TransactionalBatchOperationResult result in this.resultsByOperationIndex)
             {
                 yield return result;
             }
@@ -125,7 +125,7 @@ namespace Microsoft.Azure.Cosmos
 #endif
         override IEnumerable<string> GetActivityIds()
         {
-            return new string[1] { ActivityId };
+            return new string[1] { this.ActivityId };
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="disposing">Indicates whether to dispose managed resources or not.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && !isDisposed)
+            if (disposing && !this.isDisposed)
             {
-                isDisposed = true;
-                serverResponse?.Dispose();
+                this.isDisposed = true;
+                this.serverResponse?.Dispose();
             }
 
             base.Dispose(disposing);

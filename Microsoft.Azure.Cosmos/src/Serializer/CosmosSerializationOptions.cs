@@ -4,6 +4,8 @@
 
 namespace Microsoft.Azure.Cosmos
 {
+    using Newtonsoft.Json.Serialization;
+
     /// <summary>
     /// This class provides a way to configure basic
     /// serializer settings.
@@ -16,9 +18,9 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public CosmosSerializationOptions()
         {
-            IgnoreNullValues = false;
-            Indented = false;
-            PropertyNamingPolicy = CosmosPropertyNamingPolicy.Default;
+            this.IgnoreNullValues = false;
+            this.Indented = false;
+            this.PropertyNamingPolicy = CosmosPropertyNamingPolicy.Default;
         }
 
         /// <summary>

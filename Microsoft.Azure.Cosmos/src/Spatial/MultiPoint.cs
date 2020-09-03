@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("points");
             }
 
-            Points = new ReadOnlyCollection<Position>(points);
+            this.Points = new ReadOnlyCollection<Position>(points);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return Equals(obj as MultiPoint);
+            return this.Equals(obj as MultiPoint);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </returns>
         public override int GetHashCode()
         {
-            return Points.Aggregate(base.GetHashCode(), (current, point) => (current * 397) ^ point.GetHashCode());
+            return this.Points.Aggregate(base.GetHashCode(), (current, point) => (current * 397) ^ point.GetHashCode());
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return base.Equals(other) && Points.SequenceEqual(other.Points);
+            return base.Equals(other) && this.Points.SequenceEqual(other.Points);
         }
     }
 }

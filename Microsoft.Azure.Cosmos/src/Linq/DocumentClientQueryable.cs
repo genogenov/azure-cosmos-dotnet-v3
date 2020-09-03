@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateDatabaseQuery(string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateDatabaseQuery(new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateDatabaseQuery(new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateDocumentCollectionQuery(string databaseLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateDocumentCollectionQuery(databaseLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateDocumentCollectionQuery(databaseLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="StoredProcedure"/>
         public IQueryable<dynamic> CreateStoredProcedureQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateStoredProcedureQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateStoredProcedureQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateTriggerQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateTriggerQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateTriggerQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateUserDefinedFunctionQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateUserDefinedFunctionQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateUserDefinedFunctionQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -424,7 +424,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateConflictQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateConflictQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateConflictQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -604,7 +604,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<T> CreateDocumentQuery<T>(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateDocumentQuery<T>(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateDocumentQuery<T>(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -626,7 +626,7 @@ namespace Microsoft.Azure.Cosmos
                   " Please use the override that does not take a partitionKey parameter.")]
         public IQueryable<T> CreateDocumentQuery<T>(string collectionLink, string sqlExpression, FeedOptions feedOptions, object partitionKey)
         {
-            return CreateDocumentQuery<T>(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions, partitionKey);
+            return this.CreateDocumentQuery<T>(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions, partitionKey);
         }
 
         /// <summary>
@@ -801,7 +801,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="Microsoft.Azure.Cosmos.Linq.IDocumentQuery"/>
         public IQueryable<dynamic> CreateDocumentQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateDocumentQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateDocumentQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>
@@ -822,7 +822,7 @@ namespace Microsoft.Azure.Cosmos
                   " Please use the override that does not take a partitionKey parameter.")]
         public IQueryable<dynamic> CreateDocumentQuery(string collectionLink, string sqlExpression, FeedOptions feedOptions, object partitionKey)
         {
-            return CreateDocumentQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions, partitionKey);
+            return this.CreateDocumentQuery(collectionLink, new SqlQuerySpec(sqlExpression), feedOptions, partitionKey);
         }
 
         /// <summary>
@@ -1043,7 +1043,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="IDocumentQuery"/>
         internal IQueryable<dynamic> CreateUserDefinedTypeQuery(string userDefinedTypesLink, string sqlExpression, FeedOptions feedOptions = null)
         {
-            return CreateUserDefinedTypeQuery(userDefinedTypesLink, new SqlQuerySpec(sqlExpression), feedOptions);
+            return this.CreateUserDefinedTypeQuery(userDefinedTypesLink, new SqlQuerySpec(sqlExpression), feedOptions);
         }
 
         /// <summary>

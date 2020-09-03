@@ -24,13 +24,13 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
             OperationType operationType,
             Uri locationEndpoint)
         {
-            RequestStartTime = requestStartTime;
-            RequestResponseTime = requestResponseTime;
-            StoreResult = storeResult;
-            RequestResourceType = resourceType;
-            RequestOperationType = operationType;
-            LocationEndpoint = locationEndpoint;
-            IsSupplementalResponse = operationType == OperationType.Head || operationType == OperationType.HeadFeed;
+            this.RequestStartTime = requestStartTime;
+            this.RequestResponseTime = requestResponseTime;
+            this.StoreResult = storeResult;
+            this.RequestResourceType = resourceType;
+            this.RequestOperationType = operationType;
+            this.LocationEndpoint = locationEndpoint;
+            this.IsSupplementalResponse = operationType == OperationType.Head || operationType == OperationType.HeadFeed;
         }
 
         public override void Accept(CosmosDiagnosticsInternalVisitor visitor)

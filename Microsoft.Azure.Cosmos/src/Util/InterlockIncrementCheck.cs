@@ -39,10 +39,10 @@ namespace Microsoft.Azure.Cosmos
         /// </example>
         public void EnterLockCheck()
         {
-            Interlocked.Increment(ref counter);
-            if (counter > maxConcurrentOperations)
+            Interlocked.Increment(ref this.counter);
+            if (this.counter > this.maxConcurrentOperations)
             {
-                throw new InvalidOperationException($"InterlockIncrementCheck detected {counter} with a maximum of {maxConcurrentOperations}.");
+                throw new InvalidOperationException($"InterlockIncrementCheck detected {this.counter} with a maximum of {this.maxConcurrentOperations}.");
             }
         }
     }

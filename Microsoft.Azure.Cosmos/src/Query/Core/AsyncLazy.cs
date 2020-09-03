@@ -25,25 +25,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core
             // Note that this class is not thread safe.
             // if the valueFactory has side effects than this will have issues.
             cancellationToken.ThrowIfCancellationRequested();
-            if (!ValueInitialized)
+            if (!this.ValueInitialized)
             {
-                value = await valueFactory(cancellationToken);
-                ValueInitialized = true;
+                this.value = await this.valueFactory(cancellationToken);
+                this.ValueInitialized = true;
             }
 
-            return value;
+            return this.value;
         }
 
         public T Result
         {
             get
             {
-                if (!ValueInitialized)
+                if (!this.ValueInitialized)
                 {
                     throw new InvalidOperationException("Can not retrieve value before initialization.");
                 }
 
-                return value;
+                return this.value;
             }
         }
     }

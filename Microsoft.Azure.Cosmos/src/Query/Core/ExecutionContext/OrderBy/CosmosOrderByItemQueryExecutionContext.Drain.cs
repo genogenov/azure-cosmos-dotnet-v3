@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             {
                 // Only drain from the highest priority document producer 
                 // We need to pop and push back the document producer tree, since the priority changes according to the sort order.
-                ItemProducerTree currentItemProducerTree = PopCurrentItemProducerTree();
+                ItemProducerTree currentItemProducerTree = this.PopCurrentItemProducerTree();
                 try
                 {
                     if (!currentItemProducerTree.HasMoreResults)
@@ -71,17 +71,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                     // If we are at the beginning of the page and seeing an rid from the previous page we should increment the skip count
                     // due to the fact that JOINs can make a document appear multiple times and across continuations, so we don't want to
                     // surface this more than needed. More information can be found in the continuation token docs.
-                    if (ShouldIncrementSkipCount(currentItemProducerTree.CurrentItemProducerTree.Root))
+                    if (this.ShouldIncrementSkipCount(currentItemProducerTree.CurrentItemProducerTree.Root))
                     {
-                        ++skipCount;
+                        ++this.skipCount;
                     }
                     else
                     {
-                        skipCount = 0;
+                        this.skipCount = 0;
                     }
 
-                    previousRid = orderByQueryResult.Rid;
-                    previousOrderByItems = orderByQueryResult.OrderByItems;
+                    this.previousRid = orderByQueryResult.Rid;
+                    this.previousOrderByItems = orderByQueryResult.OrderByItems;
 
                     if (!currentItemProducerTree.TryMoveNextDocumentWithinPage())
                     {
@@ -113,17 +113,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                 }
                 finally
                 {
-                    PushCurrentItemProducerTree(currentItemProducerTree);
+                    this.PushCurrentItemProducerTree(currentItemProducerTree);
                 }
             }
 
             return QueryResponseCore.CreateSuccess(
                 result: results,
-                requestCharge: requestChargeTracker.GetAndResetCharge(),
+                requestCharge: this.requestChargeTracker.GetAndResetCharge(),
                 activityId: null,
-                responseLengthBytes: GetAndResetResponseLengthBytes(),
+                responseLengthBytes: this.GetAndResetResponseLengthBytes(),
                 disallowContinuationTokenMessage: null,
-                continuationToken: ContinuationToken);
+                continuationToken: this.ContinuationToken);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             // If we are not at the beginning of the page and we saw the same rid again.
             return !currentItemProducer.IsAtBeginningOfPage &&
                 string.Equals(
-                    previousRid,
+                    this.previousRid,
                     new OrderByQueryResult(currentItemProducer.Current).Rid,
                     StringComparison.Ordinal);
         }

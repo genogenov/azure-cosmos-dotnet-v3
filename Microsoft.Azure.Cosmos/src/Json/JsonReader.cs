@@ -27,17 +27,17 @@ namespace Microsoft.Azure.Cosmos.Json
         /// </summary>
         protected JsonReader()
         {
-            JsonObjectState = new JsonObjectState(readMode: true);
+            this.JsonObjectState = new JsonObjectState(readMode: true);
         }
 
         /// <inheritdoc />
         public abstract JsonSerializationFormat SerializationFormat { get; }
 
         /// <inheritdoc />
-        public int CurrentDepth => JsonObjectState.CurrentDepth;
+        public int CurrentDepth => this.JsonObjectState.CurrentDepth;
 
         /// <inheritdoc />
-        public JsonTokenType CurrentTokenType => JsonObjectState.CurrentTokenType;
+        public JsonTokenType CurrentTokenType => this.JsonObjectState.CurrentTokenType;
 
         /// <summary>
         /// Creates a JsonReader that can read from the supplied byte array (assumes utf-8 encoding) with format marker.

@@ -41,21 +41,21 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         public override async Task RunAsync(CancellationToken cancellationToken)
         {
-            string lastContinuation = options.StartContinuation;
+            string lastContinuation = this.options.StartContinuation;
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                TimeSpan delay = options.FeedPollDelay;
+                TimeSpan delay = this.options.FeedPollDelay;
 
                 try
                 {
                     do
                     {
-                        ResponseMessage response = await resultSetIterator.ReadNextAsync(cancellationToken).ConfigureAwait(false);
+                        ResponseMessage response = await this.resultSetIterator.ReadNextAsync(cancellationToken).ConfigureAwait(false);
                         if (response.StatusCode != HttpStatusCode.NotModified && !response.IsSuccessStatusCode)
                         {
-                            DefaultTrace.TraceWarning("unsuccessful feed read: lease token '{0}' status code {1}. substatuscode {2}", options.LeaseToken, response.StatusCode, response.Headers.SubStatusCode);
-                            HandleFailedRequest(response.StatusCode, (int)response.Headers.SubStatusCode, lastContinuation);
+                            DefaultTrace.TraceWarning("unsuccessful feed read: lease token '{0}' status code {1}. substatuscode {2}", this.options.LeaseToken, response.StatusCode, response.Headers.SubStatusCode);
+                            this.HandleFailedRequest(response.StatusCode, (int)response.Headers.SubStatusCode, lastContinuation);
 
                             if (response.Headers.RetryAfter.HasValue)
                             {
@@ -67,12 +67,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
                         }
 
                         lastContinuation = response.Headers.ContinuationToken;
-                        if (resultSetIterator.HasMoreResults)
+                        if (this.resultSetIterator.HasMoreResults)
                         {
-                            await DispatchChangesAsync(response, cancellationToken).ConfigureAwait(false);
+                            await this.DispatchChangesAsync(response, cancellationToken).ConfigureAwait(false);
                         }
                     }
-                    while (resultSetIterator.HasMoreResults && !cancellationToken.IsCancellationRequested);
+                    while (this.resultSetIterator.HasMoreResults && !cancellationToken.IsCancellationRequested);
                 }
                 catch (TaskCanceledException canceledException)
                 {
@@ -82,7 +82,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
                     }
 
                     Extensions.TraceException(canceledException);
-                    DefaultTrace.TraceWarning("exception: lease token '{0}'", options.LeaseToken);
+                    DefaultTrace.TraceWarning("exception: lease token '{0}'", this.options.LeaseToken);
 
                     // ignore as it is caused by Cosmos DB client when StopAsync is called
                 }
@@ -116,12 +116,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         private Task DispatchChangesAsync(ResponseMessage response, CancellationToken cancellationToken)
         {
-            ChangeFeedObserverContext context = new ChangeFeedObserverContextCore<T>(options.LeaseToken, response, checkpointer);
+            ChangeFeedObserverContext context = new ChangeFeedObserverContextCore<T>(this.options.LeaseToken, response, this.checkpointer);
             IEnumerable<T> asFeedResponse;
             try
             {
                 asFeedResponse = CosmosFeedResponseSerializer.FromFeedResponseStream<T>(
-                    serializerCore,
+                    this.serializerCore,
                     response.Content);
             }
             catch (Exception serializationException)
@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
             List<T> asReadOnlyList = new List<T>(asFeedResponse);
 
-            return observer.ProcessChangesAsync(context, asReadOnlyList, cancellationToken);
+            return this.observer.ProcessChangesAsync(context, asReadOnlyList, cancellationToken);
         }
     }
 }

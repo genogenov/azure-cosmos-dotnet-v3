@@ -34,18 +34,18 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosGuid cosmosGuid && Equals(cosmosGuid);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosGuid cosmosGuid && this.Equals(cosmosGuid);
 
-        public bool Equals(CosmosGuid cosmosGuid) => Value == cosmosGuid.Value;
+        public bool Equals(CosmosGuid cosmosGuid) => this.Value == cosmosGuid.Value;
 
         public override int GetHashCode()
         {
             uint hash = HashSeed;
-            hash = MurmurHash3.Hash32(Value, hash);
+            hash = MurmurHash3.Hash32(this.Value, hash);
             return (int)hash;
         }
 
-        public int CompareTo(CosmosGuid cosmosGuid) => Value.CompareTo(cosmosGuid.Value);
+        public int CompareTo(CosmosGuid cosmosGuid) => this.Value.CompareTo(cosmosGuid.Value);
 
         public static CosmosGuid Create(
             IJsonNavigator jsonNavigator,
@@ -56,7 +56,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public static CosmosGuid Create(Guid value) => new EagerCosmosGuid(value);
 
-        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteGuidValue(Value);
+        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteGuidValue(this.Value);
 
         public static new CosmosGuid CreateFromBuffer(ReadOnlyMemory<byte> buffer) => CosmosElement.CreateFromBuffer<CosmosGuid>(buffer);
 

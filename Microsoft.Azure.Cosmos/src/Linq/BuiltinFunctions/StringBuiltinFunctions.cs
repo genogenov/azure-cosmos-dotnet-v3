@@ -170,7 +170,7 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             public SqlStringWithComparisonVisitor(string sqlName)
             {
-                SqlName = sqlName ?? throw new ArgumentNullException(nameof(sqlName));
+                this.SqlName = sqlName ?? throw new ArgumentNullException(nameof(sqlName));
             }
 
             public static SqlScalarExpression GetCaseInsensitiveExpression(Expression expression)
@@ -205,7 +205,7 @@ namespace Microsoft.Azure.Cosmos.Linq
                     arguments.Add(GetCaseInsensitiveExpression(methodCallExpression.Arguments[1]));
                 }
 
-                return SqlFunctionCallScalarExpression.CreateBuiltin(SqlName, arguments.ToArray());
+                return SqlFunctionCallScalarExpression.CreateBuiltin(this.SqlName, arguments.ToArray());
             }
 
             protected override SqlScalarExpression VisitExplicit(MethodCallExpression methodCallExpression, TranslationContext context)
@@ -413,7 +413,8 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public static SqlScalarExpression Visit(MethodCallExpression methodCallExpression, TranslationContext context)
         {
-            if (StringBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out BuiltinFunctionVisitor visitor))
+            BuiltinFunctionVisitor visitor = null;
+            if (StringBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out visitor))
             {
                 return visitor.Visit(methodCallExpression, context);
             }

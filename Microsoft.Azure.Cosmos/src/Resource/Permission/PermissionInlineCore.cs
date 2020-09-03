@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return ClientContext.OperationHelperAsync(
+            return this.ClientContext.OperationHelperAsync(
                 nameof(ReadAsync),
                 requestOptions,
                 (diagnostics) => base.ReadAsync(diagnostics, tokenExpiryInSeconds, requestOptions, cancellationToken));
@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return ClientContext.OperationHelperAsync(
+            return this.ClientContext.OperationHelperAsync(
                 nameof(ReplaceAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceAsync(diagnostics, permissionProperties, tokenExpiryInSeconds, requestOptions, cancellationToken));
@@ -48,7 +48,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return ClientContext.OperationHelperAsync(
+            return this.ClientContext.OperationHelperAsync(
                 nameof(DeleteAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteAsync(diagnostics, requestOptions, cancellationToken));

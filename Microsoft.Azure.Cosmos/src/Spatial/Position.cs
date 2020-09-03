@@ -55,11 +55,11 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             if (altitude != null)
             {
-                Coordinates = new ReadOnlyCollection<double>(new[] { longitude, latitude, altitude.Value });
+                this.Coordinates = new ReadOnlyCollection<double>(new[] { longitude, latitude, altitude.Value });
             }
             else
             {
-                Coordinates = new ReadOnlyCollection<double>(new[] { longitude, latitude });
+                this.Coordinates = new ReadOnlyCollection<double>(new[] { longitude, latitude });
             }
         }
 
@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentException("coordinates");
             }
 
-            Coordinates = new ReadOnlyCollection<double>(coordinates);
+            this.Coordinates = new ReadOnlyCollection<double>(coordinates);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </value>
         public double Longitude
         {
-            get { return Coordinates[0]; }
+            get { return this.Coordinates[0]; }
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </value>
         public double Latitude
         {
-            get { return Coordinates[1]; }
+            get { return this.Coordinates[1]; }
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </value>
         public double? Altitude
         {
-            get { return Coordinates.Count > 2 ? (double?)Coordinates[2] : null; }
+            get { return this.Coordinates.Count > 2 ? (double?)this.Coordinates[2] : null; }
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The <see cref="Position"/> to compare to the current object. </param>
         public override bool Equals(object obj)
         {
-            return Equals(obj as Position);
+            return this.Equals(obj as Position);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return Coordinates.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
+                return this.Coordinates.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
             }
         }
 
@@ -164,7 +164,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return Coordinates.SequenceEqual(other.Coordinates);
+            return this.Coordinates.SequenceEqual(other.Coordinates);
         }
     }
 }

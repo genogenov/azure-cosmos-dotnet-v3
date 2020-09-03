@@ -18,8 +18,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlCollectionExpression left,
             SqlCollectionExpression right)
         {
-            Left = left;
-            Right = right;
+            this.Left = left;
+            this.Right = right;
         }
 
         public SqlCollectionExpression Left { get; }

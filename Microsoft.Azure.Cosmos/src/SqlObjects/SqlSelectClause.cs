@@ -22,9 +22,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlTopSpec topSpec = null,
             bool hasDistinct = false)
         {
-            SelectSpec = selectSpec ?? throw new ArgumentNullException(nameof(selectSpec));
-            TopSpec = topSpec;
-            HasDistinct = hasDistinct;
+            this.SelectSpec = selectSpec ?? throw new ArgumentNullException(nameof(selectSpec));
+            this.TopSpec = topSpec;
+            this.HasDistinct = hasDistinct;
         }
 
         public SqlSelectSpec SelectSpec { get; }

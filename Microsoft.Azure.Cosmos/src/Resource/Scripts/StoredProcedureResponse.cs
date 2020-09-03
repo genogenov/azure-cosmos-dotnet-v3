@@ -30,10 +30,10 @@ namespace Microsoft.Azure.Cosmos.Scripts
             StoredProcedureProperties storedProcedureProperties,
             CosmosDiagnostics diagnostics)
         {
-            StatusCode = httpStatusCode;
-            Headers = headers;
-            Resource = storedProcedureProperties;
-            Diagnostics = diagnostics;
+            this.StatusCode = httpStatusCode;
+            this.Headers = headers;
+            this.Resource = storedProcedureProperties;
+            this.Diagnostics = diagnostics;
         }
 
         /// <inheritdoc/>
@@ -49,13 +49,13 @@ namespace Microsoft.Azure.Cosmos.Scripts
         public override CosmosDiagnostics Diagnostics { get; }
 
         /// <inheritdoc/>
-        public override double RequestCharge => Headers?.RequestCharge ?? 0;
+        public override double RequestCharge => this.Headers?.RequestCharge ?? 0;
 
         /// <inheritdoc/>
-        public override string ActivityId => Headers?.ActivityId;
+        public override string ActivityId => this.Headers?.ActivityId;
 
         /// <inheritdoc/>
-        public override string ETag => Headers?.ETag;
+        public override string ETag => this.Headers?.ETag;
 
         /// <summary>
         /// Gets the token for use with session consistency requests from the Azure Cosmos DB service.
@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// <value>
         /// The token for use with session consistency requests.
         /// </value>
-        public virtual string SessionToken => Headers?.GetHeaderValue<string>(HttpConstants.HttpHeaders.SessionToken);
+        public virtual string SessionToken => this.Headers?.GetHeaderValue<string>(HttpConstants.HttpHeaders.SessionToken);
 
         /// <summary>
         /// Get <see cref="StoredProcedureProperties"/> implicitly from <see cref="StoredProcedureResponse"/>

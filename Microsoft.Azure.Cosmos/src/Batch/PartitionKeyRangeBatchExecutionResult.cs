@@ -20,15 +20,15 @@ namespace Microsoft.Azure.Cosmos
             IEnumerable<ItemBatchOperation> operations,
             TransactionalBatchResponse serverResponse)
         {
-            PartitionKeyRangeId = pkRangeId;
-            ServerResponse = serverResponse;
-            Operations = operations;
+            this.PartitionKeyRangeId = pkRangeId;
+            this.ServerResponse = serverResponse;
+            this.Operations = operations;
         }
 
-        internal bool IsSplit() => ServerResponse != null &&
-                                            ServerResponse.StatusCode == HttpStatusCode.Gone
-                                                && (ServerResponse.SubStatusCode == Documents.SubStatusCodes.CompletingSplit
-                                                || ServerResponse.SubStatusCode == Documents.SubStatusCodes.CompletingPartitionMigration
-                                                || ServerResponse.SubStatusCode == Documents.SubStatusCodes.PartitionKeyRangeGone);
+        internal bool IsSplit() => this.ServerResponse != null &&
+                                            this.ServerResponse.StatusCode == HttpStatusCode.Gone
+                                                && (this.ServerResponse.SubStatusCode == Documents.SubStatusCodes.CompletingSplit
+                                                || this.ServerResponse.SubStatusCode == Documents.SubStatusCodes.CompletingPartitionMigration
+                                                || this.ServerResponse.SubStatusCode == Documents.SubStatusCodes.PartitionKeyRangeGone);
     }
 }

@@ -22,21 +22,21 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public DocumentServiceLeaseCore(DocumentServiceLeaseCore other)
         {
-            LeaseId = other.LeaseId;
-            LeaseToken = other.LeaseToken;
-            Owner = other.Owner;
-            ContinuationToken = other.ContinuationToken;
-            ETag = other.ETag;
-            TS = other.TS;
-            ExplicitTimestamp = other.ExplicitTimestamp;
-            Properties = other.Properties;
+            this.LeaseId = other.LeaseId;
+            this.LeaseToken = other.LeaseToken;
+            this.Owner = other.Owner;
+            this.ContinuationToken = other.ContinuationToken;
+            this.ETag = other.ETag;
+            this.TS = other.TS;
+            this.ExplicitTimestamp = other.ExplicitTimestamp;
+            this.Properties = other.Properties;
         }
 
         [JsonProperty("id")]
         public string LeaseId { get; set; }
 
         [JsonIgnore]
-        public override string Id => LeaseId;
+        public override string Id => this.LeaseId;
 
         [JsonProperty("_etag")]
         public string ETag { get; set; }
@@ -49,23 +49,23 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         {
             get
             {
-                if (isMigratingFromV2)
+                if (this.isMigratingFromV2)
                 {
                     // If the user migrated the lease from V2 schema, we maintain the PartitionId property for backward compatibility
-                    return LeaseToken;
+                    return this.LeaseToken;
                 }
 
                 return null;
             }
             set
             {
-                LeaseToken = value;
-                isMigratingFromV2 = true;
+                this.LeaseToken = value;
+                this.isMigratingFromV2 = true;
             }
         }
 
         [JsonIgnore]
-        public override string CurrentLeaseToken => LeaseToken;
+        public override string CurrentLeaseToken => this.LeaseToken;
 
         [JsonProperty("Owner")]
         public override string Owner { get; set; }
@@ -79,12 +79,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         [JsonIgnore]
         public override DateTime Timestamp
         {
-            get { return ExplicitTimestamp ?? UnixStartTime.AddSeconds(TS); }
-            set { ExplicitTimestamp = value; }
+            get { return this.ExplicitTimestamp ?? UnixStartTime.AddSeconds(this.TS); }
+            set { this.ExplicitTimestamp = value; }
         }
 
         [JsonIgnore]
-        public override string ConcurrencyToken => ETag;
+        public override string ConcurrencyToken => this.ETag;
 
         [JsonProperty("properties")]
         public override Dictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
@@ -100,11 +100,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "{0} Owner='{1}' Continuation={2} Timestamp(local)={3} Timestamp(server)={4}",
-                Id,
-                Owner,
-                ContinuationToken,
-                Timestamp.ToUniversalTime(),
-                UnixStartTime.AddSeconds(TS).ToUniversalTime());
+                this.Id,
+                this.Owner,
+                this.ContinuationToken,
+                this.Timestamp.ToUniversalTime(),
+                UnixStartTime.AddSeconds(this.TS).ToUniversalTime());
         }
     }
 }

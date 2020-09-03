@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Cosmos.SqlObjects
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.Immutable;
     using Microsoft.Azure.Cosmos.SqlObjects.Visitors;
 
@@ -34,9 +35,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            Needle = needle ?? throw new ArgumentNullException(nameof(needle));
-            Not = not;
-            Haystack = haystack;
+            this.Needle = needle ?? throw new ArgumentNullException(nameof(needle));
+            this.Not = not;
+            this.Haystack = haystack;
         }
 
         public SqlScalarExpression Needle { get; }

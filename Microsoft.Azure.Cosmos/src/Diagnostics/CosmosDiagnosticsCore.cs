@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     ///  Contains the cosmos diagnostic information for the current request to Azure Cosmos DB service.
@@ -12,7 +13,7 @@ namespace Microsoft.Azure.Cosmos
     {
         internal CosmosDiagnosticsCore(CosmosDiagnosticsContext diagnosticsContext)
         {
-            Context = diagnosticsContext ?? throw new ArgumentNullException(nameof(diagnosticsContext));
+            this.Context = diagnosticsContext ?? throw new ArgumentNullException(nameof(diagnosticsContext));
         }
 
         internal CosmosDiagnosticsContext Context { get; }
@@ -20,18 +21,18 @@ namespace Microsoft.Azure.Cosmos
         /// <inheritdoc/>
         public override TimeSpan GetClientElapsedTime()
         {
-            if (Context.TryGetTotalElapsedTime(out TimeSpan timeSpan))
+            if (this.Context.TryGetTotalElapsedTime(out TimeSpan timeSpan))
             {
                 return timeSpan;
             }
 
-            return Context.GetRunningElapsedTime();
+            return this.Context.GetRunningElapsedTime();
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return Context.ToString();
+            return this.Context.ToString();
         }
     }
 }

@@ -28,15 +28,15 @@ namespace Microsoft.Azure.Cosmos.Query
             }
 
             this.innerClient = innerClient;
-            semaphore = new SemaphoreSlim(1, 1);
+            this.semaphore = new SemaphoreSlim(1, 1);
         }
 
         public void Dispose()
         {
-            innerClient.Dispose();
-            if (queryPartitionProvider != null)
+            this.innerClient.Dispose();
+            if (this.queryPartitionProvider != null)
             {
-                queryPartitionProvider.Dispose();
+                this.queryPartitionProvider.Dispose();
             }
         }
 
@@ -44,12 +44,12 @@ namespace Microsoft.Azure.Cosmos.Query
         {
             get
             {
-                return innerClient.QueryCompatibilityMode;
+                return this.innerClient.QueryCompatibilityMode;
             }
 
             set
             {
-                innerClient.QueryCompatibilityMode = value;
+                this.innerClient.QueryCompatibilityMode = value;
             }
         }
 
@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Cosmos.Query
         {
             get
             {
-                return innerClient.ResetSessionTokenRetryPolicy;
+                return this.innerClient.ResetSessionTokenRetryPolicy;
             }
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Cosmos.Query
         {
             get
             {
-                return innerClient.ReadEndpoint;
+                return this.innerClient.ReadEndpoint;
             }
         }
 
@@ -73,72 +73,72 @@ namespace Microsoft.Azure.Cosmos.Query
         {
             get
             {
-                return innerClient.ConnectionPolicy.ConnectionMode;
+                return this.innerClient.ConnectionPolicy.ConnectionMode;
             }
         }
 
         Action<IQueryable> IDocumentQueryClient.OnExecuteScalarQueryCallback
         {
-            get { return innerClient.OnExecuteScalarQueryCallback; }
+            get { return this.innerClient.OnExecuteScalarQueryCallback; }
         }
 
         async Task<CollectionCache> IDocumentQueryClient.GetCollectionCacheAsync()
         {
-            return await innerClient.GetCollectionCacheAsync();
+            return await this.innerClient.GetCollectionCacheAsync();
         }
 
         async Task<IRoutingMapProvider> IDocumentQueryClient.GetRoutingMapProviderAsync()
         {
-            return await innerClient.GetPartitionKeyRangeCacheAsync();
+            return await this.innerClient.GetPartitionKeyRangeCacheAsync();
         }
 
         public async Task<QueryPartitionProvider> GetQueryPartitionProviderAsync(CancellationToken cancellationToken)
         {
-            if (queryPartitionProvider == null)
+            if (this.queryPartitionProvider == null)
             {
-                await semaphore.WaitAsync(cancellationToken);
+                await this.semaphore.WaitAsync(cancellationToken);
 
-                if (queryPartitionProvider == null)
+                if (this.queryPartitionProvider == null)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    queryPartitionProvider = new QueryPartitionProvider(await innerClient.GetQueryEngineConfigurationAsync());
+                    this.queryPartitionProvider = new QueryPartitionProvider(await this.innerClient.GetQueryEngineConfigurationAsync());
                 }
 
-                semaphore.Release();
+                this.semaphore.Release();
             }
 
-            return queryPartitionProvider;
+            return this.queryPartitionProvider;
         }
 
         public Task<DocumentServiceResponse> ExecuteQueryAsync(DocumentServiceRequest request, IDocumentClientRetryPolicy retryPolicyInstance, CancellationToken cancellationToken)
         {
-            return innerClient.ExecuteQueryAsync(request, retryPolicyInstance, cancellationToken);
+            return this.innerClient.ExecuteQueryAsync(request, retryPolicyInstance, cancellationToken);
         }
 
         public Task<DocumentServiceResponse> ReadFeedAsync(DocumentServiceRequest request, IDocumentClientRetryPolicy retryPolicyInstance, CancellationToken cancellationToken)
         {
-            return innerClient.ReadFeedAsync(request, retryPolicyInstance, cancellationToken);
+            return this.innerClient.ReadFeedAsync(request, retryPolicyInstance, cancellationToken);
         }
 
         public async Task<ConsistencyLevel> GetDefaultConsistencyLevelAsync()
         {
-            return (ConsistencyLevel)await innerClient.GetDefaultConsistencyLevelAsync();
+            return (ConsistencyLevel)await this.innerClient.GetDefaultConsistencyLevelAsync();
         }
 
         public Task<ConsistencyLevel?> GetDesiredConsistencyLevelAsync()
         {
-            return innerClient.GetDesiredConsistencyLevelAsync();
+            return this.innerClient.GetDesiredConsistencyLevelAsync();
         }
 
         public Task EnsureValidOverwriteAsync(ConsistencyLevel requestedConsistencyLevel)
         {
-            innerClient.EnsureValidOverwrite(requestedConsistencyLevel);
+            this.innerClient.EnsureValidOverwrite(requestedConsistencyLevel);
             return CompletedTask.Instance;
         }
 
         public Task<PartitionKeyRangeCache> GetPartitionKeyRangeCacheAsync()
         {
-            return innerClient.GetPartitionKeyRangeCacheAsync();
+            return this.innerClient.GetPartitionKeyRangeCacheAsync();
         }
     }
 }

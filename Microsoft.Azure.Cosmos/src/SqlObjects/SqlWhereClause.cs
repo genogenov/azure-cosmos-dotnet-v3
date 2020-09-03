@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlWhereClause(SqlScalarExpression filterExpression)
         {
-            FilterExpression = filterExpression ?? throw new ArgumentNullException(nameof(filterExpression));
+            this.FilterExpression = filterExpression ?? throw new ArgumentNullException(nameof(filterExpression));
         }
 
         public SqlScalarExpression FilterExpression { get; }

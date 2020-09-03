@@ -88,10 +88,10 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="partitionKeyPath">The path to the partition key. Example: /location</param>
         public ContainerProperties(string id, string partitionKeyPath)
         {
-            Id = id;
-            PartitionKeyPath = partitionKeyPath;
+            this.Id = id;
+            this.PartitionKeyPath = partitionKeyPath;
 
-            ValidateRequiredProperties();
+            this.ValidateRequiredProperties();
         }
 
 #if INTERNAL || SUBPARTITIONING
@@ -135,16 +135,16 @@ namespace Microsoft.Azure.Cosmos
         [JsonIgnore]
         public PartitionKeyDefinitionVersion? PartitionKeyDefinitionVersion
         {
-            get => (Cosmos.PartitionKeyDefinitionVersion?)PartitionKey?.Version;
+            get => (Cosmos.PartitionKeyDefinitionVersion?)this.PartitionKey?.Version;
 
             set
             {
-                if (PartitionKey == null)
+                if (this.PartitionKey == null)
                 {
                     throw new ArgumentOutOfRangeException($"PartitionKey is not defined for container");
                 }
 
-                PartitionKey.Version = (Documents.PartitionKeyDefinitionVersion)value;
+                this.PartitionKey.Version = (Documents.PartitionKeyDefinitionVersion)value;
             }
         }
 
@@ -156,15 +156,15 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (conflictResolutionInternal == null)
+                if (this.conflictResolutionInternal == null)
                 {
-                    conflictResolutionInternal = new ConflictResolutionPolicy();
+                    this.conflictResolutionInternal = new ConflictResolutionPolicy();
                 }
 
-                return conflictResolutionInternal;
+                return this.conflictResolutionInternal;
             }
 
-            set => conflictResolutionInternal = value ?? throw new ArgumentNullException($"{nameof(value)}");
+            set => this.conflictResolutionInternal = value ?? throw new ArgumentNullException($"{nameof(value)}");
         }
 
         /// <summary>
@@ -191,8 +191,8 @@ namespace Microsoft.Azure.Cosmos
         [JsonProperty(PropertyName = Constants.Properties.Id)]
         public string Id
         {
-            get => id;
-            set => id = value ?? throw new ArgumentNullException(nameof(Id));
+            get => this.id;
+            set => this.id = value ?? throw new ArgumentNullException(nameof(this.Id));
         }
 
         /// <summary>
@@ -203,12 +203,12 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (uniqueKeyPolicyInternal == null)
+                if (this.uniqueKeyPolicyInternal == null)
                 {
-                    uniqueKeyPolicyInternal = new UniqueKeyPolicy();
+                    this.uniqueKeyPolicyInternal = new UniqueKeyPolicy();
                 }
 
-                return uniqueKeyPolicyInternal;
+                return this.uniqueKeyPolicyInternal;
             }
 
             set
@@ -218,7 +218,7 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentNullException($"{nameof(value)}");
                 }
 
-                uniqueKeyPolicyInternal = value;
+                this.uniqueKeyPolicyInternal = value;
             }
         }
 
@@ -253,12 +253,12 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (indexingPolicyInternal == null)
+                if (this.indexingPolicyInternal == null)
                 {
-                    indexingPolicyInternal = new IndexingPolicy();
+                    this.indexingPolicyInternal = new IndexingPolicy();
                 }
 
-                return indexingPolicyInternal;
+                return this.indexingPolicyInternal;
             }
 
             set
@@ -268,7 +268,7 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentNullException($"{nameof(value)}");
                 }
 
-                indexingPolicyInternal = value;
+                this.indexingPolicyInternal = value;
             }
         }
 
@@ -283,16 +283,16 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (geospatialConfigInternal == null)
+                if (this.geospatialConfigInternal == null)
                 {
-                    geospatialConfigInternal = new GeospatialConfig();
+                    this.geospatialConfigInternal = new GeospatialConfig();
                 }
 
-                return geospatialConfigInternal;
+                return this.geospatialConfigInternal;
             }
             set
             {
-                geospatialConfigInternal = value;
+                this.geospatialConfigInternal = value;
             }
         }
         /// <summary>
@@ -301,25 +301,25 @@ namespace Microsoft.Azure.Cosmos
         [JsonIgnore]
         public string PartitionKeyPath
         {
-            get
-            {
-#if SUBPARTITIONING
+            get 
+            { 
+                #if SUBPARTITIONING
                 if (this.PartitionKey?.Kind == PartitionKind.MultiHash && this.PartitionKey?.Paths.Count > 1)
                 {
                     throw new NotImplementedException($"This MultiHash collection has more than 1 partition key path please use `PartitionKeyPaths`");
                 }
 
-#endif
-                return PartitionKey?.Paths != null && PartitionKey.Paths.Count > 0 ? PartitionKey?.Paths[0] : null;
+                #endif
+                return this.PartitionKey?.Paths != null && this.PartitionKey.Paths.Count > 0 ? this.PartitionKey?.Paths[0] : null;
             }
             set
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    throw new ArgumentNullException(nameof(PartitionKeyPath));
+                    throw new ArgumentNullException(nameof(this.PartitionKeyPath));
                 }
 
-                PartitionKey = new PartitionKeyDefinition
+                this.PartitionKey = new PartitionKeyDefinition
                 {
                     Paths = new Collection<string>() { value }
                 };
@@ -501,12 +501,12 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         internal PartitionKeyInternal GetNoneValue()
         {
-            if (PartitionKey == null)
+            if (this.PartitionKey == null)
             {
-                throw new ArgumentNullException($"{nameof(PartitionKey)}");
+                throw new ArgumentNullException($"{nameof(this.PartitionKey)}");
             }
 
-            if (PartitionKey.Paths.Count == 0 || (PartitionKey.IsSystemKey == true))
+            if (this.PartitionKey.Paths.Count == 0 || (this.PartitionKey.IsSystemKey == true))
             {
                 return PartitionKeyInternal.Empty;
             }
@@ -541,10 +541,10 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="partitionKeyDefinition">The partition key definition.</param>
         internal ContainerProperties(string id, PartitionKeyDefinition partitionKeyDefinition)
         {
-            Id = id;
-            PartitionKey = partitionKeyDefinition;
+            this.Id = id;
+            this.PartitionKey = partitionKeyDefinition;
 
-            ValidateRequiredProperties();
+            this.ValidateRequiredProperties();
         }
 
         /// <summary>
@@ -571,41 +571,41 @@ namespace Microsoft.Azure.Cosmos
 
         internal string ResourceId { get; private set; }
 
-        internal bool HasPartitionKey => PartitionKey != null;
+        internal bool HasPartitionKey => this.PartitionKey != null;
 
         internal IReadOnlyList<IReadOnlyList<string>> PartitionKeyPathTokens
         {
             get
             {
-                if (partitionKeyPathTokens != null)
+                if (this.partitionKeyPathTokens != null)
                 {
-                    return partitionKeyPathTokens;
+                    return this.partitionKeyPathTokens;
                 }
 
-                if (PartitionKey == null)
+                if (this.PartitionKey == null)
                 {
-                    throw new ArgumentNullException(nameof(PartitionKey));
+                    throw new ArgumentNullException(nameof(this.PartitionKey));
                 }
 
-                if (PartitionKey.Paths.Count > 1 && PartitionKey.Kind != Documents.PartitionKind.MultiHash)
+                if (this.PartitionKey.Paths.Count > 1 && this.PartitionKey.Kind != Documents.PartitionKind.MultiHash) 
                 {
                     throw new NotImplementedException("PartitionKey extraction with composite partition keys not supported.");
                 }
 
-                if (PartitionKeyPath == null)
+                if (this.PartitionKeyPath == null)
                 {
-                    throw new ArgumentOutOfRangeException($"Container {Id} is not partitioned");
+                    throw new ArgumentOutOfRangeException($"Container {this.Id} is not partitioned");
                 }
 
                 List<IReadOnlyList<string>> partitionKeyPathTokensList = new List<IReadOnlyList<string>>();
-                foreach (string path in PartitionKey?.Paths)
+                foreach (string path in this.PartitionKey?.Paths)
                 {
                     string[] splitPaths = path.Split(ContainerProperties.partitionKeyTokenDelimeter, StringSplitOptions.RemoveEmptyEntries);
                     partitionKeyPathTokensList.Add(new List<string>(splitPaths));
                 }
 
-                partitionKeyPathTokens = partitionKeyPathTokensList;
-                return partitionKeyPathTokens;
+                this.partitionKeyPathTokens = partitionKeyPathTokensList;
+                return this.partitionKeyPathTokens;
             }
         }
 
@@ -614,24 +614,24 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         internal void ValidateRequiredProperties()
         {
-            if (Id == null)
+            if (this.Id == null)
             {
-                throw new ArgumentNullException(nameof(Id));
+                throw new ArgumentNullException(nameof(this.Id));
             }
 
-            if (PartitionKey == null || PartitionKey.Paths.Count == 0)
+            if (this.PartitionKey == null || this.PartitionKey.Paths.Count == 0)
             {
-                throw new ArgumentNullException(nameof(PartitionKey));
+                throw new ArgumentNullException(nameof(this.PartitionKey));
             }
 
             // HACK: Till service can handle the defaults (self-mutation)
             // If indexing mode is not 'none' and not paths are set, set them to the defaults
-            if (indexingPolicyInternal != null
-                && indexingPolicyInternal.IndexingMode != IndexingMode.None
-                && indexingPolicyInternal.IncludedPaths.Count == 0
-                && indexingPolicyInternal.ExcludedPaths.Count == 0)
+            if (this.indexingPolicyInternal != null
+                && this.indexingPolicyInternal.IndexingMode != IndexingMode.None
+                && this.indexingPolicyInternal.IncludedPaths.Count == 0
+                && this.indexingPolicyInternal.ExcludedPaths.Count == 0)
             {
-                indexingPolicyInternal.IncludedPaths.Add(new IncludedPath() { Path = IndexingPolicy.DefaultPath });
+                this.indexingPolicyInternal.IncludedPaths.Add(new IncludedPath() { Path = IndexingPolicy.DefaultPath });
             }
         }
     }

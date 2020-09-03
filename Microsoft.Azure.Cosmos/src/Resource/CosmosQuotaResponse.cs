@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="quotaInfo">Example string: functions=0;storedProcedures=0;triggers=0;documentSize=0;documentsSize=0;documentsCount=0;collectionSize=0;</param>
         internal CosmosQuotaResponse(string quotaInfo)
         {
-            source = quotaInfo;
+            this.source = quotaInfo;
             ParseQuotaString(quotaInfo);
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="quotaInfo">Example string: functions=0;storedProcedures=0;triggers=0;documentSize=0;documentsSize=0;documentsCount=0;collectionSize=0;</param>
         private void ParseQuotaString(string quotaInfo)
         {
-            Quotas = new Dictionary<string, double>();
+            this.Quotas = new Dictionary<string, double>();
             string[] quotaKeyValues = quotaInfo.Split(';');
             foreach (string quotaKeyValue in quotaKeyValues)
             {
@@ -54,28 +54,28 @@ namespace Microsoft.Azure.Cosmos
                         switch (key)
                         {
                             case DatabasesKey:
-                                Databases = value;
+                                this.Databases = value;
                                 break;
                             case FunctionsKey:
-                                UserDefinedFunctions = value;
+                                this.UserDefinedFunctions = value;
                                 break;
                             case StoredProceduresKey:
-                                StoredProcedures = value;
+                                this.StoredProcedures = value;
                                 break;
                             case TriggersKey:
-                                Triggers = value;
+                                this.Triggers = value;
                                 break;
                             case DocumentSizeKey:
-                                DocumentSize = value;
+                                this.DocumentSize = value;
                                 break;
                             case DocumentsSizeKey:
-                                DocumentsSize = value;
+                                this.DocumentsSize = value;
                                 break;
                             case DocumentsCountKey:
-                                DocumentsCount = value;
+                                this.DocumentsCount = value;
                                 break;
                             case ContainerSizeKey:
-                                ContainerSize = value;
+                                this.ContainerSize = value;
                                 break;
                             default:
                                 //Ignore unkown values
@@ -100,7 +100,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public override string ToString()
         {
-            return source;
+            return this.source;
         }
     }
 }

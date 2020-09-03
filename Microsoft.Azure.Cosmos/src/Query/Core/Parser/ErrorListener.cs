@@ -25,8 +25,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             this.parser = parser;
             this.lexer = lexer;
-            tokenStream = token_stream;
-            firstTime = true;
+            this.tokenStream = token_stream;
+            this.firstTime = true;
         }
 
         public void SyntaxError(
@@ -38,18 +38,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             string msg,
             RecognitionException recognitionException)
         {
-            if (firstTime)
+            if (this.firstTime)
             {
                 try
                 {
-                    firstTime = false;
+                    this.firstTime = false;
                     LASets la_sets = new LASets();
-                    IntervalSet set = la_sets.Compute(parser, tokenStream, line, col);
+                    IntervalSet set = la_sets.Compute(this.parser, this.tokenStream, line, col);
                     List<string> result = new List<string>();
 
                     foreach (int r in set.ToList())
                     {
-                        string rule_name = parser.Vocabulary.GetSymbolicName(r);
+                        string rule_name = this.parser.Vocabulary.GetSymbolicName(r);
                         result.Add(rule_name);
                     }
 
@@ -64,11 +64,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                         message = $"Parse error: message:{msg} offendingSymbol: {offendingSymbol}, line:{line}, col:{col}";
                     }
 
-                    parseException = new ParseException(message, recognitionException);
+                    this.parseException = new ParseException(message, recognitionException);
                 }
                 catch (Exception ex)
                 {
-                    parseException = new ParseException($"Unknown parse exception", ex);
+                    this.parseException = new ParseException($"Unknown parse exception", ex);
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent
         /// <param name="source">The source to drain documents from.</param>
         protected DocumentQueryExecutionComponentBase(IDocumentQueryExecutionComponent source)
         {
-            Source = source ?? throw new ArgumentNullException(nameof(source));
+            this.Source = source ?? throw new ArgumentNullException(nameof(source));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent
         {
             get
             {
-                return Source.IsDone;
+                return this.Source.IsDone;
             }
         }
 
@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent
         /// </summary>
         public virtual void Dispose()
         {
-            Source.Dispose();
+            this.Source.Dispose();
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent
         public virtual Task<QueryResponseCore> DrainAsync(int maxElements, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            return Source.DrainAsync(maxElements, token);
+            return this.Source.DrainAsync(maxElements, token);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent
         /// </summary>
         public void Stop()
         {
-            Source.Stop();
+            this.Source.Stop();
         }
 
         public abstract CosmosElement GetCosmosElementContinuationToken();

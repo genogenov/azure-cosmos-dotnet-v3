@@ -4,6 +4,7 @@
 
 namespace Microsoft.Azure.Cosmos
 {
+    using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Scripts;
 
     internal abstract class CosmosResponseFactoryInternal : CosmosResponseFactory

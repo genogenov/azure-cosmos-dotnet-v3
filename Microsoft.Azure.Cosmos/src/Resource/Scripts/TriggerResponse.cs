@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos.Scripts
 {
     using System.Net;
+    using Microsoft.Azure.Documents;
 
     /// <summary>
     /// The cosmos trigger response
@@ -29,10 +30,10 @@ namespace Microsoft.Azure.Cosmos.Scripts
             TriggerProperties triggerProperties,
             CosmosDiagnostics diagnostics)
         {
-            StatusCode = httpStatusCode;
-            Headers = headers;
-            Resource = triggerProperties;
-            Diagnostics = diagnostics;
+            this.StatusCode = httpStatusCode;
+            this.Headers = headers;
+            this.Resource = triggerProperties;
+            this.Diagnostics = diagnostics;
         }
 
         /// <inheritdoc/>
@@ -48,13 +49,13 @@ namespace Microsoft.Azure.Cosmos.Scripts
         public override CosmosDiagnostics Diagnostics { get; }
 
         /// <inheritdoc/>
-        public override double RequestCharge => Headers?.RequestCharge ?? 0;
+        public override double RequestCharge => this.Headers?.RequestCharge ?? 0;
 
         /// <inheritdoc/>
-        public override string ActivityId => Headers?.ActivityId;
+        public override string ActivityId => this.Headers?.ActivityId;
 
         /// <inheritdoc/>
-        public override string ETag => Headers?.ETag;
+        public override string ETag => this.Headers?.ETag;
 
         /// <summary>
         /// Get <see cref="TriggerProperties"/> implicitly from <see cref="TriggerResponse"/>

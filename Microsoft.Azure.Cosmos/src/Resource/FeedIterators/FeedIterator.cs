@@ -110,9 +110,9 @@ namespace Microsoft.Azure.Cosmos
         protected virtual void Dispose(bool disposing)
         {
             // Default implementation does not need to clean anything up
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
-                disposedValue = true;
+                this.disposedValue = true;
             }
         }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Azure.Cosmos
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            this.Dispose(disposing: true);
         }
     }
 }

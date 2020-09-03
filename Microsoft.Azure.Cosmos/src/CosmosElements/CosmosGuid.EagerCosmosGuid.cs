@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         {
             public EagerCosmosGuid(Guid value)
             {
-                Value = value;
+                this.Value = value;
             }
 
             public override Guid Value { get; }

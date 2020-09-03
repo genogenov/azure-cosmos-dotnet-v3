@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using Microsoft.Azure.Cosmos.Diagnostics;
 
     /// <summary>
@@ -19,7 +20,7 @@ namespace Microsoft.Azure.Cosmos
 
         private EmptyCosmosDiagnosticsContext()
         {
-            Diagnostics = new CosmosDiagnosticsCore(this);
+            this.Diagnostics = new CosmosDiagnosticsCore(this);
         }
 
         public override DateTime StartUtc => DateTime.MinValue;

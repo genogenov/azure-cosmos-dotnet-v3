@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
     internal sealed class ObserverExceptionWrappingChangeFeedObserverDecorator<T> : ChangeFeedObserver<T>
     {
-        private readonly ChangeFeedObserver<T> changeFeedObserver;
+        private ChangeFeedObserver<T> changeFeedObserver;
 
         public ObserverExceptionWrappingChangeFeedObserverDecorator(ChangeFeedObserver<T> changeFeedObserver)
         {
@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         {
             try
             {
-                await changeFeedObserver.CloseAsync(context, reason).ConfigureAwait(false);
+                await this.changeFeedObserver.CloseAsync(context, reason).ConfigureAwait(false);
             }
             catch (Exception userException)
             {
@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         {
             try
             {
-                await changeFeedObserver.OpenAsync(context).ConfigureAwait(false);
+                await this.changeFeedObserver.OpenAsync(context).ConfigureAwait(false);
             }
             catch (Exception userException)
             {
@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         {
             try
             {
-                await changeFeedObserver.ProcessChangesAsync(context, docs, cancellationToken).ConfigureAwait(false);
+                await this.changeFeedObserver.ProcessChangesAsync(context, docs, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception userException)
             {

@@ -10,14 +10,14 @@ namespace Microsoft.Azure.Cosmos.Timers
 #nullable enable
     internal sealed class TimerWheelTimerCore : TimerWheelTimer
     {
-        private static readonly object completedObject = new object();
+        private static object completedObject = new object();
         private readonly TaskCompletionSource<object> taskCompletionSource;
-        private readonly object memberLock;
+        private readonly Object memberLock;
         private readonly TimerWheel timerWheel;
         private bool timerStarted = false;
 
         internal TimerWheelTimerCore(
-            TimeSpan timeoutPeriod,
+            TimeSpan timeoutPeriod, 
             TimerWheel timerWheel)
         {
             if (timeoutPeriod.Ticks == 0)
@@ -26,37 +26,37 @@ namespace Microsoft.Azure.Cosmos.Timers
             }
 
             this.timerWheel = timerWheel ?? throw new ArgumentNullException(nameof(timerWheel));
-            Timeout = timeoutPeriod;
-            taskCompletionSource = new TaskCompletionSource<object>();
-            memberLock = new object();
+            this.Timeout = timeoutPeriod;
+            this.taskCompletionSource = new TaskCompletionSource<object>();
+            this.memberLock = new Object();
         }
 
         public override TimeSpan Timeout { get; }
 
         public override Task StartTimerAsync()
         {
-            lock (memberLock)
+            lock (this.memberLock)
             {
-                if (timerStarted)
+                if (this.timerStarted)
                 {
                     // use only once enforcement
                     throw new InvalidOperationException("Timer Already Started");
                 }
 
-                timerWheel.SubscribeForTimeouts(this);
-                timerStarted = true;
-                return taskCompletionSource.Task;
+                this.timerWheel.SubscribeForTimeouts(this);
+                this.timerStarted = true;
+                return this.taskCompletionSource.Task;
             }
         }
 
         public override bool CancelTimer()
         {
-            return taskCompletionSource.TrySetCanceled();
+            return this.taskCompletionSource.TrySetCanceled();
         }
 
         public override bool FireTimeout()
         {
-            return taskCompletionSource.TrySetResult(TimerWheelTimerCore.completedObject);
+            return this.taskCompletionSource.TrySetResult(TimerWheelTimerCore.completedObject);
         }
     }
 }

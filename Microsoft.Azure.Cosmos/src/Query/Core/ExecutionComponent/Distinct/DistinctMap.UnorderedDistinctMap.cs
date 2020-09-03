@@ -10,6 +10,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
     using System.Text;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.CosmosElements.Numbers;
+    using Microsoft.Azure.Cosmos.Json;
+    using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
@@ -180,19 +182,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
                 hash = default;
                 return cosmosElement switch
                 {
-                    CosmosArray cosmosArray => AddArrayValue(cosmosArray),
-                    CosmosBoolean cosmosBoolean => AddSimpleValue(cosmosBoolean.Value ? SimpleValues.True : SimpleValues.False),
-                    CosmosNull _ => AddSimpleValue(SimpleValues.Null),
-                    CosmosNumber cosmosNumber => AddNumberValue(cosmosNumber.Value),
-                    CosmosObject cosmosObject => AddObjectValue(cosmosObject),
-                    CosmosString cosmosString => AddStringValue(cosmosString.Value),
+                    CosmosArray cosmosArray => this.AddArrayValue(cosmosArray),
+                    CosmosBoolean cosmosBoolean => this.AddSimpleValue(cosmosBoolean.Value ? SimpleValues.True : SimpleValues.False),
+                    CosmosNull _ => this.AddSimpleValue(SimpleValues.Null),
+                    CosmosNumber cosmosNumber => this.AddNumberValue(cosmosNumber.Value),
+                    CosmosObject cosmosObject => this.AddObjectValue(cosmosObject),
+                    CosmosString cosmosString => this.AddStringValue(cosmosString.Value),
                     _ => throw new ArgumentOutOfRangeException($"Unexpected {nameof(CosmosElement)}: {cosmosElement}"),
                 };
             }
 
             public override string GetContinuationToken()
             {
-                return GetCosmosElementContinuationToken().ToString();
+                return this.GetCosmosElementContinuationToken().ToString();
             }
 
             public override CosmosElement GetCosmosElementContinuationToken()
@@ -201,35 +203,35 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
                 {
                     {
                         UnorderdDistinctMap.PropertyNames.Numbers,
-                        CosmosArray.Create(numbers.Select(x => CosmosNumber64.Create(x)))
+                        CosmosArray.Create(this.numbers.Select(x => CosmosNumber64.Create(x)))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.StringsLength4,
-                        CosmosArray.Create(stringsLength4.Select(x => CosmosUInt32.Create(x)))
+                        CosmosArray.Create(this.stringsLength4.Select(x => CosmosUInt32.Create(x)))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.StringsLength8,
-                        CosmosArray.Create(stringsLength8.Select(x => CosmosInt64.Create((long)x)))
+                        CosmosArray.Create(this.stringsLength8.Select(x => CosmosInt64.Create((long)x)))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.StringsLength16,
-                        CosmosArray.Create(stringsLength16.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
+                        CosmosArray.Create(this.stringsLength16.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.StringsLength16Plus,
-                        CosmosArray.Create(stringsLength16Plus.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
+                        CosmosArray.Create(this.stringsLength16Plus.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.Arrays,
-                        CosmosArray.Create(arrays.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
+                        CosmosArray.Create(this.arrays.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.Object,
-                        CosmosArray.Create(objects.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
+                        CosmosArray.Create(this.objects.Select(x => CosmosBinary.Create(UInt128.ToByteArray(x))))
                     },
                     {
                         UnorderdDistinctMap.PropertyNames.SimpleValues,
-                        CosmosString.Create(simpleValues.ToString())
+                        CosmosString.Create(this.simpleValues.ToString())
                     }
                 };
 
@@ -243,7 +245,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
             /// <returns>Whether or not the value was successfully added.</returns>
             private bool AddNumberValue(Number64 value)
             {
-                return numbers.Add(value);
+                return this.numbers.Add(value);
             }
 
             /// <summary>
@@ -253,9 +255,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
             /// <returns>Whether or not the value was successfully added.</returns>
             private bool AddSimpleValue(SimpleValues value)
             {
-                if (((int)simpleValues & (int)value) == 0)
+                if (((int)this.simpleValues & (int)value) == 0)
                 {
-                    simpleValues = (SimpleValues)((int)simpleValues | (int)value);
+                    this.simpleValues = (SimpleValues)((int)this.simpleValues | (int)value);
                     return true;
                 }
 
@@ -276,32 +278,32 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
                 if (utf8Length <= UnorderdDistinctMap.UInt128Length)
                 {
                     Span<byte> utf8Buffer = stackalloc byte[UInt128Length];
-                    Encoding.UTF8.GetBytes(value, utf8Buffer);
+                    Encoding.UTF8.GetBytes(value, utf8Buffer); 
                     if (utf8Length == 0)
                     {
-                        added = AddSimpleValue(SimpleValues.EmptyString);
+                        added = this.AddSimpleValue(SimpleValues.EmptyString);
                     }
                     else if (utf8Length <= UnorderdDistinctMap.UIntLength)
                     {
                         uint uintValue = MemoryMarshal.Read<uint>(utf8Buffer);
-                        added = stringsLength4.Add(uintValue);
+                        added = this.stringsLength4.Add(uintValue);
                     }
                     else if (utf8Length <= UnorderdDistinctMap.ULongLength)
                     {
                         ulong uLongValue = MemoryMarshal.Read<ulong>(utf8Buffer);
-                        added = stringsLength8.Add(uLongValue);
+                        added = this.stringsLength8.Add(uLongValue);
                     }
                     else
                     {
                         UInt128 uInt128Value = UInt128.FromByteArray(utf8Buffer);
-                        added = stringsLength16.Add(uInt128Value);
+                        added = this.stringsLength16.Add(uInt128Value);
                     }
                 }
                 else
                 {
                     // Else the string is too large and we will just store the hash.
                     UInt128 uint128Value = DistinctHash.GetHash(CosmosString.Create(value));
-                    added = stringsLength16Plus.Add(uint128Value);
+                    added = this.stringsLength16Plus.Add(uint128Value);
                 }
 
                 return added;
@@ -315,7 +317,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
             private bool AddArrayValue(CosmosArray array)
             {
                 UInt128 hash = DistinctHash.GetHash(array);
-                return arrays.Add(hash);
+                return this.arrays.Add(hash);
             }
 
             /// <summary>
@@ -326,7 +328,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
             private bool AddObjectValue(CosmosObject cosmosObject)
             {
                 UInt128 hash = DistinctHash.GetHash(cosmosObject);
-                return objects.Add(hash);
+                return this.objects.Add(hash);
             }
 
             public static TryCatch<DistinctMap> TryCreate(CosmosElement continuationToken)

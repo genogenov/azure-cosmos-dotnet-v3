@@ -43,7 +43,7 @@ namespace Microsoft.Azure.Cosmos
             CancellationToken cancellationToken)
         {
             DocumentClientException clientException = exception as DocumentClientException;
-            ShouldRetryResult shouldRetryResult = await ShouldRetryInternalAsync(clientException?.StatusCode,
+            ShouldRetryResult shouldRetryResult = await this.ShouldRetryInternalAsync(clientException?.StatusCode,
                 clientException?.GetSubStatus(),
                 cancellationToken);
             if (shouldRetryResult != null)
@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Cosmos
                 return shouldRetryResult;
             }
 
-            return nextRetryPolicy != null ? await nextRetryPolicy?.ShouldRetryAsync(exception, cancellationToken) : ShouldRetryResult.NoRetry();
+            return this.nextRetryPolicy != null ? await this.nextRetryPolicy?.ShouldRetryAsync(exception, cancellationToken) : ShouldRetryResult.NoRetry();
         }
 
         /// <summary> 
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Cosmos
             ResponseMessage cosmosResponseMessage,
             CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetryResult = await ShouldRetryInternalAsync(cosmosResponseMessage?.StatusCode,
+            ShouldRetryResult shouldRetryResult = await this.ShouldRetryInternalAsync(cosmosResponseMessage?.StatusCode,
                 cosmosResponseMessage?.Headers.SubStatusCode,
                 cancellationToken);
             if (shouldRetryResult != null)
@@ -72,12 +72,12 @@ namespace Microsoft.Azure.Cosmos
                 return shouldRetryResult;
             }
 
-            return nextRetryPolicy != null ? await nextRetryPolicy?.ShouldRetryAsync(cosmosResponseMessage, cancellationToken) : ShouldRetryResult.NoRetry();
+            return this.nextRetryPolicy != null ? await this.nextRetryPolicy?.ShouldRetryAsync(cosmosResponseMessage, cancellationToken) : ShouldRetryResult.NoRetry();
         }
 
         public void OnBeforeSendRequest(DocumentServiceRequest request)
         {
-            nextRetryPolicy?.OnBeforeSendRequest(request);
+            this.nextRetryPolicy?.OnBeforeSendRequest(request);
         }
 
         private async Task<ShouldRetryResult> ShouldRetryInternalAsync(
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Cosmos
             if (statusCode == HttpStatusCode.Gone
                 && subStatusCode == SubStatusCodes.PartitionKeyRangeGone)
             {
-                if (retried)
+                if (this.retried)
                 {
                     return ShouldRetryResult.NoRetry();
                 }
@@ -103,16 +103,16 @@ namespace Microsoft.Azure.Cosmos
                 using (DocumentServiceRequest request = DocumentServiceRequest.Create(
                     OperationType.Read,
                     ResourceType.Collection,
-                    collectionLink,
+                    this.collectionLink,
                     null,
                     AuthorizationTokenType.PrimaryMasterKey))
                 {
-                    ContainerProperties collection = await collectionCache.ResolveCollectionAsync(request, cancellationToken);
-                    CollectionRoutingMap routingMap = await partitionKeyRangeCache.TryLookupAsync(collection.ResourceId, null, request, cancellationToken);
+                    ContainerProperties collection = await this.collectionCache.ResolveCollectionAsync(request, cancellationToken);
+                    CollectionRoutingMap routingMap = await this.partitionKeyRangeCache.TryLookupAsync(collection.ResourceId, null, request, cancellationToken);
                     if (routingMap != null)
                     {
                         // Force refresh.
-                        await partitionKeyRangeCache.TryLookupAsync(
+                        await this.partitionKeyRangeCache.TryLookupAsync(
                                 collection.ResourceId,
                                 routingMap,
                                 request,
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Cosmos
                     }
                 }
 
-                retried = true;
+                this.retried = true;
                 return ShouldRetryResult.RetryAfter(TimeSpan.FromSeconds(0));
             }
 

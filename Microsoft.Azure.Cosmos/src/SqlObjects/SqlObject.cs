@@ -25,9 +25,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         public abstract TResult Accept<T, TResult>(SqlObjectVisitor<T, TResult> visitor, T input);
 
-        public override string ToString() => Serialize(prettyPrint: false);
+        public override string ToString() => this.Serialize(prettyPrint: false);
 
-        public override int GetHashCode() => Accept(SqlObjectHasher.Singleton);
+        public override int GetHashCode() => this.Accept(SqlObjectHasher.Singleton);
 
         public override bool Equals(object obj)
         {
@@ -36,19 +36,19 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 return false;
             }
 
-            return Equals(sqlObject);
+            return this.Equals(sqlObject);
         }
 
         public bool Equals(SqlObject other) => SqlObject.Equals(this, other);
 
-        public string PrettyPrint() => Serialize(prettyPrint: true);
+        public string PrettyPrint() => this.Serialize(prettyPrint: true);
 
-        public SqlObject GetObfuscatedObject() => Accept(new SqlObjectObfuscator());
+        public SqlObject GetObfuscatedObject() => this.Accept(new SqlObjectObfuscator());
 
         private string Serialize(bool prettyPrint)
         {
             SqlObjectTextSerializer sqlObjectTextSerializer = new SqlObjectTextSerializer(prettyPrint);
-            Accept(sqlObjectTextSerializer);
+            this.Accept(sqlObjectTextSerializer);
             return sqlObjectTextSerializer.ToString();
         }
 

@@ -31,16 +31,16 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public override async Task RunAsync(CancellationToken shutdownToken)
         {
-            ChangeFeedObserverContextCore<T> context = new ChangeFeedObserverContextCore<T>(lease.CurrentLeaseToken);
-            await observer.OpenAsync(context).ConfigureAwait(false);
+            ChangeFeedObserverContextCore<T> context = new ChangeFeedObserverContextCore<T>(this.lease.CurrentLeaseToken);
+            await this.observer.OpenAsync(context).ConfigureAwait(false);
 
-            processorCancellation = CancellationTokenSource.CreateLinkedTokenSource(shutdownToken);
+            this.processorCancellation = CancellationTokenSource.CreateLinkedTokenSource(shutdownToken);
 
-            Task processorTask = processor.RunAsync(processorCancellation.Token);
-            processorTask.ContinueWith(_ => renewerCancellation.Cancel()).LogException();
+            Task processorTask = this.processor.RunAsync(this.processorCancellation.Token);
+            processorTask.ContinueWith(_ => this.renewerCancellation.Cancel()).LogException();
 
-            Task renewerTask = renewer.RunAsync(renewerCancellation.Token);
-            renewerTask.ContinueWith(_ => processorCancellation.Cancel()).LogException();
+            Task renewerTask = this.renewer.RunAsync(this.renewerCancellation.Token);
+            renewerTask.ContinueWith(_ => this.processorCancellation.Cancel()).LogException();
 
             ChangeFeedObserverCloseReason closeReason = shutdownToken.IsCancellationRequested ?
                 ChangeFeedObserverCloseReason.Shutdown :
@@ -86,14 +86,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
             }
             finally
             {
-                await observer.CloseAsync(context, closeReason).ConfigureAwait(false);
+                await this.observer.CloseAsync(context, closeReason).ConfigureAwait(false);
             }
         }
 
         public override void Dispose()
         {
-            processorCancellation?.Dispose();
-            renewerCancellation.Dispose();
+            this.processorCancellation?.Dispose();
+            this.renewerCancellation.Dispose();
         }
     }
 }

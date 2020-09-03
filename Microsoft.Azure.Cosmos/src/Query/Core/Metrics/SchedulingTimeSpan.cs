@@ -7,6 +7,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -31,11 +32,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             TimeSpan waitTime,
             long numPreemptions)
         {
-            TurnaroundTime = turnaroundTime;
-            ResponseTime = responseTime;
-            RunTime = runTime;
-            WaitTime = waitTime;
-            NumPreemptions = numPreemptions;
+            this.TurnaroundTime = turnaroundTime;
+            this.ResponseTime = responseTime;
+            this.RunTime = runTime;
+            this.WaitTime = waitTime;
+            this.NumPreemptions = numPreemptions;
         }
 
         /// <summary>
@@ -142,15 +143,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
             jsonWriter.WriteStartObject();
             jsonWriter.WritePropertyName("TurnaroundTimeInMs");
-            jsonWriter.WriteValue(TurnaroundTime.TotalMilliseconds);
+            jsonWriter.WriteValue(this.TurnaroundTime.TotalMilliseconds);
             jsonWriter.WritePropertyName("ResponseTimeInMs");
-            jsonWriter.WriteValue(ResponseTime.TotalMilliseconds);
+            jsonWriter.WriteValue(this.ResponseTime.TotalMilliseconds);
             jsonWriter.WritePropertyName("RunTimeInMs");
-            jsonWriter.WriteValue(RunTime.TotalMilliseconds);
+            jsonWriter.WriteValue(this.RunTime.TotalMilliseconds);
             jsonWriter.WritePropertyName("WaitTime");
-            jsonWriter.WriteValue(WaitTime.TotalMilliseconds);
+            jsonWriter.WriteValue(this.WaitTime.TotalMilliseconds);
             jsonWriter.WritePropertyName("NumberOfPreemptions");
-            jsonWriter.WriteValue(NumPreemptions);
+            jsonWriter.WriteValue(this.NumPreemptions);
             jsonWriter.WriteEndObject();
         }
 
@@ -163,11 +164,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             return string.Format(
                 CultureInfo.InvariantCulture,
                 "Turnaround Time: {0}ms, Response Time: {1}ms, Run Time: {2}ms, Wait Time: {3}ms, Number Of Preemptions: {4}",
-                TurnaroundTime.TotalMilliseconds,
-                ResponseTime.TotalMilliseconds,
-                RunTime.TotalMilliseconds,
-                WaitTime.TotalMilliseconds,
-                NumPreemptions);
+                this.TurnaroundTime.TotalMilliseconds,
+                this.ResponseTime.TotalMilliseconds,
+                this.RunTime.TotalMilliseconds,
+                this.WaitTime.TotalMilliseconds,
+                this.NumPreemptions);
         }
 
         /// <summary>

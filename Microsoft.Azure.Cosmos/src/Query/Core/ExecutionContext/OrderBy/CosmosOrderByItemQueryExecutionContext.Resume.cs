@@ -203,7 +203,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                             return TryCatch.FromResult();
                         }
 
-                        return await TryFilterAsync(
+                        return await this.TryFilterAsync(
                             itemProducerTree,
                             sortOrders,
                             continuationToken,
@@ -622,8 +622,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                 RangeFilterInitializationInfo[] filters,
                 IReadOnlyDictionary<string, OrderByContinuationToken> continuationTokens)
             {
-                Filters = filters;
-                ContinuationTokens = continuationTokens;
+                this.Filters = filters;
+                this.ContinuationTokens = continuationTokens;
             }
 
             public RangeFilterInitializationInfo[] Filters { get; }
@@ -635,8 +635,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         {
             public OrderByColumn(string expression, SortOrder sortOrder)
             {
-                Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-                SortOrder = sortOrder;
+                this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+                this.SortOrder = sortOrder;
             }
 
             public string Expression { get; }

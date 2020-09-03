@@ -44,12 +44,12 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
                     throw new ArgumentOutOfRangeException($"{nameof(jsonNavigatorNode)} must be a {JsonNodeType.Number64} node. Got {type} instead.");
                 }
 
-                lazyNumber = new Lazy<Number64>(() => jsonNavigator.GetNumber64Value(jsonNavigatorNode));
+                this.lazyNumber = new Lazy<Number64>(() => jsonNavigator.GetNumber64Value(jsonNavigatorNode));
             }
 
             public override Number64 GetValue()
             {
-                return lazyNumber.Value;
+                return this.lazyNumber.Value;
             }
         }
     }

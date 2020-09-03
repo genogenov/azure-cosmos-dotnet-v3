@@ -20,12 +20,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override Task<IReadOnlyList<DocumentServiceLease>> GetAllLeasesAsync()
         {
-            return Task.FromResult<IReadOnlyList<DocumentServiceLease>>(container.Values.ToList().AsReadOnly());
+            return Task.FromResult<IReadOnlyList<DocumentServiceLease>>(this.container.Values.ToList().AsReadOnly());
         }
 
         public override Task<IEnumerable<DocumentServiceLease>> GetOwnedLeasesAsync()
         {
-            return Task.FromResult<IEnumerable<DocumentServiceLease>>(container.Values.AsEnumerable());
+            return Task.FromResult<IEnumerable<DocumentServiceLease>>(this.container.Values.AsEnumerable());
         }
     }
 }

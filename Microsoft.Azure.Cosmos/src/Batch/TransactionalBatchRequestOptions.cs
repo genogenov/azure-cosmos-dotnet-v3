@@ -24,8 +24,8 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public ConsistencyLevel? ConsistencyLevel
         {
-            get => BaseConsistencyLevel;
-            set => BaseConsistencyLevel = value;
+            get => this.BaseConsistencyLevel;
+            set => this.BaseConsistencyLevel = value;
         }
 
         /// <summary>

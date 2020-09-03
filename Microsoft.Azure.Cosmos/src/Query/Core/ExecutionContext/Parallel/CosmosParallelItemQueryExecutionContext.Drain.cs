@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.Parallel
             //  otherwise we would need to add to the continuation token how many items to skip over on that page.
 
             // Only drain from the leftmost (current) document producer tree
-            ItemProducerTree currentItemProducerTree = PopCurrentItemProducerTree();
+            ItemProducerTree currentItemProducerTree = this.PopCurrentItemProducerTree();
             List<CosmosElement> results = new List<CosmosElement>();
             try
             {
@@ -56,16 +56,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.Parallel
             }
             finally
             {
-                PushCurrentItemProducerTree(currentItemProducerTree);
+                this.PushCurrentItemProducerTree(currentItemProducerTree);
             }
 
             return QueryResponseCore.CreateSuccess(
                     result: results,
-                    requestCharge: requestChargeTracker.GetAndResetCharge(),
+                    requestCharge: this.requestChargeTracker.GetAndResetCharge(),
                     activityId: null,
-                    responseLengthBytes: GetAndResetResponseLengthBytes(),
+                    responseLengthBytes: this.GetAndResetResponseLengthBytes(),
                     disallowContinuationTokenMessage: null,
-                    continuationToken: ContinuationToken);
+                    continuationToken: this.ContinuationToken);
         }
     }
 }

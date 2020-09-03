@@ -5,8 +5,10 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Diagnostics;
 
     /// <summary>
     /// Abstraction which allows defining of custom message handlers.
@@ -31,14 +33,14 @@ namespace Microsoft.Azure.Cosmos
             RequestMessage request,
             CancellationToken cancellationToken)
         {
-            if (InnerHandler == null)
+            if (this.InnerHandler == null)
             {
-                throw new ArgumentNullException(nameof(InnerHandler));
+                throw new ArgumentNullException(nameof(this.InnerHandler));
             }
 
-            using (request.DiagnosticsContext.CreateRequestHandlerScopeScope(InnerHandler))
+            using (request.DiagnosticsContext.CreateRequestHandlerScopeScope(this.InnerHandler))
             {
-                return await InnerHandler.SendAsync(request, cancellationToken);
+                return await this.InnerHandler.SendAsync(request, cancellationToken);
             }
         }
     }

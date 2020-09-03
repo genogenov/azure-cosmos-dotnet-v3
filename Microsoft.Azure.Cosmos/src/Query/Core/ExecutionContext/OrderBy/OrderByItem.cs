@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
         {
             get
             {
-                if (!cosmosObject.TryGetValue(ItemName, out CosmosElement cosmosElement))
+                if (!this.cosmosObject.TryGetValue(ItemName, out CosmosElement cosmosElement))
                 {
                     cosmosElement = null;
                 }

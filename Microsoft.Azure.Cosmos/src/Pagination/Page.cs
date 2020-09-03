@@ -9,7 +9,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
     {
         protected Page(TState state)
         {
-            State = state;
+            this.State = state;
         }
 
         public TState State { get; }

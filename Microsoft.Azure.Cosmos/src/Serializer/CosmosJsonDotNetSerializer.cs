@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Text;
     using Newtonsoft.Json;
@@ -27,7 +28,7 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         internal CosmosJsonDotNetSerializer()
         {
-            SerializerSettings = null;
+            this.SerializerSettings = null;
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Microsoft.Azure.Cosmos
         {
             if (cosmosSerializerOptions == null)
             {
-                SerializerSettings = null;
+                this.SerializerSettings = null;
                 return;
             }
 
@@ -54,7 +55,7 @@ namespace Microsoft.Azure.Cosmos
                     : null
             };
 
-            SerializerSettings = jsonSerializerSettings;
+            this.SerializerSettings = jsonSerializerSettings;
         }
 
         /// <summary>
@@ -66,7 +67,7 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         internal CosmosJsonDotNetSerializer(JsonSerializerSettings jsonSerializerSettings)
         {
-            SerializerSettings = jsonSerializerSettings ?? throw new ArgumentNullException(nameof(jsonSerializerSettings));
+            this.SerializerSettings = jsonSerializerSettings ?? throw new ArgumentNullException(nameof(jsonSerializerSettings));
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Microsoft.Azure.Cosmos
                 {
                     using (JsonTextReader jsonTextReader = new JsonTextReader(sr))
                     {
-                        JsonSerializer jsonSerializer = GetSerializer();
+                        JsonSerializer jsonSerializer = this.GetSerializer();
                         return jsonSerializer.Deserialize<T>(jsonTextReader);
                     }
                 }
@@ -109,7 +110,7 @@ namespace Microsoft.Azure.Cosmos
                 using (JsonWriter writer = new JsonTextWriter(streamWriter))
                 {
                     writer.Formatting = Newtonsoft.Json.Formatting.None;
-                    JsonSerializer jsonSerializer = GetSerializer();
+                    JsonSerializer jsonSerializer = this.GetSerializer();
                     jsonSerializer.Serialize(writer, input);
                     writer.Flush();
                     streamWriter.Flush();
@@ -126,7 +127,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         private JsonSerializer GetSerializer()
         {
-            return JsonSerializer.Create(SerializerSettings);
+            return JsonSerializer.Create(this.SerializerSettings);
         }
     }
 }

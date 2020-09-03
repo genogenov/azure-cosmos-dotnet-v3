@@ -55,16 +55,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 throw new ArgumentException("queryengineConfiguration cannot be empty!");
             }
 
-            disposed = false;
+            this.disposed = false;
             this.queryengineConfiguration = JsonConvert.SerializeObject(queryengineConfiguration);
-            serviceProvider = IntPtr.Zero;
+            this.serviceProvider = IntPtr.Zero;
 
-            serviceProviderStateLock = new object();
+            this.serviceProviderStateLock = new object();
         }
 
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -80,23 +80,20 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 throw new ArgumentException("queryengineConfiguration cannot be empty!");
             }
 
-            if (!disposed)
+            if (!this.disposed)
             {
-                lock (serviceProviderStateLock)
+                lock (this.serviceProviderStateLock)
                 {
                     this.queryengineConfiguration = JsonConvert.SerializeObject(queryengineConfiguration);
 
-                    if (!disposed && serviceProvider != IntPtr.Zero)
+                    if (!this.disposed && this.serviceProvider != IntPtr.Zero)
                     {
                         uint errorCode = ServiceInteropWrapper.UpdateServiceProvider(
-                            serviceProvider,
+                            this.serviceProvider,
                             this.queryengineConfiguration);
 
                         Exception exception = Marshal.GetExceptionForHR((int)errorCode);
-                        if (exception != null)
-                        {
-                            throw exception;
-                        }
+                        if (exception != null) throw exception;
                     }
                 }
             }
@@ -114,7 +111,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
             bool allowNonValueAggregateQuery,
             bool hasLogicalPartitionKey)
         {
-            TryCatch<PartitionedQueryExecutionInfoInternal> tryGetInternalQueryInfo = TryGetPartitionedQueryExecutionInfoInternal(
+            TryCatch<PartitionedQueryExecutionInfoInternal> tryGetInternalQueryInfo = this.TryGetPartitionedQueryExecutionInfoInternal(
                 querySpec,
                 partitionKeyDefinition,
                 requireFormattableOrderByQuery,
@@ -126,7 +123,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 return TryCatch<PartitionedQueryExecutionInfo>.FromException(tryGetInternalQueryInfo.Exception);
             }
 
-            PartitionedQueryExecutionInfo queryInfo = ConvertPartitionedQueryExecutionInfo(tryGetInternalQueryInfo.Result, partitionKeyDefinition);
+            PartitionedQueryExecutionInfo queryInfo = this.ConvertPartitionedQueryExecutionInfo(tryGetInternalQueryInfo.Result, partitionKeyDefinition);
             return TryCatch<PartitionedQueryExecutionInfo>.FromResult(queryInfo);
         }
 
@@ -181,7 +178,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
 
             PartitionKind partitionKind = partitionKeyDefinition.Kind;
 
-            Initialize();
+            this.Initialize();
 
             byte[] buffer = new byte[InitialBufferSize];
             uint errorCode;
@@ -192,7 +189,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 fixed (byte* bytePtr = buffer)
                 {
                     errorCode = ServiceInteropWrapper.GetPartitionKeyRangesFromQuery(
-                        serviceProvider,
+                        this.serviceProvider,
                         queryText,
                         requireFormattableOrderByQuery,
                         isContinuationExpected,
@@ -212,7 +209,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                         fixed (byte* bytePtr2 = buffer)
                         {
                             errorCode = ServiceInteropWrapper.GetPartitionKeyRangesFromQuery(
-                                serviceProvider,
+                                this.serviceProvider,
                                 queryText,
                                 requireFormattableOrderByQuery,
                                 isContinuationExpected,
@@ -266,28 +263,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
 
         ~QueryPartitionProvider()
         {
-            Dispose(false);
+            this.Dispose(false);
         }
 
         private void Initialize()
         {
-            if (!disposed)
+            if (!this.disposed)
             {
-                if (serviceProvider == IntPtr.Zero)
+                if (this.serviceProvider == IntPtr.Zero)
                 {
-                    lock (serviceProviderStateLock)
+                    lock (this.serviceProviderStateLock)
                     {
-                        if (!disposed && serviceProvider == IntPtr.Zero)
+                        if (!this.disposed && this.serviceProvider == IntPtr.Zero)
                         {
                             uint errorCode = ServiceInteropWrapper.CreateServiceProvider(
-                                queryengineConfiguration,
-                                out serviceProvider);
+                                this.queryengineConfiguration,
+                                out this.serviceProvider);
 
                             Exception exception = Marshal.GetExceptionForHR((int)errorCode);
-                            if (exception != null)
-                            {
-                                throw exception;
-                            }
+                            if (exception != null) throw exception;
                         }
                     }
                 }
@@ -300,7 +294,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
 
         private void Dispose(bool disposing)
         {
-            if (disposed)
+            if (this.disposed)
             {
                 return;
             }
@@ -310,15 +304,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 // Free managed objects
             }
 
-            lock (serviceProviderStateLock)
+            lock (this.serviceProviderStateLock)
             {
-                if (serviceProvider != IntPtr.Zero)
+                if (this.serviceProvider != IntPtr.Zero)
                 {
-                    Marshal.Release(serviceProvider);
-                    serviceProvider = IntPtr.Zero;
+                    Marshal.Release(this.serviceProvider);
+                    this.serviceProvider = IntPtr.Zero;
                 }
 
-                disposed = true;
+                this.disposed = true;
             }
         }
     }

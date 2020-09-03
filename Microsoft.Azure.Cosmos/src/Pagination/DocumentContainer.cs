@@ -26,38 +26,38 @@ namespace Microsoft.Azure.Cosmos.Pagination
 
         public Task<TryCatch<List<PartitionKeyRange>>> MonadicGetChildRangeAsync(
             PartitionKeyRange partitionKeyRange,
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicGetChildRangeAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicGetChildRangeAsync(
                 partitionKeyRange,
                 cancellationToken);
 
         public Task<List<PartitionKeyRange>> GetChildRangeAsync(
             PartitionKeyRange partitionKeyRange,
             CancellationToken cancellationToken) => TryCatch<List<PartitionKeyRange>>.UnsafeGetResultAsync(
-                MonadicGetChildRangeAsync(
+                this.MonadicGetChildRangeAsync(
                     partitionKeyRange,
                     cancellationToken),
                 cancellationToken);
 
         public Task<TryCatch<List<PartitionKeyRange>>> MonadicGetFeedRangesAsync(
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicGetFeedRangesAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicGetFeedRangesAsync(
                 cancellationToken);
 
         public Task<List<PartitionKeyRange>> GetFeedRangesAsync(
             CancellationToken cancellationToken) => TryCatch<List<PartitionKeyRange>>.UnsafeGetResultAsync(
-                MonadicGetFeedRangesAsync(
+                this.MonadicGetFeedRangesAsync(
                     cancellationToken),
                 cancellationToken);
 
         public Task<TryCatch<Record>> MonadicCreateItemAsync(
             CosmosObject payload,
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicCreateItemAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicCreateItemAsync(
                 payload,
                 cancellationToken);
 
         public Task<Record> CreateItemAsync(
             CosmosObject payload,
             CancellationToken cancellationToken) => TryCatch<List<PartitionKeyRange>>.UnsafeGetResultAsync(
-                MonadicCreateItemAsync(
+                this.MonadicCreateItemAsync(
                     payload,
                     cancellationToken),
                 cancellationToken);
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
         public Task<TryCatch<Record>> MonadicReadItemAsync(
             CosmosElement partitionKey,
             Guid identifer,
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicReadItemAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicReadItemAsync(
                 partitionKey,
                 identifer,
                 cancellationToken);
@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
             CosmosElement partitionKey,
             Guid identifier,
             CancellationToken cancellationToken) => TryCatch<Record>.UnsafeGetResultAsync(
-                MonadicReadItemAsync(
+                this.MonadicReadItemAsync(
                     partitionKey,
                     identifier,
                     cancellationToken),
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
             int partitionKeyRangeId,
             long resourceIdentifer,
             int pageSize,
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicReadFeedAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicReadFeedAsync(
                 partitionKeyRangeId,
                 resourceIdentifer,
                 pageSize,
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
             long resourceIdentifier,
             int pageSize,
             CancellationToken cancellationToken) => TryCatch<DocumentContainerPage>.UnsafeGetResultAsync(
-                MonadicReadFeedAsync(
+                this.MonadicReadFeedAsync(
                     partitionKeyRangeId,
                     resourceIdentifier,
                     pageSize,
@@ -104,14 +104,14 @@ namespace Microsoft.Azure.Cosmos.Pagination
 
         public Task<TryCatch> MonadicSplitAsync(
             int partitionKeyRangeId,
-            CancellationToken cancellationToken) => monadicDocumentContainer.MonadicSplitAsync(
+            CancellationToken cancellationToken) => this.monadicDocumentContainer.MonadicSplitAsync(
                 partitionKeyRangeId,
                 cancellationToken);
 
         public Task SplitAsync(
             int partitionKeyRangeId,
             CancellationToken cancellationToken) => TryCatch.UnsafeWaitAsync(
-                MonadicSplitAsync(
+                this.MonadicSplitAsync(
                     partitionKeyRangeId,
                     cancellationToken),
                 cancellationToken);

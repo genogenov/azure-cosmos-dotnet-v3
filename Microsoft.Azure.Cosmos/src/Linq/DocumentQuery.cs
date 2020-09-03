@@ -77,8 +77,8 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             this.partitionKey = partitionKey;
 
-            Expression = expression ?? Expression.Constant(this);
-            queryProvider = new DocumentQueryProvider(
+            this.Expression = expression ?? Expression.Constant(this);
+            this.queryProvider = new DocumentQueryProvider(
                 client,
                 resourceTypeEnum,
                 resourceType,
@@ -86,9 +86,9 @@ namespace Microsoft.Azure.Cosmos.Linq
                 feedOptions,
                 partitionKey,
                 this.client.OnExecuteScalarQueryCallback);
-            executeNextAysncMetrics = new SchedulingStopwatch();
-            executeNextAysncMetrics.Ready();
-            CorrelatedActivityId = Guid.NewGuid();
+            this.executeNextAysncMetrics = new SchedulingStopwatch();
+            this.executeNextAysncMetrics.Ready();
+            this.CorrelatedActivityId = Guid.NewGuid();
         }
 
         public DocumentQuery(
@@ -155,7 +155,7 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public IQueryProvider Provider
         {
-            get { return queryProvider; }
+            get { return this.queryProvider; }
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             get
             {
-                return queryExecutionContext == null || !queryExecutionContext.IsDone;
+                return this.queryExecutionContext == null || !this.queryExecutionContext.IsDone;
             }
         }
 
@@ -176,15 +176,15 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public void Dispose()
         {
-            if (queryExecutionContext != null)
+            if (this.queryExecutionContext != null)
             {
-                queryExecutionContext.Dispose();
+                this.queryExecutionContext.Dispose();
                 DefaultTrace.TraceInformation(
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "{0}, CorrelatedActivityId: {1} | Disposing DocumentQuery",
                         DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                        CorrelatedActivityId));
+                        this.CorrelatedActivityId));
             }
         }
 
@@ -193,7 +193,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public Task<DocumentFeedResponse<dynamic>> ExecuteNextAsync(CancellationToken cancellationToken = default)
         {
-            return ExecuteNextAsync<dynamic>(cancellationToken);
+            return this.ExecuteNextAsync<dynamic>(cancellationToken);
         }
 
         /// <summary>
@@ -203,32 +203,32 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             try
             {
-                if (!tracedFirstExecution)
+                if (!this.tracedFirstExecution)
                 {
                     DefaultTrace.TraceInformation(string.Format(
                         CultureInfo.InvariantCulture,
                         "{0}, CorrelatedActivityId: {1} | First ExecuteNextAsync",
                         DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                        CorrelatedActivityId));
-                    tracedFirstExecution = true;
+                        this.CorrelatedActivityId));
+                    this.tracedFirstExecution = true;
                 }
 
-                executeNextAysncMetrics.Start();
-                return TaskHelper.InlineIfPossible(() => ExecuteNextPrivateAsync<TResponse>(cancellationToken), null, cancellationToken);
+                this.executeNextAysncMetrics.Start();
+                return TaskHelper.InlineIfPossible(() => this.ExecuteNextPrivateAsync<TResponse>(cancellationToken), null, cancellationToken);
             }
             finally
             {
-                executeNextAysncMetrics.Stop();
-                if (!HasMoreResults && !tracedLastExecution)
+                this.executeNextAysncMetrics.Stop();
+                if (!this.HasMoreResults && !this.tracedLastExecution)
                 {
                     DefaultTrace.TraceInformation(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "{0}, CorrelatedActivityId: {1} | Last ExecuteNextAsync with ExecuteNextAsyncMetrics: [{2}]",
                             DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                            CorrelatedActivityId,
-                            executeNextAysncMetrics));
-                    tracedLastExecution = true;
+                            this.CorrelatedActivityId,
+                            this.executeNextAysncMetrics));
+                    this.tracedLastExecution = true;
                 }
             }
         }
@@ -243,7 +243,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             using (IDocumentQueryExecutionContext localQueryExecutionContext =
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-                TaskHelper.InlineIfPossible(() => CreateDocumentQueryExecutionContextAsync(false, CancellationToken.None), null).Result)
+                TaskHelper.InlineIfPossible(() => this.CreateDocumentQueryExecutionContextAsync(false, CancellationToken.None), null).Result)
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
             {
                 while (!localQueryExecutionContext.IsDone)
@@ -253,8 +253,8 @@ namespace Microsoft.Azure.Cosmos.Linq
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
                     DocumentFeedResponse<T> typedFeedResponse = FeedResponseBinder.ConvertCosmosElementFeed<T>(
                         feedResponse,
-                        resourceTypeEnum,
-                        feedOptions.JsonSerializerSettings);
+                        this.resourceTypeEnum,
+                        this.feedOptions.JsonSerializerSettings);
                     foreach (T item in typedFeedResponse)
                     {
                         yield return item;
@@ -268,39 +268,39 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         public override string ToString()
         {
-            SqlQuerySpec querySpec = DocumentQueryEvaluator.Evaluate(Expression);
+            SqlQuerySpec querySpec = DocumentQueryEvaluator.Evaluate(this.Expression);
             if (querySpec != null)
             {
                 return JsonConvert.SerializeObject(querySpec);
             }
 
-            return new Uri(client.ServiceEndpoint, documentsFeedOrDatabaseLink).ToString();
+            return new Uri(this.client.ServiceEndpoint, this.documentsFeedOrDatabaseLink).ToString();
         }
 
         private Task<IDocumentQueryExecutionContext> CreateDocumentQueryExecutionContextAsync(bool isContinuationExpected, CancellationToken cancellationToken)
         {
             return DocumentQueryExecutionContextFactory.CreateDocumentQueryExecutionContextAsync(
-                client,
-                resourceTypeEnum,
-                resourceType,
-                Expression,
-                feedOptions,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.Expression,
+                this.feedOptions,
+                this.documentsFeedOrDatabaseLink,
                 isContinuationExpected,
                 cancellationToken,
-                CorrelatedActivityId);
+                this.CorrelatedActivityId);
         }
 
         internal async Task<List<T>> ExecuteAllAsync(CancellationToken cancellationToken = default)
         {
             List<T> result = new List<T>();
             using (IDocumentQueryExecutionContext localQueryExecutionContext =
-                await TaskHelper.InlineIfPossible(() => CreateDocumentQueryExecutionContextAsync(false, cancellationToken), null, cancellationToken))
+                await TaskHelper.InlineIfPossible(() => this.CreateDocumentQueryExecutionContextAsync(false, cancellationToken), null, cancellationToken))
             {
                 while (!localQueryExecutionContext.IsDone)
                 {
@@ -314,32 +314,32 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         private async Task<DocumentFeedResponse<TResponse>> ExecuteNextPrivateAsync<TResponse>(CancellationToken cancellationToken)
         {
-            if (queryExecutionContext == null)
+            if (this.queryExecutionContext == null)
             {
-                queryExecutionContext = await CreateDocumentQueryExecutionContextAsync(true, cancellationToken);
+                this.queryExecutionContext = await this.CreateDocumentQueryExecutionContextAsync(true, cancellationToken);
             }
-            else if (queryExecutionContext.IsDone)
+            else if (this.queryExecutionContext.IsDone)
             {
-                queryExecutionContext.Dispose();
-                queryExecutionContext = await CreateDocumentQueryExecutionContextAsync(true, cancellationToken);
+                this.queryExecutionContext.Dispose();
+                this.queryExecutionContext = await this.CreateDocumentQueryExecutionContextAsync(true, cancellationToken);
             }
 
-            DocumentFeedResponse<CosmosElement> response = await queryExecutionContext.ExecuteNextFeedResponseAsync(cancellationToken);
+            DocumentFeedResponse<CosmosElement> response = await this.queryExecutionContext.ExecuteNextFeedResponseAsync(cancellationToken);
             DocumentFeedResponse<TResponse> typedFeedResponse = FeedResponseBinder.ConvertCosmosElementFeed<TResponse>(
                 response,
-                resourceTypeEnum,
-                feedOptions.JsonSerializerSettings);
+                this.resourceTypeEnum,
+                this.feedOptions.JsonSerializerSettings);
 
-            if (!HasMoreResults && !tracedLastExecution)
+            if (!this.HasMoreResults && !this.tracedLastExecution)
             {
                 DefaultTrace.TraceInformation(
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "{0}, CorrelatedActivityId: {1} | Last ExecuteNextAsync with ExecuteNextAsyncMetrics: [{2}]",
                         DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                        CorrelatedActivityId,
-                        executeNextAysncMetrics));
-                tracedLastExecution = true;
+                        this.CorrelatedActivityId,
+                        this.executeNextAysncMetrics));
+                this.tracedLastExecution = true;
             }
             return typedFeedResponse;
         }

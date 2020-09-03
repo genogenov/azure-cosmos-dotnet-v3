@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
         public HashIndex(DataType dataType)
             : this()
         {
-            DataType = dataType;
+            this.DataType = dataType;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos
         public HashIndex(DataType dataType, short precision)
             : this(dataType)
         {
-            Precision = precision;
+            this.Precision = precision;
         }
 
         /// <summary>
@@ -89,9 +89,9 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>A clone of the hash index.</returns>
         public object Clone()
         {
-            return new HashIndex(DataType)
+            return new HashIndex(this.DataType)
             {
-                Precision = Precision
+                Precision = this.Precision
             };
         }
     }

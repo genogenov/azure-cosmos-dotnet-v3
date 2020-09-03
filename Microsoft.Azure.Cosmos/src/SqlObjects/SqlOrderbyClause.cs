@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            OrderbyItems = orderbyItems;
+            this.OrderbyItems = orderbyItems;
         }
 
         public ImmutableArray<SqlOrderByItem> OrderbyItems { get; }

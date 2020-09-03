@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         public override ChangeFeedObserver<T> CreateObserver()
         {
-            return new ChangeFeedObserverBase<T>(onChanges);
+            return new ChangeFeedObserverBase<T>(this.onChanges);
         }
     }
 }

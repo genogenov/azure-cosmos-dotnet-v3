@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
 
             public override float GetValue()
             {
-                return number;
+                return this.number;
             }
         }
     }

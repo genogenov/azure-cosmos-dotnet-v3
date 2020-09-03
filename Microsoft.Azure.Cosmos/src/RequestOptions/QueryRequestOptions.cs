@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
+    using System.Globalization;
     using System.Text;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.Query.Core;
@@ -107,8 +108,8 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public ConsistencyLevel? ConsistencyLevel
         {
-            get => BaseConsistencyLevel;
-            set => BaseConsistencyLevel = value;
+            get => this.BaseConsistencyLevel;
+            set => this.BaseConsistencyLevel = value;
         }
 
         /// <summary>
@@ -166,76 +167,76 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="request">The <see cref="RequestMessage"/></param>
         internal override void PopulateRequestOptions(RequestMessage request)
         {
-            if (PartitionKey != null && request.ResourceType != ResourceType.Document)
+            if (this.PartitionKey != null && request.ResourceType != ResourceType.Document)
             {
-                throw new ArgumentException($"{nameof(PartitionKey)} can only be set for item operations");
+                throw new ArgumentException($"{nameof(this.PartitionKey)} can only be set for item operations");
             }
 
             // Cross partition is only applicable to item operations.
-            if (PartitionKey == null && !IsEffectivePartitionKeyRouting && request.ResourceType == ResourceType.Document)
+            if (this.PartitionKey == null && !this.IsEffectivePartitionKeyRouting && request.ResourceType == ResourceType.Document)
             {
                 request.Headers.Add(HttpConstants.HttpHeaders.EnableCrossPartitionQuery, bool.TrueString);
             }
 
-            RequestOptions.SetSessionToken(request, SessionToken);
+            RequestOptions.SetSessionToken(request, this.SessionToken);
 
             // Flow the pageSize only when we are not doing client eval
-            if (MaxItemCount.HasValue)
+            if (this.MaxItemCount.HasValue)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.PageSize, MaxItemCount.ToString());
+                request.Headers.Add(HttpConstants.HttpHeaders.PageSize, this.MaxItemCount.ToString());
             }
 
-            if (MaxConcurrency.HasValue && MaxConcurrency > 0)
+            if (this.MaxConcurrency.HasValue && this.MaxConcurrency > 0)
             {
                 request.Headers.Add(HttpConstants.HttpHeaders.ParallelizeCrossPartitionQuery, bool.TrueString);
             }
 
-            if (EnableScanInQuery.HasValue && EnableScanInQuery.Value)
+            if (this.EnableScanInQuery.HasValue && this.EnableScanInQuery.Value)
             {
                 request.Headers.Add(HttpConstants.HttpHeaders.EnableScanInQuery, bool.TrueString);
             }
 
-            if (EnableLowPrecisionOrderBy != null)
+            if (this.EnableLowPrecisionOrderBy != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.EnableLowPrecisionOrderBy, EnableLowPrecisionOrderBy.ToString());
+                request.Headers.Add(HttpConstants.HttpHeaders.EnableLowPrecisionOrderBy, this.EnableLowPrecisionOrderBy.ToString());
             }
 
-            if (ResponseContinuationTokenLimitInKb != null)
+            if (this.ResponseContinuationTokenLimitInKb != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.ResponseContinuationTokenLimitInKB, ResponseContinuationTokenLimitInKb.ToString());
+                request.Headers.Add(HttpConstants.HttpHeaders.ResponseContinuationTokenLimitInKB, this.ResponseContinuationTokenLimitInKb.ToString());
             }
 
-            if (CosmosSerializationFormatOptions != null)
+            if (this.CosmosSerializationFormatOptions != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.ContentSerializationFormat, CosmosSerializationFormatOptions.ContentSerializationFormat);
+                request.Headers.Add(HttpConstants.HttpHeaders.ContentSerializationFormat, this.CosmosSerializationFormatOptions.ContentSerializationFormat);
             }
 
-            if (StartId != null)
+            if (this.StartId != null)
             {
-                request.Headers.Set(HttpConstants.HttpHeaders.StartId, Convert.ToBase64String(Encoding.UTF8.GetBytes(StartId)));
+                request.Headers.Set(HttpConstants.HttpHeaders.StartId, Convert.ToBase64String(Encoding.UTF8.GetBytes(this.StartId)));
             }
 
-            if (EndId != null)
+            if (this.EndId != null)
             {
-                request.Headers.Set(HttpConstants.HttpHeaders.EndId, Convert.ToBase64String(Encoding.UTF8.GetBytes(EndId)));
+                request.Headers.Set(HttpConstants.HttpHeaders.EndId, Convert.ToBase64String(Encoding.UTF8.GetBytes(this.EndId)));
             }
 
-            if (StartId != null || EndId != null)
+            if (this.StartId != null || this.EndId != null)
             {
                 request.Headers.Set(HttpConstants.HttpHeaders.ReadFeedKeyType, ReadFeedKeyType.ResourceId.ToString());
             }
 
-            if (EnumerationDirection.HasValue)
+            if (this.EnumerationDirection.HasValue)
             {
-                request.Headers.Set(HttpConstants.HttpHeaders.EnumerationDirection, EnumerationDirection.Value.ToString());
+                request.Headers.Set(HttpConstants.HttpHeaders.EnumerationDirection, this.EnumerationDirection.Value.ToString());
             }
 
             request.Headers.Add(HttpConstants.HttpHeaders.PopulateQueryMetrics, bool.TrueString);
 
-            if (FeedRange != null)
+            if (this.FeedRange != null)
             {
                 FeedRangeRequestMessagePopulatorVisitor queryFeedRangeVisitor = new FeedRangeRequestMessagePopulatorVisitor(request);
-                ((FeedRangeInternal)FeedRange).Accept(queryFeedRangeVisitor);
+                ((FeedRangeInternal)this.FeedRange).Accept(queryFeedRangeVisitor);
             }
 
             base.PopulateRequestOptions(request);
@@ -245,21 +246,21 @@ namespace Microsoft.Azure.Cosmos
         {
             QueryRequestOptions queryRequestOptions = new QueryRequestOptions
             {
-                IfMatchEtag = IfMatchEtag,
-                IfNoneMatchEtag = IfNoneMatchEtag,
-                MaxItemCount = MaxItemCount,
-                ResponseContinuationTokenLimitInKb = ResponseContinuationTokenLimitInKb,
-                EnableScanInQuery = EnableScanInQuery,
-                EnableLowPrecisionOrderBy = EnableLowPrecisionOrderBy,
-                MaxBufferedItemCount = MaxBufferedItemCount,
-                SessionToken = SessionToken,
-                ConsistencyLevel = ConsistencyLevel,
-                MaxConcurrency = MaxConcurrency,
-                PartitionKey = PartitionKey,
-                CosmosSerializationFormatOptions = CosmosSerializationFormatOptions,
-                Properties = Properties,
-                IsEffectivePartitionKeyRouting = IsEffectivePartitionKeyRouting,
-                CosmosElementContinuationToken = CosmosElementContinuationToken,
+                IfMatchEtag = this.IfMatchEtag,
+                IfNoneMatchEtag = this.IfNoneMatchEtag,
+                MaxItemCount = this.MaxItemCount,
+                ResponseContinuationTokenLimitInKb = this.ResponseContinuationTokenLimitInKb,
+                EnableScanInQuery = this.EnableScanInQuery,
+                EnableLowPrecisionOrderBy = this.EnableLowPrecisionOrderBy,
+                MaxBufferedItemCount = this.MaxBufferedItemCount,
+                SessionToken = this.SessionToken,
+                ConsistencyLevel = this.ConsistencyLevel,
+                MaxConcurrency = this.MaxConcurrency,
+                PartitionKey = this.PartitionKey,
+                CosmosSerializationFormatOptions = this.CosmosSerializationFormatOptions,
+                Properties = this.Properties,
+                IsEffectivePartitionKeyRouting = this.IsEffectivePartitionKeyRouting,
+                CosmosElementContinuationToken = this.CosmosElementContinuationToken,
             };
 
             return queryRequestOptions;

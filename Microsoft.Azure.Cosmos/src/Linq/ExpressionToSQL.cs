@@ -19,6 +19,7 @@ namespace Microsoft.Azure.Cosmos.Linq
     using Microsoft.Azure.Cosmos.SqlObjects;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using static Microsoft.Azure.Cosmos.Linq.FromParameterBindings;
 
     // ReSharper disable UnusedParameter.Local
@@ -75,10 +76,10 @@ namespace Microsoft.Azure.Cosmos.Linq
             public const string Where = "Where";
         }
 
-        private static readonly string SqlRoot = "root";
-        private static readonly string DefaultParameterName = "v";
-        private static readonly bool usePropertyRef = false;
-        private static readonly SqlIdentifier RootIdentifier = SqlIdentifier.Create(SqlRoot);
+        private static string SqlRoot = "root";
+        private static string DefaultParameterName = "v";
+        private static bool usePropertyRef = false;
+        private static SqlIdentifier RootIdentifier = SqlIdentifier.Create(SqlRoot);
 
         /// <summary>
         /// Toplevel entry point.
@@ -122,10 +123,7 @@ namespace Microsoft.Azure.Cosmos.Linq
                     MethodCallExpression methodCallExpression = (MethodCallExpression)inputExpression;
                     bool shouldConvertToScalarAnyCollection = (context.PeekMethod() == null) && methodCallExpression.Method.Name.Equals(LinqMethods.Any);
                     collection = ExpressionToSql.VisitMethodCall(methodCallExpression, context);
-                    if (shouldConvertToScalarAnyCollection)
-                    {
-                        collection = ExpressionToSql.ConvertToScalarAnyCollection(context);
-                    }
+                    if (shouldConvertToScalarAnyCollection) collection = ExpressionToSql.ConvertToScalarAnyCollection(context);
 
                     break;
 
@@ -191,10 +189,7 @@ namespace Microsoft.Azure.Cosmos.Linq
                 }
             }
 
-            if (parameterName == null)
-            {
-                parameterName = ExpressionToSql.DefaultParameterName;
-            }
+            if (parameterName == null) parameterName = ExpressionToSql.DefaultParameterName;
 
             return parameterName;
         }
@@ -1277,9 +1272,11 @@ namespace Microsoft.Azure.Cosmos.Linq
                     }
                     else
                     {
+                        SubqueryKind? objKind;
+                        bool isMinMaxAvg;
                         isSubqueryExpression = ExpressionToSql.IsSubqueryScalarExpression(
                             methodCallExpression.Arguments[0] as MethodCallExpression,
-                            out SubqueryKind? objKind, out bool isMinMaxAvg);
+                            out objKind, out isMinMaxAvg);
 
                         if (isSubqueryExpression)
                         {
@@ -1428,7 +1425,9 @@ namespace Microsoft.Azure.Cosmos.Linq
             ReadOnlyCollection<ParameterExpression> parameters,
             TranslationContext context)
         {
-            bool shouldUseSubquery = ExpressionToSql.IsSubqueryScalarExpression(expression, out SubqueryKind? expressionObjKind, out bool isMinMaxAvgMethod);
+            SubqueryKind? expressionObjKind;
+            bool isMinMaxAvgMethod;
+            bool shouldUseSubquery = ExpressionToSql.IsSubqueryScalarExpression(expression, out expressionObjKind, out isMinMaxAvgMethod);
 
             SqlScalarExpression sqlScalarExpression;
             if (!shouldUseSubquery)
@@ -1520,10 +1519,7 @@ namespace Microsoft.Azure.Cosmos.Linq
             packagedQuery.fromParameters.SetInputParameter(typeof(object), context.currentQuery.GetInputParameterInContext(shouldBeOnNewQuery).Name, context.InScope);
             context.currentQuery = packagedQuery;
 
-            if (shouldBeOnNewQuery)
-            {
-                context.CurrentSubqueryBinding.ShouldBeOnNewQuery = false;
-            }
+            if (shouldBeOnNewQuery) context.CurrentSubqueryBinding.ShouldBeOnNewQuery = false;
 
             Collection collection = ExpressionToSql.VisitCollectionExpression(expression, parameters, context);
 
@@ -1675,14 +1671,16 @@ namespace Microsoft.Azure.Cosmos.Linq
             }
 
             SqlScalarExpression scalarExpression = ExpressionToSql.VisitScalarExpression(expression, context);
+            SqlNumberLiteral offsetNumberLiteral;
+            SqlParameter sqlParameter;
             SqlOffsetSpec offsetSpec;
 
             // skipExpression must be number literal
-            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out SqlNumberLiteral offsetNumberLiteral))
+            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out offsetNumberLiteral))
             {
                 offsetSpec = SqlOffsetSpec.Create(offsetNumberLiteral);
             }
-            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out SqlParameter sqlParameter))
+            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out sqlParameter))
             {
                 offsetSpec = SqlOffsetSpec.Create(sqlParameter);
             }
@@ -1711,14 +1709,16 @@ namespace Microsoft.Azure.Cosmos.Linq
             }
 
             SqlScalarExpression scalarExpression = ExpressionToSql.VisitScalarExpression(expression, context);
+            SqlNumberLiteral takeNumberLiteral;
+            SqlParameter sqlParameter;
             SqlLimitSpec limitSpec;
 
             // takeExpression must be number literal
-            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out SqlNumberLiteral takeNumberLiteral))
+            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out takeNumberLiteral))
             {
                 limitSpec = SqlLimitSpec.Create(takeNumberLiteral);
             }
-            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out SqlParameter sqlParameter))
+            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out sqlParameter))
             {
                 limitSpec = SqlLimitSpec.Create(sqlParameter);
             }
@@ -1747,14 +1747,16 @@ namespace Microsoft.Azure.Cosmos.Linq
             }
 
             SqlScalarExpression scalarExpression = ExpressionToSql.VisitScalarExpression(expression, context);
+            SqlNumberLiteral takeNumberLiteral;
+            SqlParameter sqlParameter;
             SqlTopSpec topSpec;
 
             // takeExpression must be number literal
-            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out SqlNumberLiteral takeNumberLiteral))
+            if (TryGetTopSkipTakeLiteral(scalarExpression, context, out takeNumberLiteral))
             {
                 topSpec = SqlTopSpec.Create(takeNumberLiteral);
             }
-            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out SqlParameter sqlParameter))
+            else if (TryGetTopSkipTakeParameter(scalarExpression, context, out sqlParameter))
             {
                 topSpec = SqlTopSpec.Create(sqlParameter);
             }
@@ -1826,7 +1828,7 @@ namespace Microsoft.Azure.Cosmos.Linq
             TranslationContext context)
         {
             SqlScalarExpression countExpression;
-            countExpression = SqlLiteralScalarExpression.Create(SqlNumberLiteral.Create(1));
+            countExpression = SqlLiteralScalarExpression.Create(SqlNumberLiteral.Create((Number64)1));
 
             if (arguments.Count == 2)
             {

@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override Task<bool> IsInitializedAsync()
         {
-            return Task.FromResult(isInitialized);
+            return Task.FromResult(this.isInitialized);
         }
 
         public override Task MarkInitializedAsync()

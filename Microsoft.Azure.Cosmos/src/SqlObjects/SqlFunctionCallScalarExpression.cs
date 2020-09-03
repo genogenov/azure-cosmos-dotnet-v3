@@ -158,9 +158,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            Arguments = arguments;
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            IsUdf = isUdf;
+            this.Arguments = arguments;
+            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+            this.IsUdf = isUdf;
         }
 
         public SqlIdentifier Name { get; }

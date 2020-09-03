@@ -39,7 +39,7 @@ namespace Microsoft.Azure.Cosmos
                     newClientId = EnvironmentInformation.clientId++;
                 }
 
-                ClientId = newClientId.ToString().PadLeft(2, '0');
+                this.ClientId = newClientId.ToString().PadLeft(2, '0');
             }
         }
 

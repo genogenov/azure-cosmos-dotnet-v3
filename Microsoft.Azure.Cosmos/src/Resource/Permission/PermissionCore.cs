@@ -24,9 +24,9 @@ namespace Microsoft.Azure.Cosmos
             UserCore user,
             string userId)
         {
-            Id = userId;
-            ClientContext = clientContext;
-            linkUri = clientContext.CreateLink(
+            this.Id = userId;
+            this.ClientContext = clientContext;
+            this.linkUri = clientContext.CreateLink(
                 parentLink: user.LinkUri,
                 uriPathSegment: Paths.PermissionsPathSegment,
                 id: userId);
@@ -42,12 +42,12 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            ResponseMessage response = await DeletePermissionStreamAsync(
+            ResponseMessage response = await this.DeletePermissionStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
 
-            return ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
+            return this.ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
         }
 
         public Task<ResponseMessage> DeletePermissionStreamAsync(
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return ProcessStreamAsync(
+            return this.ProcessStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 streamPayload: null,
                 operationType: OperationType.Delete,
@@ -70,13 +70,13 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            ResponseMessage response = await ReadPermissionStreamAsync(
+            ResponseMessage response = await this.ReadPermissionStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 tokenExpiryInSeconds: tokenExpiryInSeconds,
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
 
-            return ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
+            return this.ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
         }
 
         public Task<ResponseMessage> ReadPermissionStreamAsync(
@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return ProcessStreamAsync(
+            return this.ProcessStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 streamPayload: null,
                 operationType: OperationType.Read,
@@ -106,15 +106,15 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(permissionProperties));
             }
 
-            ClientContext.ValidateResource(permissionProperties.Id);
-            ResponseMessage response = await ReplaceStreamInternalAsync(
+            this.ClientContext.ValidateResource(permissionProperties.Id);
+            ResponseMessage response = await this.ReplaceStreamInternalAsync(
                 diagnosticsContext: diagnosticsContext,
-                streamPayload: ClientContext.SerializerCore.ToStream(permissionProperties),
+                streamPayload: this.ClientContext.SerializerCore.ToStream(permissionProperties),
                 tokenExpiryInSeconds: tokenExpiryInSeconds,
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
 
-            return ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
+            return this.ClientContext.ResponseFactory.CreatePermissionResponse(this, response);
         }
 
         public Task<ResponseMessage> ReplacePermissionStreamAsync(
@@ -128,10 +128,10 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(permissionProperties));
             }
 
-            ClientContext.ValidateResource(permissionProperties.Id);
-            return ReplaceStreamInternalAsync(
+            this.ClientContext.ValidateResource(permissionProperties.Id);
+            return this.ReplaceStreamInternalAsync(
                 diagnosticsContext: diagnosticsContext,
-                streamPayload: ClientContext.SerializerCore.ToStream(permissionProperties),
+                streamPayload: this.ClientContext.SerializerCore.ToStream(permissionProperties),
                 tokenExpiryInSeconds: null,
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
@@ -144,7 +144,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return ProcessStreamAsync(
+            return this.ProcessStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 streamPayload: streamPayload,
                 operationType: OperationType.Replace,
@@ -161,11 +161,11 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return ProcessResourceOperationStreamAsync(
+            return this.ProcessResourceOperationStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 streamPayload: streamPayload,
                 operationType: operationType,
-                linkUri: linkUri,
+                linkUri: this.linkUri,
                 resourceType: ResourceType.Permission,
                 tokenExpiryInSeconds: tokenExpiryInSeconds,
                 requestOptions: requestOptions,
@@ -182,7 +182,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return ClientContext.ProcessResourceOperationStreamAsync(
+            return this.ClientContext.ProcessResourceOperationStreamAsync(
               resourceUri: linkUri,
               resourceType: resourceType,
               operationType: operationType,

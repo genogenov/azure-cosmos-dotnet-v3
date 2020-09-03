@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos
 
         internal Documents.ConsistencyLevel ToDirectConsistencyLevel()
         {
-            return (Documents.ConsistencyLevel)DefaultConsistencyLevel;
+            return (Documents.ConsistencyLevel)this.DefaultConsistencyLevel;
         }
     }
 }

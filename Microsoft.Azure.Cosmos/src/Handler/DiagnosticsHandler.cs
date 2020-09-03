@@ -41,13 +41,13 @@ namespace Microsoft.Azure.Cosmos.Handlers
                 // If the CPU monitor fails for some reason don't block the application
                 try
                 {
-                    cpuMonitor = new CpuMonitor();
-                    cpuMonitor.Start();
-                    isCpuMonitorEnabled = true;
+                    this.cpuMonitor = new CpuMonitor();
+                    this.cpuMonitor.Start();
+                    this.isCpuMonitorEnabled = true;
                 }
                 catch (Exception)
                 {
-                    isCpuMonitorEnabled = false;
+                    this.isCpuMonitorEnabled = false;
                 }
             }
 
@@ -57,11 +57,11 @@ namespace Microsoft.Azure.Cosmos.Handlers
             /// </summary>
             public void RecordCpuDiagnostics(RequestMessage request)
             {
-                if (isCpuMonitorEnabled)
+                if (this.isCpuMonitorEnabled)
                 {
                     try
                     {
-                        CpuLoadHistory cpuHistory = cpuMonitor.GetCpuLoad();
+                        CpuLoadHistory cpuHistory = this.cpuMonitor.GetCpuLoad();
                         if (cpuHistory != null)
                         {
                             request.DiagnosticsContext.AddDiagnosticsInternal(new CosmosSystemInfo(cpuHistory));
@@ -69,7 +69,7 @@ namespace Microsoft.Azure.Cosmos.Handlers
                     }
                     catch (Exception)
                     {
-                        isCpuMonitorEnabled = false;
+                        this.isCpuMonitorEnabled = false;
                     }
                 }
             }

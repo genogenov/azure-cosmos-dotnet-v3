@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Cosmos.Json
         /// </summary>
         protected JsonWriter()
         {
-            JsonObjectState = new JsonObjectState(false);
+            this.JsonObjectState = new JsonObjectState(false);
         }
 
         /// <inheritdoc />
@@ -86,7 +86,7 @@ namespace Microsoft.Azure.Cosmos.Json
             Encoding.UTF8.GetBytes(fieldName, utf8Buffer);
             Utf8Span utf8FieldName = Utf8Span.UnsafeFromUtf8BytesNoValidation(utf8Buffer);
 
-            WriteFieldName(utf8FieldName);
+            this.WriteFieldName(utf8FieldName);
         }
 
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace Microsoft.Azure.Cosmos.Json
             Encoding.UTF8.GetBytes(value, utf8Buffer);
             Utf8Span utf8Value = Utf8Span.UnsafeFromUtf8BytesNoValidation(utf8Buffer);
 
-            WriteStringValue(utf8Value);
+            this.WriteStringValue(utf8Value);
         }
 
         /// <inheritdoc />
@@ -156,7 +156,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 throw new ArgumentNullException("jsonReader can not be null");
             }
 
-            bool sameFormat = jsonReader.SerializationFormat == SerializationFormat;
+            bool sameFormat = jsonReader.SerializationFormat == this.SerializationFormat;
 
             JsonTokenType jsonTokenType = jsonReader.CurrentTokenType;
             switch (jsonTokenType)
@@ -165,38 +165,38 @@ namespace Microsoft.Azure.Cosmos.Json
                     break;
 
                 case JsonTokenType.BeginArray:
-                    WriteArrayStart();
+                    this.WriteArrayStart();
                     break;
 
                 case JsonTokenType.EndArray:
-                    WriteArrayEnd();
+                    this.WriteArrayEnd();
                     break;
 
                 case JsonTokenType.BeginObject:
-                    WriteObjectStart();
+                    this.WriteObjectStart();
                     break;
 
                 case JsonTokenType.EndObject:
-                    WriteObjectEnd();
+                    this.WriteObjectEnd();
                     break;
 
                 case JsonTokenType.True:
-                    WriteBoolValue(true);
+                    this.WriteBoolValue(true);
                     break;
 
                 case JsonTokenType.False:
-                    WriteBoolValue(false);
+                    this.WriteBoolValue(false);
                     break;
 
                 case JsonTokenType.Null:
-                    WriteNullValue();
+                    this.WriteNullValue();
                     break;
 
                 default:
                     {
                         if (sameFormat && jsonReader.TryGetBufferedRawJsonToken(out ReadOnlyMemory<byte> bufferedRawJsonToken))
                         {
-                            WriteRawJsonToken(jsonTokenType, bufferedRawJsonToken.Span);
+                            this.WriteRawJsonToken(jsonTokenType, bufferedRawJsonToken.Span);
                         }
                         else
                         {
@@ -208,11 +208,11 @@ namespace Microsoft.Azure.Cosmos.Json
                                         string value = jsonReader.GetStringValue();
                                         if (jsonTokenType == JsonTokenType.FieldName)
                                         {
-                                            WriteFieldName(value);
+                                            this.WriteFieldName(value);
                                         }
                                         else
                                         {
-                                            WriteStringValue(value);
+                                            this.WriteStringValue(value);
                                         }
 
                                         break;
@@ -221,70 +221,70 @@ namespace Microsoft.Azure.Cosmos.Json
                                 case JsonTokenType.Number:
                                     {
                                         Number64 value = jsonReader.GetNumberValue();
-                                        WriteNumber64Value(value);
+                                        this.WriteNumber64Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Int8:
                                     {
                                         sbyte value = jsonReader.GetInt8Value();
-                                        WriteInt8Value(value);
+                                        this.WriteInt8Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Int16:
                                     {
                                         short value = jsonReader.GetInt16Value();
-                                        WriteInt16Value(value);
+                                        this.WriteInt16Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Int32:
                                     {
                                         int value = jsonReader.GetInt32Value();
-                                        WriteInt32Value(value);
+                                        this.WriteInt32Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Int64:
                                     {
                                         long value = jsonReader.GetInt64Value();
-                                        WriteInt64Value(value);
+                                        this.WriteInt64Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.UInt32:
                                     {
                                         uint value = jsonReader.GetUInt32Value();
-                                        WriteUInt32Value(value);
+                                        this.WriteUInt32Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Float32:
                                     {
                                         float value = jsonReader.GetFloat32Value();
-                                        WriteFloat32Value(value);
+                                        this.WriteFloat32Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Float64:
                                     {
                                         double value = jsonReader.GetFloat64Value();
-                                        WriteFloat64Value(value);
+                                        this.WriteFloat64Value(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Guid:
                                     {
                                         Guid value = jsonReader.GetGuidValue();
-                                        WriteGuidValue(value);
+                                        this.WriteGuidValue(value);
                                     }
                                     break;
 
                                 case JsonTokenType.Binary:
                                     {
                                         ReadOnlyMemory<byte> value = jsonReader.GetBinaryValue();
-                                        WriteBinaryValue(value.Span);
+                                        this.WriteBinaryValue(value.Span);
                                     }
                                     break;
 
@@ -310,7 +310,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
             while (jsonReader.Read())
             {
-                WriteCurrentToken(jsonReader);
+                this.WriteCurrentToken(jsonReader);
             }
         }
 
@@ -321,7 +321,7 @@ namespace Microsoft.Azure.Cosmos.Json
         public void WriteJsonFragment(ReadOnlyMemory<byte> jsonFragment)
         {
             IJsonReader jsonReader = JsonReader.Create(jsonFragment);
-            WriteAll(jsonReader);
+            this.WriteAll(jsonReader);
         }
 
         /// <inheritdoc />

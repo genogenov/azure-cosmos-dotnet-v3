@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Cosmos.Json
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Interface for all JsonReaders that know how to read jsons.

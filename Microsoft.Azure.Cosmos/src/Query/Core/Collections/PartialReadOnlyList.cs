@@ -42,19 +42,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
             this.list = list;
             this.startIndex = startIndex;
-            Count = count;
+            this.Count = count;
         }
 
         public T this[int index]
         {
             get
             {
-                if (index < 0 || index >= Count)
+                if (index < 0 || index >= this.Count)
                 {
                     throw new ArgumentOutOfRangeException("index");
                 }
 
-                return list[checked(startIndex + index)];
+                return this.list[checked(this.startIndex + index)];
             }
         }
 
@@ -62,15 +62,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
         public IEnumerator<T> GetEnumerator()
         {
-            for (int i = 0; i < Count; ++i)
+            for (int i = 0; i < this.Count; ++i)
             {
-                yield return list[i + startIndex];
+                yield return this.list[i + this.startIndex];
             }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
 }

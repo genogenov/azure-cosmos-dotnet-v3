@@ -35,8 +35,8 @@ namespace Microsoft.Azure.Cosmos
             CosmosDiagnosticsContext diagnosticsContext)
         {
             this.container = container;
-            clientContext = this.container.ClientContext;
-            inputOperations = operations;
+            this.clientContext = this.container.ClientContext;
+            this.inputOperations = operations;
             this.partitionKey = partitionKey;
             this.batchOptions = batchOptions;
             this.diagnosticsContext = diagnosticsContext;
@@ -44,32 +44,32 @@ namespace Microsoft.Azure.Cosmos
 
         public async Task<TransactionalBatchResponse> ExecuteAsync(CancellationToken cancellationToken)
         {
-            using (diagnosticsContext.GetOverallScope())
+            using (this.diagnosticsContext.GetOverallScope())
             {
-                BatchExecUtils.EnsureValid(inputOperations, batchOptions);
+                BatchExecUtils.EnsureValid(this.inputOperations, this.batchOptions);
 
-                foreach (ItemBatchOperation operation in inputOperations)
+                foreach (ItemBatchOperation operation in this.inputOperations)
                 {
-                    operation.DiagnosticsContext = diagnosticsContext;
+                    operation.DiagnosticsContext = this.diagnosticsContext;
                 }
 
-                PartitionKey? serverRequestPartitionKey = partitionKey;
-                if (batchOptions != null && batchOptions.IsEffectivePartitionKeyRouting)
+                PartitionKey? serverRequestPartitionKey = this.partitionKey;
+                if (this.batchOptions != null && this.batchOptions.IsEffectivePartitionKeyRouting)
                 {
                     serverRequestPartitionKey = null;
                 }
 
                 SinglePartitionKeyServerBatchRequest serverRequest;
-                using (diagnosticsContext.CreateScope("CreateBatchRequest"))
+                using (this.diagnosticsContext.CreateScope("CreateBatchRequest"))
                 {
                     serverRequest = await SinglePartitionKeyServerBatchRequest.CreateAsync(
                           serverRequestPartitionKey,
-                          new ArraySegment<ItemBatchOperation>(inputOperations.ToArray()),
-                          clientContext.SerializerCore,
+                          new ArraySegment<ItemBatchOperation>(this.inputOperations.ToArray()),
+                          this.clientContext.SerializerCore,
                           cancellationToken);
                 }
 
-                return await ExecuteServerRequestAsync(serverRequest, cancellationToken);
+                return await this.ExecuteServerRequestAsync(serverRequest, cancellationToken);
             }
         }
 
@@ -86,12 +86,12 @@ namespace Microsoft.Azure.Cosmos
             using (Stream serverRequestPayload = serverRequest.TransferBodyStream())
             {
                 Debug.Assert(serverRequestPayload != null, "Server request payload expected to be non-null");
-                ResponseMessage responseMessage = await clientContext.ProcessResourceOperationStreamAsync(
-                    container.LinkUri,
+                ResponseMessage responseMessage = await this.clientContext.ProcessResourceOperationStreamAsync(
+                    this.container.LinkUri,
                     ResourceType.Document,
                     OperationType.Batch,
-                    batchOptions,
-                    container,
+                    this.batchOptions,
+                    this.container,
                     serverRequest.PartitionKey,
                     serverRequestPayload,
                     requestMessage =>
@@ -100,15 +100,15 @@ namespace Microsoft.Azure.Cosmos
                         requestMessage.Headers.Add(HttpConstants.HttpHeaders.IsBatchAtomic, bool.TrueString);
                         requestMessage.Headers.Add(HttpConstants.HttpHeaders.IsBatchOrdered, bool.TrueString);
                     },
-                    diagnosticsContext: diagnosticsContext,
+                    diagnosticsContext: this.diagnosticsContext,
                     cancellationToken);
 
-                using (diagnosticsContext.CreateScope("TransactionalBatchResponse"))
+                using (this.diagnosticsContext.CreateScope("TransactionalBatchResponse"))
                 {
                     return await TransactionalBatchResponse.FromResponseMessageAsync(
                         responseMessage,
                         serverRequest,
-                        clientContext.SerializerCore,
+                        this.clientContext.SerializerCore,
                         shouldPromoteOperationStatus: true,
                         cancellationToken);
                 }

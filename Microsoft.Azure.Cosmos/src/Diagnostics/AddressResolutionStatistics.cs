@@ -12,9 +12,9 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
             DateTime endTime,
             string targetEndpoint)
         {
-            StartTime = startTime;
-            EndTime = endTime;
-            TargetEndpoint = targetEndpoint ?? throw new ArgumentNullException(nameof(startTime));
+            this.StartTime = startTime;
+            this.EndTime = endTime;
+            this.TargetEndpoint = targetEndpoint ?? throw new ArgumentNullException(nameof(startTime));
         }
 
         public DateTime StartTime { get; }

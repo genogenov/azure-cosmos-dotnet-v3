@@ -11,6 +11,7 @@ namespace Microsoft.Azure.Cosmos
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Security.AccessControl;
     using Microsoft.Azure.Cosmos.Fluent;
     using Microsoft.Azure.Documents;
     using Microsoft.Azure.Documents.Client;
@@ -74,12 +75,12 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public CosmosClientOptions()
         {
-            GatewayModeMaxConnectionLimit = ConnectionPolicy.Default.MaxConnectionLimit;
-            RequestTimeout = ConnectionPolicy.Default.RequestTimeout;
-            ConnectionMode = CosmosClientOptions.DefaultConnectionMode;
-            ConnectionProtocol = CosmosClientOptions.DefaultProtocol;
-            ApiType = CosmosClientOptions.DefaultApiType;
-            CustomHandlers = new Collection<RequestHandler>();
+            this.GatewayModeMaxConnectionLimit = ConnectionPolicy.Default.MaxConnectionLimit;
+            this.RequestTimeout = ConnectionPolicy.Default.RequestTimeout;
+            this.ConnectionMode = CosmosClientOptions.DefaultConnectionMode;
+            this.ConnectionProtocol = CosmosClientOptions.DefaultProtocol;
+            this.ApiType = CosmosClientOptions.DefaultApiType;
+            this.CustomHandlers = new Collection<RequestHandler>();
         }
 
         /// <summary>
@@ -128,7 +129,7 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="CosmosClientBuilder.WithConnectionModeGateway(int?, IWebProxy)"/>
         public int GatewayModeMaxConnectionLimit
         {
-            get => gatewayModeMaxConnectionLimit;
+            get => this.gatewayModeMaxConnectionLimit;
             set
             {
                 if (value <= 0)
@@ -136,12 +137,12 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
-                if (HttpClientFactory != null && value != ConnectionPolicy.Default.MaxConnectionLimit)
+                if (this.HttpClientFactory != null && value != ConnectionPolicy.Default.MaxConnectionLimit )
                 {
-                    throw new ArgumentException($"{nameof(httpClientFactory)} can not be set along with {nameof(GatewayModeMaxConnectionLimit)}. This must be set on the HttpClientHandler.MaxConnectionsPerServer property.");
+                    throw new ArgumentException($"{nameof(this.httpClientFactory)} can not be set along with {nameof(this.GatewayModeMaxConnectionLimit)}. This must be set on the HttpClientHandler.MaxConnectionsPerServer property.");
                 }
 
-                gatewayModeMaxConnectionLimit = value;
+                this.gatewayModeMaxConnectionLimit = value;
             }
         }
 
@@ -173,20 +174,20 @@ namespace Microsoft.Azure.Cosmos
         /// <seealso cref="CosmosClientBuilder.WithConnectionModeGateway(int?, IWebProxy)"/>
         public ConnectionMode ConnectionMode
         {
-            get => connectionMode;
+            get => this.connectionMode;
             set
             {
                 if (value == ConnectionMode.Gateway)
                 {
-                    ConnectionProtocol = Protocol.Https;
+                    this.ConnectionProtocol = Protocol.Https;
                 }
                 else if (value == ConnectionMode.Direct)
                 {
-                    connectionProtocol = Protocol.Tcp;
+                    this.connectionProtocol = Protocol.Tcp;
                 }
 
-                ValidateDirectTCPSettings();
-                connectionMode = value;
+                this.ValidateDirectTCPSettings();
+                this.connectionMode = value;
             }
         }
 
@@ -259,11 +260,11 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public TimeSpan? IdleTcpConnectionTimeout
         {
-            get => idleTcpConnectionTimeout;
+            get => this.idleTcpConnectionTimeout;
             set
             {
-                idleTcpConnectionTimeout = value;
-                ValidateDirectTCPSettings();
+                this.idleTcpConnectionTimeout = value;
+                this.ValidateDirectTCPSettings();
             }
         }
 
@@ -278,11 +279,11 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public TimeSpan? OpenTcpConnectionTimeout
         {
-            get => openTcpConnectionTimeout;
+            get => this.openTcpConnectionTimeout;
             set
             {
-                openTcpConnectionTimeout = value;
-                ValidateDirectTCPSettings();
+                this.openTcpConnectionTimeout = value;
+                this.ValidateDirectTCPSettings();
             }
         }
 
@@ -300,11 +301,11 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public int? MaxRequestsPerTcpConnection
         {
-            get => maxRequestsPerTcpConnection;
+            get => this.maxRequestsPerTcpConnection;
             set
             {
-                maxRequestsPerTcpConnection = value;
-                ValidateDirectTCPSettings();
+                this.maxRequestsPerTcpConnection = value;
+                this.ValidateDirectTCPSettings();
             }
         }
 
@@ -317,11 +318,11 @@ namespace Microsoft.Azure.Cosmos
         /// </value>
         public int? MaxTcpConnectionsPerEndpoint
         {
-            get => maxTcpConnectionsPerEndpoint;
+            get => this.maxTcpConnectionsPerEndpoint;
             set
             {
-                maxTcpConnectionsPerEndpoint = value;
-                ValidateDirectTCPSettings();
+                this.maxTcpConnectionsPerEndpoint = value;
+                this.ValidateDirectTCPSettings();
             }
         }
 
@@ -338,11 +339,11 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public PortReuseMode? PortReuseMode
         {
-            get => portReuseMode;
+            get => this.portReuseMode;
             set
             {
-                portReuseMode = value;
-                ValidateDirectTCPSettings();
+                this.portReuseMode = value;
+                this.ValidateDirectTCPSettings();
             }
         }
 
@@ -352,18 +353,18 @@ namespace Microsoft.Azure.Cosmos
         [JsonIgnore]
         public IWebProxy WebProxy
         {
-            get => webProxy;
+            get => this.webProxy;
             set
             {
-                webProxy = value;
-                if (ConnectionMode != ConnectionMode.Gateway)
+                this.webProxy = value;
+                if (this.ConnectionMode != ConnectionMode.Gateway)
                 {
-                    throw new ArgumentException($"{nameof(WebProxy)} requires {nameof(ConnectionMode)} to be set to {nameof(ConnectionMode.Gateway)}");
+                    throw new ArgumentException($"{nameof(this.WebProxy)} requires {nameof(this.ConnectionMode)} to be set to {nameof(ConnectionMode.Gateway)}");
                 }
 
-                if (HttpClientFactory != null)
+                if (this.HttpClientFactory != null)
                 {
-                    throw new ArgumentException($"{nameof(WebProxy)} cannot be set along {nameof(HttpClientFactory)}");
+                    throw new ArgumentException($"{nameof(this.WebProxy)} cannot be set along {nameof(this.HttpClientFactory)}");
                 }
             }
         }
@@ -384,16 +385,16 @@ namespace Microsoft.Azure.Cosmos
         /// </example>
         public CosmosSerializationOptions SerializerOptions
         {
-            get => serializerOptions;
+            get => this.serializerOptions;
             set
             {
-                if (Serializer != null)
+                if (this.Serializer != null)
                 {
                     throw new ArgumentException(
-                        $"{nameof(SerializerOptions)} is not compatible with {nameof(Serializer)}. Only one can be set.  ");
+                        $"{nameof(this.SerializerOptions)} is not compatible with {nameof(this.Serializer)}. Only one can be set.  ");
                 }
 
-                serializerOptions = value;
+                this.serializerOptions = value;
             }
         }
 
@@ -415,16 +416,16 @@ namespace Microsoft.Azure.Cosmos
         [JsonConverter(typeof(ClientOptionJsonConverter))]
         public CosmosSerializer Serializer
         {
-            get => serializerInternal;
+            get => this.serializerInternal;
             set
             {
-                if (SerializerOptions != null)
+                if (this.SerializerOptions != null)
                 {
                     throw new ArgumentException(
-                        $"{nameof(Serializer)} is not compatible with {nameof(SerializerOptions)}. Only one can be set.  ");
+                        $"{nameof(this.Serializer)} is not compatible with {nameof(this.SerializerOptions)}. Only one can be set.  ");
                 }
 
-                serializerInternal = value;
+                this.serializerInternal = value;
             }
         }
 
@@ -475,20 +476,20 @@ namespace Microsoft.Azure.Cosmos
         [JsonIgnore]
         public Func<HttpClient> HttpClientFactory
         {
-            get => httpClientFactory;
+            get => this.httpClientFactory;
             set
             {
-                if (WebProxy != null)
+                if (this.WebProxy != null)
                 {
-                    throw new ArgumentException($"{nameof(HttpClientFactory)} cannot be set along {nameof(WebProxy)}");
+                    throw new ArgumentException($"{nameof(this.HttpClientFactory)} cannot be set along {nameof(this.WebProxy)}");
                 }
 
-                if (GatewayModeMaxConnectionLimit != ConnectionPolicy.Default.MaxConnectionLimit)
+                if (this.GatewayModeMaxConnectionLimit != ConnectionPolicy.Default.MaxConnectionLimit)
                 {
-                    throw new ArgumentException($"{nameof(httpClientFactory)} can not be set along with {nameof(GatewayModeMaxConnectionLimit)}. This must be set on the HttpClientHandler.MaxConnectionsPerServer property.");
+                    throw new ArgumentException($"{nameof(this.httpClientFactory)} can not be set along with {nameof(this.GatewayModeMaxConnectionLimit)}. This must be set on the HttpClientHandler.MaxConnectionsPerServer property.");
                 }
 
-                httpClientFactory = value;
+                this.httpClientFactory = value;
             }
         }
 
@@ -505,11 +506,11 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         internal Protocol ConnectionProtocol
         {
-            get => connectionProtocol;
+            get => this.connectionProtocol;
             set
             {
-                ValidateDirectTCPSettings();
-                connectionProtocol = value;
+                this.ValidateDirectTCPSettings();
+                this.connectionProtocol = value;
             }
         }
 
@@ -598,84 +599,84 @@ namespace Microsoft.Azure.Cosmos
 
         internal void SetSerializerIfNotConfigured(CosmosSerializer serializer)
         {
-            if (serializerInternal == null)
+            if (this.serializerInternal == null)
             {
-                serializerInternal = serializer ?? throw new ArgumentNullException(nameof(serializer));
+                this.serializerInternal = serializer ?? throw new ArgumentNullException(nameof(serializer));
             }
         }
 
         internal CosmosClientOptions Clone()
         {
-            CosmosClientOptions cloneConfiguration = (CosmosClientOptions)MemberwiseClone();
+            CosmosClientOptions cloneConfiguration = (CosmosClientOptions)this.MemberwiseClone();
             return cloneConfiguration;
         }
 
         internal ConnectionPolicy GetConnectionPolicy()
         {
-            ValidateDirectTCPSettings();
-            ValidateLimitToEndpointSettings();
-            UserAgentContainer userAgent = BuildUserAgentContainer();
-
+            this.ValidateDirectTCPSettings();
+            this.ValidateLimitToEndpointSettings();
+            UserAgentContainer userAgent = this.BuildUserAgentContainer();
+            
             ConnectionPolicy connectionPolicy = new ConnectionPolicy()
             {
-                MaxConnectionLimit = GatewayModeMaxConnectionLimit,
-                RequestTimeout = RequestTimeout,
-                ConnectionMode = ConnectionMode,
-                ConnectionProtocol = ConnectionProtocol,
+                MaxConnectionLimit = this.GatewayModeMaxConnectionLimit,
+                RequestTimeout = this.RequestTimeout,
+                ConnectionMode = this.ConnectionMode,
+                ConnectionProtocol = this.ConnectionProtocol,
                 UserAgentContainer = userAgent,
                 UseMultipleWriteLocations = true,
-                IdleTcpConnectionTimeout = IdleTcpConnectionTimeout,
-                OpenTcpConnectionTimeout = OpenTcpConnectionTimeout,
-                MaxRequestsPerTcpConnection = MaxRequestsPerTcpConnection,
-                MaxTcpConnectionsPerEndpoint = MaxTcpConnectionsPerEndpoint,
-                EnableEndpointDiscovery = !LimitToEndpoint,
-                PortReuseMode = portReuseMode,
-                EnableTcpConnectionEndpointRediscovery = EnableTcpConnectionEndpointRediscovery,
-                HttpClientFactory = httpClientFactory,
+                IdleTcpConnectionTimeout = this.IdleTcpConnectionTimeout,
+                OpenTcpConnectionTimeout = this.OpenTcpConnectionTimeout,
+                MaxRequestsPerTcpConnection = this.MaxRequestsPerTcpConnection,
+                MaxTcpConnectionsPerEndpoint = this.MaxTcpConnectionsPerEndpoint,
+                EnableEndpointDiscovery = !this.LimitToEndpoint,
+                PortReuseMode = this.portReuseMode,
+                EnableTcpConnectionEndpointRediscovery = this.EnableTcpConnectionEndpointRediscovery,
+                HttpClientFactory = this.httpClientFactory,
             };
 
-            if (ApplicationRegion != null)
+            if (this.ApplicationRegion != null)
             {
-                connectionPolicy.SetCurrentLocation(ApplicationRegion);
+                connectionPolicy.SetCurrentLocation(this.ApplicationRegion);
             }
 
-            if (ApplicationPreferredRegions != null)
+            if (this.ApplicationPreferredRegions != null)
             {
-                connectionPolicy.SetPreferredLocations(ApplicationPreferredRegions);
+                connectionPolicy.SetPreferredLocations(this.ApplicationPreferredRegions);
             }
 
-            if (MaxRetryAttemptsOnRateLimitedRequests != null)
+            if (this.MaxRetryAttemptsOnRateLimitedRequests != null)
             {
-                connectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = MaxRetryAttemptsOnRateLimitedRequests.Value;
+                connectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = this.MaxRetryAttemptsOnRateLimitedRequests.Value;
             }
 
-            if (MaxRetryWaitTimeOnRateLimitedRequests != null)
+            if (this.MaxRetryWaitTimeOnRateLimitedRequests != null)
             {
-                connectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = (int)MaxRetryWaitTimeOnRateLimitedRequests.Value.TotalSeconds;
+                connectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = (int)this.MaxRetryWaitTimeOnRateLimitedRequests.Value.TotalSeconds;
             }
 
-            if (InitialRetryForRetryWithMilliseconds != null)
+            if (this.InitialRetryForRetryWithMilliseconds != null)
             {
                 connectionPolicy.RetryOptions.InitialRetryForRetryWithMilliseconds =
-                    InitialRetryForRetryWithMilliseconds;
+                    this.InitialRetryForRetryWithMilliseconds;
             }
 
-            if (MaximumRetryForRetryWithMilliseconds != null)
+            if (this.MaximumRetryForRetryWithMilliseconds != null)
             {
                 connectionPolicy.RetryOptions.MaximumRetryForRetryWithMilliseconds =
-                    MaximumRetryForRetryWithMilliseconds;
+                    this.MaximumRetryForRetryWithMilliseconds;
             }
 
-            if (RandomSaltForRetryWithMilliseconds != null)
+            if (this.RandomSaltForRetryWithMilliseconds != null)
             {
                 connectionPolicy.RetryOptions.RandomSaltForRetryWithMilliseconds
-                    = RandomSaltForRetryWithMilliseconds;
+                    = this.RandomSaltForRetryWithMilliseconds;
             }
 
-            if (TotalWaitTimeForRetryWithMilliseconds != null)
+            if (this.TotalWaitTimeForRetryWithMilliseconds != null)
             {
                 connectionPolicy.RetryOptions.TotalWaitTimeForRetryWithMilliseconds
-                    = TotalWaitTimeForRetryWithMilliseconds;
+                    = this.TotalWaitTimeForRetryWithMilliseconds;
             }
 
             return connectionPolicy;
@@ -683,12 +684,12 @@ namespace Microsoft.Azure.Cosmos
 
         internal Documents.ConsistencyLevel? GetDocumentsConsistencyLevel()
         {
-            if (!ConsistencyLevel.HasValue)
+            if (!this.ConsistencyLevel.HasValue)
             {
                 return null;
             }
 
-            switch (ConsistencyLevel.Value)
+            switch (this.ConsistencyLevel.Value)
             {
                 case Cosmos.ConsistencyLevel.BoundedStaleness:
                     return Documents.ConsistencyLevel.BoundedStaleness;
@@ -701,7 +702,7 @@ namespace Microsoft.Azure.Cosmos
                 case Cosmos.ConsistencyLevel.Strong:
                     return Documents.ConsistencyLevel.Strong;
                 default:
-                    throw new ArgumentException($"Unsupported ConsistencyLevel {ConsistencyLevel.Value}");
+                    throw new ArgumentException($"Unsupported ConsistencyLevel {this.ConsistencyLevel.Value}");
             }
         }
 
@@ -737,68 +738,68 @@ namespace Microsoft.Azure.Cosmos
 
         private void ValidateLimitToEndpointSettings()
         {
-            if (!string.IsNullOrEmpty(ApplicationRegion) && LimitToEndpoint)
+            if (!string.IsNullOrEmpty(this.ApplicationRegion) && this.LimitToEndpoint)
             {
-                throw new ArgumentException($"Cannot specify {nameof(ApplicationRegion)} and enable {nameof(LimitToEndpoint)}. Only one can be set.");
+                throw new ArgumentException($"Cannot specify {nameof(this.ApplicationRegion)} and enable {nameof(this.LimitToEndpoint)}. Only one can be set.");
             }
 
-            if (ApplicationPreferredRegions?.Count > 0 && LimitToEndpoint)
+            if (this.ApplicationPreferredRegions?.Count > 0 && this.LimitToEndpoint)
             {
-                throw new ArgumentException($"Cannot specify {nameof(ApplicationPreferredRegions)} and enable {nameof(LimitToEndpoint)}. Only one can be set.");
+                throw new ArgumentException($"Cannot specify {nameof(this.ApplicationPreferredRegions)} and enable {nameof(this.LimitToEndpoint)}. Only one can be set.");
             }
 
-            if (!string.IsNullOrEmpty(ApplicationRegion) && ApplicationPreferredRegions?.Count > 0)
+            if (!string.IsNullOrEmpty(this.ApplicationRegion) && this.ApplicationPreferredRegions?.Count > 0)
             {
-                throw new ArgumentException($"Cannot specify {nameof(ApplicationPreferredRegions)} and {nameof(ApplicationRegion)}. Only one can be set.");
+                throw new ArgumentException($"Cannot specify {nameof(this.ApplicationPreferredRegions)} and {nameof(this.ApplicationRegion)}. Only one can be set.");
             }
         }
 
         private void ValidateDirectTCPSettings()
         {
             string settingName = string.Empty;
-            if (ConnectionMode != ConnectionMode.Direct)
+            if (this.ConnectionMode != ConnectionMode.Direct)
             {
-                if (IdleTcpConnectionTimeout.HasValue)
+                if (this.IdleTcpConnectionTimeout.HasValue)
                 {
-                    settingName = nameof(IdleTcpConnectionTimeout);
+                    settingName = nameof(this.IdleTcpConnectionTimeout);
                 }
-                else if (OpenTcpConnectionTimeout.HasValue)
+                else if (this.OpenTcpConnectionTimeout.HasValue)
                 {
-                    settingName = nameof(OpenTcpConnectionTimeout);
+                    settingName = nameof(this.OpenTcpConnectionTimeout);
                 }
-                else if (MaxRequestsPerTcpConnection.HasValue)
+                else if (this.MaxRequestsPerTcpConnection.HasValue)
                 {
-                    settingName = nameof(MaxRequestsPerTcpConnection);
+                    settingName = nameof(this.MaxRequestsPerTcpConnection);
                 }
-                else if (MaxTcpConnectionsPerEndpoint.HasValue)
+                else if (this.MaxTcpConnectionsPerEndpoint.HasValue)
                 {
-                    settingName = nameof(MaxTcpConnectionsPerEndpoint);
+                    settingName = nameof(this.MaxTcpConnectionsPerEndpoint);
                 }
-                else if (PortReuseMode.HasValue)
+                else if (this.PortReuseMode.HasValue)
                 {
-                    settingName = nameof(PortReuseMode);
+                    settingName = nameof(this.PortReuseMode);
                 }
             }
 
             if (!string.IsNullOrEmpty(settingName))
             {
-                throw new ArgumentException($"{settingName} requires {nameof(ConnectionMode)} to be set to {nameof(ConnectionMode.Direct)}");
+                throw new ArgumentException($"{settingName} requires {nameof(this.ConnectionMode)} to be set to {nameof(ConnectionMode.Direct)}");
             }
         }
 
         internal UserAgentContainer BuildUserAgentContainer()
         {
             UserAgentContainer userAgent = new UserAgentContainer();
-            string features = GetUserAgentFeatures();
+            string features = this.GetUserAgentFeatures();
 
             if (!string.IsNullOrEmpty(features))
             {
                 userAgent.SetFeatures(features.ToString());
             }
-
-            if (!string.IsNullOrEmpty(ApplicationName))
+            
+            if (!string.IsNullOrEmpty(this.ApplicationName))
             {
-                userAgent.Suffix = ApplicationName;
+                userAgent.Suffix = this.ApplicationName;
             }
 
             return userAgent;
@@ -807,12 +808,12 @@ namespace Microsoft.Azure.Cosmos
         private string GetUserAgentFeatures()
         {
             CosmosClientOptionsFeatures features = CosmosClientOptionsFeatures.NoFeatures;
-            if (AllowBulkExecution)
+            if (this.AllowBulkExecution)
             {
                 features |= CosmosClientOptionsFeatures.AllowBulkExecution;
             }
 
-            if (HttpClientFactory != null)
+            if (this.HttpClientFactory != null)
             {
                 features |= CosmosClientOptionsFeatures.HttpClientFactory;
             }
@@ -821,7 +822,7 @@ namespace Microsoft.Azure.Cosmos
             {
                 return null;
             }
-
+            
             return Convert.ToString((int)features, 2).PadLeft(8, '0');
         }
 

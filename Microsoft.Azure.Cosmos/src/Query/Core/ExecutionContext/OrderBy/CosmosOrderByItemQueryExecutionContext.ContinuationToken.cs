@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             // With this information we have captured the progress for all partitions in a single continuation token.
             get
             {
-                IEnumerable<ItemProducer> activeItemProducers = GetActiveItemProducers();
+                IEnumerable<ItemProducer> activeItemProducers = this.GetActiveItemProducers();
                 string continuationToken;
                 if (activeItemProducers.Any())
                 {
@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                             },
                             orderByQueryResult.OrderByItems,
                             orderByQueryResult.Rid,
-                            ShouldIncrementSkipCount(itemProducer) ? skipCount + 1 : 0,
+                            this.ShouldIncrementSkipCount(itemProducer) ? this.skipCount + 1 : 0,
                             filter);
 
                         return OrderByContinuationToken.ToCosmosElement(orderByContinuationToken);
@@ -68,7 +68,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            IEnumerable<ItemProducer> activeItemProducers = GetActiveItemProducers();
+            IEnumerable<ItemProducer> activeItemProducers = this.GetActiveItemProducers();
             if (!activeItemProducers.Any())
             {
                 return default;
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
                     },
                     orderByItems: orderByQueryResult.OrderByItems,
                     rid: orderByQueryResult.Rid,
-                    skipCount: ShouldIncrementSkipCount(activeItemProducer) ? skipCount + 1 : 0,
+                    skipCount: this.ShouldIncrementSkipCount(activeItemProducer) ? this.skipCount + 1 : 0,
                     filter: activeItemProducer.Filter);
 
                 CosmosElement cosmosElementToken = OrderByContinuationToken.ToCosmosElement(orderByContinuationToken);
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.OrderBy
             {
                 OrderByQueryResult orderByQueryResultX = new OrderByQueryResult(x);
                 OrderByQueryResult orderByQueryResultY = new OrderByQueryResult(y);
-                return orderByConsumeComparer.CompareOrderByItems(
+                return this.orderByConsumeComparer.CompareOrderByItems(
                     orderByQueryResultX.OrderByItems,
                     orderByQueryResultY.OrderByItems) == 0;
             }

@@ -22,15 +22,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public override async Task StartAsync()
         {
-            await bootstrapper.InitializeAsync().ConfigureAwait(false);
-            await partitionController.InitializeAsync().ConfigureAwait(false);
-            partitionLoadBalancer.Start();
+            await this.bootstrapper.InitializeAsync().ConfigureAwait(false);
+            await this.partitionController.InitializeAsync().ConfigureAwait(false);
+            this.partitionLoadBalancer.Start();
         }
 
         public override async Task StopAsync()
         {
-            await partitionLoadBalancer.StopAsync().ConfigureAwait(false);
-            await partitionController.ShutdownAsync().ConfigureAwait(false);
+            await this.partitionLoadBalancer.StopAsync().ConfigureAwait(false);
+            await this.partitionController.ShutdownAsync().ConfigureAwait(false);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Microsoft.Azure.Cosmos
             PatchOperationType operationType,
             string path)
         {
-            OperationType = operationType;
-            Path = string.IsNullOrWhiteSpace(path)
+            this.OperationType = operationType;
+            this.Path = string.IsNullOrWhiteSpace(path)
                 ? throw new ArgumentNullException(nameof(path))
                 : path;
         }

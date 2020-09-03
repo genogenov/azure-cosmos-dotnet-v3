@@ -7,11 +7,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Collections;
+    using Microsoft.Azure.Cosmos.Query.Core.Metrics;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
     using Microsoft.Azure.Cosmos.Resource.CosmosExceptions;
+    using Microsoft.Azure.Documents;
     using PartitionKeyRange = Documents.PartitionKeyRange;
     using PartitionKeyRangeIdentity = Documents.PartitionKeyRangeIdentity;
 
@@ -108,29 +112,29 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
             long initialPageSize = 50,
             string initialContinuationToken = null)
         {
-            bufferedPages = new AsyncCollection<QueryResponseCore>();
+            this.bufferedPages = new AsyncCollection<QueryResponseCore>();
 
             // We use a binary semaphore to get the behavior of a mutex,
             // since fetching documents from the backend using a continuation token is a critical section.
-            fetchSemaphore = new SemaphoreSlim(1, 1);
+            this.fetchSemaphore = new SemaphoreSlim(1, 1);
             this.queryContext = queryContext;
             this.querySpecForInit = querySpecForInit;
-            PartitionKeyRange = partitionKeyRange ?? throw new ArgumentNullException(nameof(partitionKeyRange));
+            this.PartitionKeyRange = partitionKeyRange ?? throw new ArgumentNullException(nameof(partitionKeyRange));
             this.produceAsyncCompleteCallback = produceAsyncCompleteCallback ?? throw new ArgumentNullException(nameof(produceAsyncCompleteCallback));
             this.equalityComparer = equalityComparer ?? throw new ArgumentNullException(nameof(equalityComparer));
-            pageSize = initialPageSize;
-            CurrentContinuationToken = initialContinuationToken;
-            BackendContinuationToken = initialContinuationToken;
-            PreviousContinuationToken = initialContinuationToken;
+            this.pageSize = initialPageSize;
+            this.CurrentContinuationToken = initialContinuationToken;
+            this.BackendContinuationToken = initialContinuationToken;
+            this.PreviousContinuationToken = initialContinuationToken;
             if (!string.IsNullOrEmpty(initialContinuationToken))
             {
-                hasStartedFetching = true;
-                IsActive = true;
+                this.hasStartedFetching = true;
+                this.IsActive = true;
             }
 
             this.testFlags = testFlags;
 
-            HasMoreResults = true;
+            this.HasMoreResults = true;
         }
 
         public delegate void ProduceAsyncCompleteDelegate(
@@ -186,18 +190,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <summary>
         /// Gets a value indicating whether this producer has more backend results.
         /// </summary>
-        public bool HasMoreBackendResults => hasStartedFetching == false
-                    || (hasStartedFetching == true && !string.IsNullOrEmpty(BackendContinuationToken));
+        public bool HasMoreBackendResults => this.hasStartedFetching == false
+                    || (this.hasStartedFetching == true && !string.IsNullOrEmpty(this.BackendContinuationToken));
 
         /// <summary>
         /// Gets how many items are left in the current page.
         /// </summary>
-        public int ItemsLeftInCurrentPage => itemsLeftInCurrentPage;
+        public int ItemsLeftInCurrentPage => this.itemsLeftInCurrentPage;
 
         /// <summary>
         /// Gets how many documents are buffered in this producer.
         /// </summary>
-        public int BufferedItemCount => (int)bufferedItemCount;
+        public int BufferedItemCount => (int)this.bufferedItemCount;
 
         /// <summary>
         /// Gets or sets the page size of this producer.
@@ -214,7 +218,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <summary>
         /// Gets the current document in this producer.
         /// </summary>
-        public CosmosElement Current => CurrentPage?.Current;
+        public CosmosElement Current => this.CurrentPage?.Current;
 
         /// <summary>
         /// A static object representing that the move next operation succeeded, and was able to load the next page
@@ -235,9 +239,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             token.ThrowIfCancellationRequested();
 
-            if (bufferedPages.Count == 0)
+            if (this.bufferedPages.Count == 0)
             {
-                await BufferMoreDocumentsAsync(token);
+                await this.BufferMoreDocumentsAsync(token);
             }
         }
 
@@ -252,8 +256,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
 
             try
             {
-                await fetchSemaphore.WaitAsync();
-                if (!HasMoreBackendResults || hitException)
+                await this.fetchSemaphore.WaitAsync();
+                if (!this.HasMoreBackendResults || this.hitException)
                 {
                     // Just NOP
                     return;
@@ -261,19 +265,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
 
                 int pageSize = (int)Math.Min(this.pageSize, int.MaxValue);
 
-                QueryResponseCore feedResponse = await queryContext.ExecuteQueryAsync(
-                    querySpecForInit: querySpecForInit,
-                    continuationToken: BackendContinuationToken,
+                QueryResponseCore feedResponse = await this.queryContext.ExecuteQueryAsync(
+                    querySpecForInit: this.querySpecForInit,
+                    continuationToken: this.BackendContinuationToken,
                     partitionKeyRange: new PartitionKeyRangeIdentity(
-                            queryContext.ContainerResourceId,
-                            PartitionKeyRange.Id),
-                    isContinuationExpected: queryContext.IsContinuationExpected,
+                            this.queryContext.ContainerResourceId,
+                            this.PartitionKeyRange.Id),
+                    isContinuationExpected: this.queryContext.IsContinuationExpected,
                     pageSize: pageSize,
                     cancellationToken: token);
 
-                CosmosQueryExecutionInfo = feedResponse.CosmosQueryExecutionInfo;
+                this.CosmosQueryExecutionInfo = feedResponse.CosmosQueryExecutionInfo;
 
-                if ((testFlags != null) && testFlags.SimulateThrottles)
+                if ((this.testFlags != null) && this.testFlags.SimulateThrottles)
                 {
                     Random random = new Random();
                     if (random.Next() % 2 == 0)
@@ -288,7 +292,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                 }
 
                 // Can not simulate an empty page on the first page, since we would return a null continuation token, which will end the query early.
-                if ((testFlags != null) && testFlags.SimulateEmptyPages && (BackendContinuationToken != null))
+                if ((this.testFlags != null) && this.testFlags.SimulateEmptyPages && (this.BackendContinuationToken != null))
                 {
                     Random random = new Random();
                     if (random.Next() % 2 == 0)
@@ -299,27 +303,27 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                             activityId: QueryResponseCore.EmptyGuidString,
                             responseLengthBytes: 0,
                             disallowContinuationTokenMessage: null,
-                            continuationToken: BackendContinuationToken);
+                            continuationToken: this.BackendContinuationToken);
                     }
                 }
 
-                hasStartedFetching = true;
-                ActivityId = Guid.Parse(feedResponse.ActivityId);
-                await bufferedPages.AddAsync(feedResponse);
+                this.hasStartedFetching = true;
+                this.ActivityId = Guid.Parse(feedResponse.ActivityId);
+                await this.bufferedPages.AddAsync(feedResponse);
                 if (!feedResponse.IsSuccess)
                 {
                     // set this flag so that people stop trying to buffer more on this producer.
-                    hitException = true;
+                    this.hitException = true;
                     return;
                 }
 
                 // The backend continuation token is used for the children on splits 
                 // and should not be updated on exceptions
-                BackendContinuationToken = feedResponse.ContinuationToken;
+                this.BackendContinuationToken = feedResponse.ContinuationToken;
 
-                Interlocked.Add(ref bufferedItemCount, feedResponse.CosmosElements.Count);
+                Interlocked.Add(ref this.bufferedItemCount, feedResponse.CosmosElements.Count);
 
-                produceAsyncCompleteCallback(
+                this.produceAsyncCompleteCallback(
                     feedResponse.CosmosElements.Count,
                     feedResponse.RequestCharge,
                     feedResponse.ResponseLengthBytes,
@@ -328,81 +332,81 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
             }
             finally
             {
-                fetchSemaphore.Release();
+                this.fetchSemaphore.Release();
             }
         }
 
         public void Shutdown()
         {
-            HasMoreResults = false;
+            this.HasMoreResults = false;
         }
 
         public async Task<(bool movedToNextPage, QueryResponseCore? failureReponse)> TryMoveNextPageAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (itemsLeftInCurrentPage != 0)
+            if (this.itemsLeftInCurrentPage != 0)
             {
                 throw new InvalidOperationException("Tried to move onto the next page before finishing the first page.");
             }
 
             // We need to buffer pages if empty, since thats how we know there are no more pages left.
-            await BufferMoreIfEmptyAsync(cancellationToken);
-            if (bufferedPages.Count == 0)
+            await this.BufferMoreIfEmptyAsync(cancellationToken);
+            if (this.bufferedPages.Count == 0)
             {
-                HasMoreResults = false;
+                this.HasMoreResults = false;
                 return ItemProducer.IsDoneResponse;
             }
 
             // Pull a FeedResponse using TryCatch (we could have buffered an exception).
-            QueryResponseCore queryResponse = await bufferedPages.TakeAsync(cancellationToken);
+            QueryResponseCore queryResponse = await this.bufferedPages.TakeAsync(cancellationToken);
             if (!queryResponse.IsSuccess)
             {
-                HasMoreResults = false;
+                this.HasMoreResults = false;
                 return (false, queryResponse);
             }
 
             // Update the state.
-            PreviousContinuationToken = CurrentContinuationToken;
-            CurrentContinuationToken = queryResponse.ContinuationToken;
-            CurrentPage = queryResponse.CosmosElements.GetEnumerator();
-            itemsLeftInCurrentPage = queryResponse.CosmosElements.Count;
-            enumeratorPrimed = false;
-            IsAtBeginningOfPage = false;
+            this.PreviousContinuationToken = this.CurrentContinuationToken;
+            this.CurrentContinuationToken = queryResponse.ContinuationToken;
+            this.CurrentPage = queryResponse.CosmosElements.GetEnumerator();
+            this.itemsLeftInCurrentPage = queryResponse.CosmosElements.Count;
+            this.enumeratorPrimed = false;
+            this.IsAtBeginningOfPage = false;
 
             return ItemProducer.IsSuccessResponse;
         }
 
         public bool TryMoveNextDocumentWithinPage()
         {
-            if (CurrentPage == null)
+            if (this.CurrentPage == null)
             {
                 return false;
             }
 
-            CosmosElement originalCurrent = Current;
-            bool movedNext = CurrentPage.MoveNext();
+            CosmosElement originalCurrent = this.Current;
+            bool movedNext = this.CurrentPage.MoveNext();
 
-            if (!movedNext || ((originalCurrent != null) && !equalityComparer.Equals(originalCurrent, Current)))
+            if (!movedNext || ((originalCurrent != null) && !this.equalityComparer.Equals(originalCurrent, this.Current)))
             {
-                IsActive = false;
+                this.IsActive = false;
             }
 
-            if (!enumeratorPrimed)
+            if (!this.enumeratorPrimed)
             {
-                IsAtBeginningOfPage = true;
-                enumeratorPrimed = true;
+                this.IsAtBeginningOfPage = true;
+                this.enumeratorPrimed = true;
             }
             else
             {
-                Interlocked.Decrement(ref bufferedItemCount);
-                Interlocked.Decrement(ref itemsLeftInCurrentPage);
+                Interlocked.Decrement(ref this.bufferedItemCount);
+                Interlocked.Decrement(ref this.itemsLeftInCurrentPage);
 
-                IsAtBeginningOfPage = false;
+                this.IsAtBeginningOfPage = false;
             }
 
-            if (!movedNext && (CurrentContinuationToken == null))
+            if (!movedNext && (this.CurrentContinuationToken == null))
             {
-                HasMoreResults = false;
+                this.HasMoreResults = false;
             }
 
             return movedNext;

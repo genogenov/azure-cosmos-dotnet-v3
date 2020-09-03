@@ -27,33 +27,33 @@ namespace Microsoft.Azure.Cosmos
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestedClientConsistencyLevel = requestedClientConsistencyLevel;
-            transportHandler = new TransportHandler(client);
-            Debug.Assert(transportHandler.InnerHandler == null, nameof(transportHandler));
+            this.transportHandler = new TransportHandler(client);
+            Debug.Assert(this.transportHandler.InnerHandler == null, nameof(this.transportHandler));
 
-            invalidPartitionExceptionRetryHandler = new NamedCacheRetryHandler();
-            Debug.Assert(invalidPartitionExceptionRetryHandler.InnerHandler == null, "The invalidPartitionExceptionRetryHandler.InnerHandler must be null to allow other handlers to be linked.");
+            this.invalidPartitionExceptionRetryHandler = new NamedCacheRetryHandler();
+            Debug.Assert(this.invalidPartitionExceptionRetryHandler.InnerHandler == null, "The invalidPartitionExceptionRetryHandler.InnerHandler must be null to allow other handlers to be linked.");
 
-            PartitionKeyRangeHandler = new PartitionKeyRangeHandler(client);
-            Debug.Assert(PartitionKeyRangeHandler.InnerHandler == null, "The PartitionKeyRangeHandler.InnerHandler must be null to allow other handlers to be linked.");
+            this.PartitionKeyRangeHandler = new PartitionKeyRangeHandler(client);
+            Debug.Assert(this.PartitionKeyRangeHandler.InnerHandler == null, "The PartitionKeyRangeHandler.InnerHandler must be null to allow other handlers to be linked.");
 
-            diagnosticsHandler = new DiagnosticsHandler();
-            Debug.Assert(diagnosticsHandler.InnerHandler == null, nameof(diagnosticsHandler));
+            this.diagnosticsHandler = new DiagnosticsHandler();
+            Debug.Assert(this.diagnosticsHandler.InnerHandler == null, nameof(this.diagnosticsHandler));
 
-            UseRetryPolicy();
-            AddCustomHandlers(customHandlers);
+            this.UseRetryPolicy();
+            this.AddCustomHandlers(customHandlers);
         }
 
         internal IReadOnlyCollection<RequestHandler> CustomHandlers
         {
-            get => customHandlers;
+            get => this.customHandlers;
             private set
             {
                 if (value != null && value.Any(x => x?.InnerHandler != null))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(CustomHandlers));
+                    throw new ArgumentOutOfRangeException(nameof(this.CustomHandlers));
                 }
 
-                customHandlers = value;
+                this.customHandlers = value;
             }
         }
 
@@ -120,35 +120,35 @@ namespace Microsoft.Azure.Cosmos
         public RequestInvokerHandler Build()
         {
             RequestInvokerHandler root = new RequestInvokerHandler(
-                client,
-                requestedClientConsistencyLevel);
+                this.client,
+                this.requestedClientConsistencyLevel);
 
             RequestHandler current = root;
-            if (CustomHandlers != null && CustomHandlers.Any())
+            if (this.CustomHandlers != null && this.CustomHandlers.Any())
             {
-                foreach (RequestHandler handler in CustomHandlers)
+                foreach (RequestHandler handler in this.CustomHandlers)
                 {
                     current.InnerHandler = handler;
                     current = current.InnerHandler;
                 }
             }
 
-            Debug.Assert(diagnosticsHandler != null, nameof(diagnosticsHandler));
-            current.InnerHandler = diagnosticsHandler;
+            Debug.Assert(this.diagnosticsHandler != null, nameof(this.diagnosticsHandler));
+            current.InnerHandler = this.diagnosticsHandler;
             current = current.InnerHandler;
 
-            Debug.Assert(retryHandler != null, nameof(retryHandler));
-            current.InnerHandler = retryHandler;
+            Debug.Assert(this.retryHandler != null, nameof(this.retryHandler));
+            current.InnerHandler = this.retryHandler;
             current = current.InnerHandler;
 
             // Have a router handler
-            RequestHandler feedHandler = CreateDocumentFeedPipeline();
+            RequestHandler feedHandler = this.CreateDocumentFeedPipeline();
 
             Debug.Assert(feedHandler != null, nameof(feedHandler));
-            Debug.Assert(transportHandler.InnerHandler == null, nameof(transportHandler));
+            Debug.Assert(this.transportHandler.InnerHandler == null, nameof(this.transportHandler));
             RequestHandler routerHandler = new RouterHandler(
                 documentFeedHandler: feedHandler,
-                pointOperationHandler: transportHandler);
+                pointOperationHandler: this.transportHandler);
 
             current.InnerHandler = routerHandler;
             current = current.InnerHandler;
@@ -180,14 +180,14 @@ namespace Microsoft.Azure.Cosmos
 
         private ClientPipelineBuilder UseRetryPolicy()
         {
-            retryHandler = new RetryHandler(client);
-            Debug.Assert(retryHandler.InnerHandler == null, "The retryHandler.InnerHandler must be null to allow other handlers to be linked.");
+            this.retryHandler = new RetryHandler(this.client);
+            Debug.Assert(this.retryHandler.InnerHandler == null, "The retryHandler.InnerHandler must be null to allow other handlers to be linked.");
             return this;
         }
 
         private ClientPipelineBuilder AddCustomHandlers(IReadOnlyCollection<RequestHandler> customHandlers)
         {
-            CustomHandlers = customHandlers;
+            this.CustomHandlers = customHandlers;
             return this;
         }
 
@@ -195,9 +195,9 @@ namespace Microsoft.Azure.Cosmos
         {
             RequestHandler[] feedPipeline = new RequestHandler[]
                 {
-                    invalidPartitionExceptionRetryHandler,
-                    PartitionKeyRangeHandler,
-                    transportHandler,
+                    this.invalidPartitionExceptionRetryHandler,
+                    this.PartitionKeyRangeHandler,
+                    this.transportHandler,
                 };
 
             return ClientPipelineBuilder.CreatePipeline(feedPipeline);

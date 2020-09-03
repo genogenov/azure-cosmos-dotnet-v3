@@ -24,25 +24,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
             DocumentServiceLeaseCheckpointer leaseCheckpointer,
             CosmosSerializerCore serializerCore)
         {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            if (changeFeedProcessorOptions == null)
-            {
-                throw new ArgumentNullException(nameof(changeFeedProcessorOptions));
-            }
-
-            if (leaseCheckpointer == null)
-            {
-                throw new ArgumentNullException(nameof(leaseCheckpointer));
-            }
-
-            if (serializerCore == null)
-            {
-                throw new ArgumentNullException(nameof(serializerCore));
-            }
+            if (container == null) throw new ArgumentNullException(nameof(container));
+            if (changeFeedProcessorOptions == null) throw new ArgumentNullException(nameof(changeFeedProcessorOptions));
+            if (leaseCheckpointer == null) throw new ArgumentNullException(nameof(leaseCheckpointer));
+            if (serializerCore == null) throw new ArgumentNullException(nameof(serializerCore));
 
             this.container = container;
             this.changeFeedProcessorOptions = changeFeedProcessorOptions;
@@ -52,41 +37,34 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         public override FeedProcessor Create(DocumentServiceLease lease, ChangeFeedObserver<T> observer)
         {
-            if (observer == null)
-            {
-                throw new ArgumentNullException(nameof(observer));
-            }
-
-            if (lease == null)
-            {
-                throw new ArgumentNullException(nameof(lease));
-            }
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (lease == null) throw new ArgumentNullException(nameof(lease));
 
             ProcessorOptions options = new ProcessorOptions
             {
                 StartContinuation = !string.IsNullOrEmpty(lease.ContinuationToken) ?
                     lease.ContinuationToken :
-                    changeFeedProcessorOptions.StartContinuation,
+                    this.changeFeedProcessorOptions.StartContinuation,
                 LeaseToken = lease.CurrentLeaseToken,
-                FeedPollDelay = changeFeedProcessorOptions.FeedPollDelay,
-                MaxItemCount = changeFeedProcessorOptions.MaxItemCount,
-                StartFromBeginning = changeFeedProcessorOptions.StartFromBeginning,
-                StartTime = changeFeedProcessorOptions.StartTime,
-                SessionToken = changeFeedProcessorOptions.SessionToken,
+                FeedPollDelay = this.changeFeedProcessorOptions.FeedPollDelay,
+                MaxItemCount = this.changeFeedProcessorOptions.MaxItemCount,
+                StartFromBeginning = this.changeFeedProcessorOptions.StartFromBeginning,
+                StartTime = this.changeFeedProcessorOptions.StartTime,
+                SessionToken = this.changeFeedProcessorOptions.SessionToken,
             };
 
             string partitionKeyRangeId = lease.CurrentLeaseToken;
 
-            PartitionCheckpointerCore checkpointer = new PartitionCheckpointerCore(leaseCheckpointer, lease);
+            PartitionCheckpointerCore checkpointer = new PartitionCheckpointerCore(this.leaseCheckpointer, lease);
             ChangeFeedPartitionKeyResultSetIteratorCore iterator = ResultSetIteratorUtils.BuildResultSetIterator(
                 partitionKeyRangeId: partitionKeyRangeId,
                 continuationToken: options.StartContinuation,
                 maxItemCount: options.MaxItemCount,
-                container: container,
+                container: this.container,
                 startTime: options.StartTime,
                 startFromBeginning: options.StartFromBeginning);
 
-            return new FeedProcessorCore<T>(observer, iterator, options, checkpointer, serializerCore);
+            return new FeedProcessorCore<T>(observer, iterator, options, checkpointer, this.serializerCore);
         }
     }
 }

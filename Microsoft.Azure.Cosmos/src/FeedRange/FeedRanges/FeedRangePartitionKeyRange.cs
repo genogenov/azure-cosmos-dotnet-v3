@@ -4,6 +4,7 @@
 
 namespace Microsoft.Azure.Cosmos
 {
+    using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Threading;
@@ -20,7 +21,7 @@ namespace Microsoft.Azure.Cosmos
     {
         public FeedRangePartitionKeyRange(string partitionKeyRangeId)
         {
-            PartitionKeyRangeId = partitionKeyRangeId;
+            this.PartitionKeyRangeId = partitionKeyRangeId;
         }
 
         public string PartitionKeyRangeId { get; }
@@ -32,7 +33,7 @@ namespace Microsoft.Azure.Cosmos
         {
             Documents.PartitionKeyRange pkRange = await routingMapProvider.TryGetPartitionKeyRangeByIdAsync(
                 collectionResourceId: containerRid,
-                partitionKeyRangeId: PartitionKeyRangeId,
+                partitionKeyRangeId: this.PartitionKeyRangeId,
                 forceRefresh: false);
 
             if (pkRange == null)
@@ -40,7 +41,7 @@ namespace Microsoft.Azure.Cosmos
                 // Try with a refresh
                 pkRange = await routingMapProvider.TryGetPartitionKeyRangeByIdAsync(
                     collectionResourceId: containerRid,
-                    partitionKeyRangeId: PartitionKeyRangeId,
+                    partitionKeyRangeId: this.PartitionKeyRangeId,
                     forceRefresh: true);
             }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Azure.Cosmos
                 throw CosmosExceptionFactory.Create(
                     statusCode: HttpStatusCode.Gone,
                     subStatusCode: (int)SubStatusCodes.PartitionKeyRangeGone,
-                    message: $"The PartitionKeyRangeId: \"{PartitionKeyRangeId}\" is not valid for the current container {containerRid} .",
+                    message: $"The PartitionKeyRangeId: \"{this.PartitionKeyRangeId}\" is not valid for the current container {containerRid} .",
                     stackTrace: string.Empty,
                     activityId: string.Empty,
                     requestCharge: 0,
@@ -69,7 +70,7 @@ namespace Microsoft.Azure.Cosmos
             Documents.PartitionKeyDefinition partitionKeyDefinition,
             CancellationToken cancellationToken)
         {
-            IEnumerable<string> partitionKeyRanges = new List<string>() { PartitionKeyRangeId };
+            IEnumerable<string> partitionKeyRanges = new List<string>() { this.PartitionKeyRangeId };
             return Task.FromResult(partitionKeyRanges);
         }
 
@@ -79,6 +80,6 @@ namespace Microsoft.Azure.Cosmos
             IFeedRangeAsyncVisitor<TResult> visitor,
             CancellationToken cancellationToken = default) => visitor.VisitAsync(this, cancellationToken);
 
-        public override string ToString() => PartitionKeyRangeId;
+        public override string ToString() => this.PartitionKeyRangeId;
     }
 }

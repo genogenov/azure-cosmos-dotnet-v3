@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         private SqlOffsetSpec(SqlScalarExpression offsetExpression)
         {
-            OffsetExpression = offsetExpression ?? throw new ArgumentNullException(nameof(offsetExpression));
+            this.OffsetExpression = offsetExpression ?? throw new ArgumentNullException(nameof(offsetExpression));
         }
 
         public SqlScalarExpression OffsetExpression { get; }

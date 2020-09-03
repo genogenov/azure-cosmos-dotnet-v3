@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos.Linq
 
                 if (searchList.NodeType == ExpressionType.Constant)
                 {
-                    return VisitIN(searchExpression, (ConstantExpression)searchList, context);
+                    return this.VisitIN(searchExpression, (ConstantExpression)searchList, context);
                 }
 
                 SqlScalarExpression array = ExpressionToSql.VisitScalarExpression(searchList, context);
@@ -156,43 +156,31 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         static ArrayBuiltinFunctions()
         {
-            ArrayBuiltinFunctionDefinitions = new Dictionary<string, BuiltinFunctionVisitor>
-            {
-                {
-                    "Concat",
-                    new ArrayConcatVisitor()
-                },
+            ArrayBuiltinFunctionDefinitions = new Dictionary<string, BuiltinFunctionVisitor>();
 
-                {
-                    "Contains",
-                    new ArrayContainsVisitor()
-                },
+            ArrayBuiltinFunctionDefinitions.Add("Concat",
+                new ArrayConcatVisitor());
 
-                {
-                    "Count",
-                    new ArrayCountVisitor()
-                },
+            ArrayBuiltinFunctionDefinitions.Add("Contains",
+                new ArrayContainsVisitor());
 
-                {
-                    "get_Item",
-                    new ArrayGetItemVisitor()
-                },
+            ArrayBuiltinFunctionDefinitions.Add("Count",
+                new ArrayCountVisitor());
 
-                {
-                    "ToArray",
-                    new ArrayToArrayVisitor()
-                },
+            ArrayBuiltinFunctionDefinitions.Add("get_Item",
+                new ArrayGetItemVisitor());
 
-                {
-                    "ToList",
-                    new ArrayToArrayVisitor()
-                }
-            };
+            ArrayBuiltinFunctionDefinitions.Add("ToArray",
+                new ArrayToArrayVisitor());
+
+            ArrayBuiltinFunctionDefinitions.Add("ToList",
+                new ArrayToArrayVisitor());
         }
 
         public static SqlScalarExpression Visit(MethodCallExpression methodCallExpression, TranslationContext context)
         {
-            if (ArrayBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out BuiltinFunctionVisitor visitor))
+            BuiltinFunctionVisitor visitor = null;
+            if (ArrayBuiltinFunctionDefinitions.TryGetValue(methodCallExpression.Method.Name, out visitor))
             {
                 return visitor.Visit(methodCallExpression, context);
             }

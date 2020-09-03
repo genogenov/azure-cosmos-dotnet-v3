@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Cosmos
         public ConflictResolutionPolicy()
         {
             // defaults
-            Mode = ConflictResolutionMode.LastWriterWins;
+            this.Mode = ConflictResolutionMode.LastWriterWins;
         }
 
         /// <summary>

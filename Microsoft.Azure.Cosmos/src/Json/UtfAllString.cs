@@ -23,10 +23,10 @@ namespace Microsoft.Azure.Cosmos.Json
             Utf8Memory utf8EscapedString,
             string utf16EscapedString)
         {
-            Utf8String = utf8String;
-            Utf16String = utf16String;
-            Utf8EscapedString = utf8EscapedString;
-            Utf16EscapedString = utf16EscapedString;
+            this.Utf8String = utf8String;
+            this.Utf16String = utf16String;
+            this.Utf8EscapedString = utf8EscapedString;
+            this.Utf16EscapedString = utf16EscapedString;
         }
 
         public Utf8Memory Utf8String { get; }

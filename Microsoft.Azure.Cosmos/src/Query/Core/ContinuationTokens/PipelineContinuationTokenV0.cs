@@ -17,14 +17,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
         public PipelineContinuationTokenV0(CosmosElement sourceContinuationToken)
             : base(PipelineContinuationTokenV0.VersionNumber)
         {
-            SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
+            this.SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
         }
 
         public CosmosElement SourceContinuationToken { get; }
 
         public override string ToString()
         {
-            return SourceContinuationToken.ToString();
+            return this.SourceContinuationToken.ToString();
         }
 
         public static bool TryCreateFromCosmosElement(

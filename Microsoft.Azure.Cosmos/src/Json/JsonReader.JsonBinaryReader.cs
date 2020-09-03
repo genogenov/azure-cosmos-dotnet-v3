@@ -174,8 +174,8 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 buffer = buffer.Slice(0, jsonValueLength);
 
-                jsonBinaryBuffer = new JsonBinaryMemoryReader(buffer);
-                arrayAndObjectEndStack = new Stack<int>();
+                this.jsonBinaryBuffer = new JsonBinaryMemoryReader(buffer);
+                this.arrayAndObjectEndStack = new Stack<int>();
                 this.jsonStringDictionary = jsonStringDictionary;
             }
 
@@ -194,13 +194,13 @@ namespace Microsoft.Azure.Cosmos.Json
                 JsonTokenType jsonTokenType;
                 int nextTokenOffset;
                 // First check if we just finished an array or object context
-                if (!arrayAndObjectEndStack.Empty() && (arrayAndObjectEndStack.Peek() == jsonBinaryBuffer.Position))
+                if (!this.arrayAndObjectEndStack.Empty() && (this.arrayAndObjectEndStack.Peek() == this.jsonBinaryBuffer.Position))
                 {
-                    if (JsonObjectState.InArrayContext)
+                    if (this.JsonObjectState.InArrayContext)
                     {
                         jsonTokenType = JsonTokenType.EndArray;
                     }
-                    else if (JsonObjectState.InObjectContext)
+                    else if (this.JsonObjectState.InObjectContext)
                     {
                         jsonTokenType = JsonTokenType.EndObject;
                     }
@@ -210,21 +210,21 @@ namespace Microsoft.Azure.Cosmos.Json
                     }
 
                     nextTokenOffset = 0;
-                    arrayAndObjectEndStack.Pop();
+                    this.arrayAndObjectEndStack.Pop();
                 }
                 else
                 {
                     // We are not at the end of a context.
-                    if (jsonBinaryBuffer.IsEof)
+                    if (this.jsonBinaryBuffer.IsEof)
                     {
                         // Need to check if we are still inside of an object or array
-                        if (JsonObjectState.CurrentDepth != 0)
+                        if (this.JsonObjectState.CurrentDepth != 0)
                         {
-                            if (JsonObjectState.InObjectContext)
+                            if (this.JsonObjectState.InObjectContext)
                             {
                                 throw new JsonMissingEndObjectException();
                             }
-                            else if (JsonObjectState.InArrayContext)
+                            else if (this.JsonObjectState.InArrayContext)
                             {
                                 throw new JsonMissingEndArrayException();
                             }
@@ -237,15 +237,15 @@ namespace Microsoft.Azure.Cosmos.Json
                         return false;
                     }
 
-                    if ((JsonObjectState.CurrentDepth == 0) && (CurrentTokenType != JsonTokenType.NotStarted))
+                    if ((this.JsonObjectState.CurrentDepth == 0) && (this.CurrentTokenType != JsonTokenType.NotStarted))
                     {
                         // There are trailing characters outside of the outter most object or array
                         throw new JsonUnexpectedTokenException();
                     }
 
-                    byte firstByte = jsonBinaryBuffer.Peek();
+                    byte firstByte = this.jsonBinaryBuffer.Peek();
                     jsonTokenType = JsonBinaryReader.GetJsonTokenType(firstByte);
-                    if ((jsonTokenType == JsonTokenType.String) && JsonObjectState.IsPropertyExpected)
+                    if ((jsonTokenType == JsonTokenType.String) && this.JsonObjectState.IsPropertyExpected)
                     {
                         jsonTokenType = JsonTokenType.FieldName;
                     }
@@ -255,19 +255,19 @@ namespace Microsoft.Azure.Cosmos.Json
                     if ((jsonTokenType == JsonTokenType.BeginArray) || (jsonTokenType == JsonTokenType.BeginObject))
                     {
                         if (!JsonBinaryEncoding.TryGetValueLength(
-                            jsonBinaryBuffer.GetBufferedRawJsonToken().Span,
+                            this.jsonBinaryBuffer.GetBufferedRawJsonToken().Span,
                             out int arrayOrObjectLength))
                         {
                             throw new JsonUnexpectedTokenException();
                         }
 
-                        arrayAndObjectEndStack.Push(jsonBinaryBuffer.Position + arrayOrObjectLength);
+                        this.arrayAndObjectEndStack.Push(this.jsonBinaryBuffer.Position + arrayOrObjectLength);
                         nextTokenOffset = JsonBinaryReader.GetArrayOrObjectPrefixLength(firstByte);
                     }
                     else
                     {
                         if (!JsonBinaryEncoding.TryGetValueLength(
-                            jsonBinaryBuffer.GetBufferedRawJsonToken().Span,
+                            this.jsonBinaryBuffer.GetBufferedRawJsonToken().Span,
                             out nextTokenOffset))
                         {
                             throw new JsonUnexpectedTokenException();
@@ -275,52 +275,52 @@ namespace Microsoft.Azure.Cosmos.Json
                     }
                 }
 
-                JsonObjectState.RegisterToken(jsonTokenType);
-                currentTokenPosition = jsonBinaryBuffer.Position;
-                jsonBinaryBuffer.SkipBytes(nextTokenOffset);
+                this.JsonObjectState.RegisterToken(jsonTokenType);
+                this.currentTokenPosition = this.jsonBinaryBuffer.Position;
+                this.jsonBinaryBuffer.SkipBytes(nextTokenOffset);
                 return true;
             }
 
             /// <inheritdoc />
             public override Number64 GetNumberValue()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Number)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Number)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetNumberValue(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override string GetStringValue()
             {
                 if (!(
-                    (JsonObjectState.CurrentTokenType == JsonTokenType.String) ||
-                    (JsonObjectState.CurrentTokenType == JsonTokenType.FieldName)))
+                    (this.JsonObjectState.CurrentTokenType == JsonTokenType.String) ||
+                    (this.JsonObjectState.CurrentTokenType == JsonTokenType.FieldName)))
                 {
                     throw new JsonInvalidTokenException();
                 }
 
                 return JsonBinaryEncoding.GetStringValue(
-                    Utf8Memory.UnsafeCreateNoValidation(jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition)),
-                    jsonStringDictionary);
+                    Utf8Memory.UnsafeCreateNoValidation(this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition)),
+                    this.jsonStringDictionary);
             }
 
             /// <inheritdoc />
             public override bool TryGetBufferedStringValue(out Utf8Memory bufferedUtf8StringValue)
             {
                 if (!(
-                    (JsonObjectState.CurrentTokenType == JsonTokenType.String) ||
-                    (JsonObjectState.CurrentTokenType == JsonTokenType.FieldName)))
+                    (this.JsonObjectState.CurrentTokenType == JsonTokenType.String) ||
+                    (this.JsonObjectState.CurrentTokenType == JsonTokenType.FieldName)))
                 {
                     throw new JsonInvalidTokenException();
                 }
 
                 return JsonBinaryEncoding.TryGetBufferedStringValue(
-                    Utf8Memory.UnsafeCreateNoValidation(jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition)),
-                    jsonStringDictionary,
+                    Utf8Memory.UnsafeCreateNoValidation(this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition)),
+                    this.jsonStringDictionary,
                     out bufferedUtf8StringValue);
             }
 
@@ -328,17 +328,17 @@ namespace Microsoft.Azure.Cosmos.Json
             public override bool TryGetBufferedRawJsonToken(out ReadOnlyMemory<byte> bufferedRawJsonToken)
             {
                 if (!JsonBinaryEncoding.TryGetValueLength(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span,
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span,
                     out int length))
                 {
                     throw new InvalidOperationException();
                 }
 
-                ReadOnlyMemory<byte> candidate = jsonBinaryBuffer.GetBufferedRawJsonToken(
-                    currentTokenPosition,
-                    currentTokenPosition + length);
+                ReadOnlyMemory<byte> candidate = this.jsonBinaryBuffer.GetBufferedRawJsonToken(
+                    this.currentTokenPosition,
+                    this.currentTokenPosition + length);
 
-                if ((jsonStringDictionary != null) && JsonBinaryReader.IsStringOrNested(CurrentTokenType))
+                if ((this.jsonStringDictionary != null) && JsonBinaryReader.IsStringOrNested(this.CurrentTokenType))
                 {
                     // If there is dictionary encoding, then we need to force a rewrite.
                     bufferedRawJsonToken = default;
@@ -366,108 +366,108 @@ namespace Microsoft.Azure.Cosmos.Json
             /// <inheritdoc />
             public override sbyte GetInt8Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Int8)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Int8)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetInt8Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override short GetInt16Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Int16)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Int16)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetInt16Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override int GetInt32Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Int32)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Int32)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetInt32Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override long GetInt64Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Int64)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Int64)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetInt64Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override uint GetUInt32Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.UInt32)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.UInt32)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetUInt32Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override float GetFloat32Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Float32)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Float32)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetFloat32Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override double GetFloat64Value()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Float64)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Float64)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetFloat64Value(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override Guid GetGuidValue()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Guid)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Guid)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
                 return JsonBinaryEncoding.GetGuidValue(
-                    jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition).Span);
+                    this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition).Span);
             }
 
             /// <inheritdoc />
             public override ReadOnlyMemory<byte> GetBinaryValue()
             {
-                if (JsonObjectState.CurrentTokenType != JsonTokenType.Binary)
+                if (this.JsonObjectState.CurrentTokenType != JsonTokenType.Binary)
                 {
                     throw new JsonNotNumberTokenException();
                 }
 
-                return JsonBinaryEncoding.GetBinaryValue(jsonBinaryBuffer.GetBufferedRawJsonToken(currentTokenPosition));
+                return JsonBinaryEncoding.GetBinaryValue(this.jsonBinaryBuffer.GetBufferedRawJsonToken(this.currentTokenPosition));
             }
 
             private static JsonTokenType GetJsonTokenType(byte typeMarker)
@@ -554,7 +554,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 public void SkipBytes(int offset)
                 {
-                    position += offset;
+                    this.position += offset;
                 }
             }
         }

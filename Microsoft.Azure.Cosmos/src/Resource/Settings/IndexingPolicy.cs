@@ -35,8 +35,8 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public IndexingPolicy()
         {
-            Automatic = true;
-            IndexingMode = IndexingMode.Consistent;
+            this.Automatic = true;
+            this.IndexingMode = IndexingMode.Consistent;
         }
 
         /// <summary>

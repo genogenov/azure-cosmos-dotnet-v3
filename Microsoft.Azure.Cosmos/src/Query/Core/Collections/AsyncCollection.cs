@@ -59,17 +59,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
             this.collection = collection;
             this.boundingCapacity = boundingCapacity;
-            notFull = IsUnbounded ? null : new SemaphoreSlim(boundingCapacity - count, boundingCapacity);
-            notEmpty = new SemaphoreSlim(count);
+            this.notFull = this.IsUnbounded ? null : new SemaphoreSlim(boundingCapacity - count, boundingCapacity);
+            this.notEmpty = new SemaphoreSlim(count);
             if (collection is ConcurrentQueue<T> concurrentQueue)
             {
-                tryPeekDelegate = concurrentQueue.TryPeek;
+                this.tryPeekDelegate = concurrentQueue.TryPeek;
                 return;
             }
 
             if (collection is PriorityQueue<T> priorityQueue)
             {
-                tryPeekDelegate = priorityQueue.TryPeek;
+                this.tryPeekDelegate = priorityQueue.TryPeek;
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
         {
             get
             {
-                return collection.Count;
+                return this.collection.Count;
             }
         }
 
@@ -88,30 +88,30 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
         {
             get
             {
-                return boundingCapacity >= int.MaxValue;
+                return this.boundingCapacity >= int.MaxValue;
             }
         }
 
         public async Task AddAsync(T item, CancellationToken token = default)
         {
-            if (!IsUnbounded)
+            if (!this.IsUnbounded)
             {
-                await notFull.WaitAsync(token);
+                await this.notFull.WaitAsync(token);
             }
 
-            if (collection.TryAdd(item))
+            if (this.collection.TryAdd(item))
             {
-                notEmpty.Release();
+                this.notEmpty.Release();
             }
         }
 
         public async Task AddRangeAsync(IEnumerable<T> items, CancellationToken token = default)
         {
-            if (!IsUnbounded)
+            if (!this.IsUnbounded)
             {
                 foreach (T item in items)
                 {
-                    await AddAsync(item);
+                    await this.AddAsync(item);
                 }
             }
             else
@@ -119,7 +119,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
                 int count = 0;
                 foreach (T item in items)
                 {
-                    if (collection.TryAdd(item))
+                    if (this.collection.TryAdd(item))
                     {
                         ++count;
                     }
@@ -127,19 +127,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
                 if (count > 0)
                 {
-                    notEmpty.Release(count);
+                    this.notEmpty.Release(count);
                 }
             }
         }
 
         public async Task<T> TakeAsync(CancellationToken token = default)
         {
-            await notEmpty.WaitAsync(token);
-            if (collection.TryTake(out T item))
+            await this.notEmpty.WaitAsync(token);
+            if (this.collection.TryTake(out T item))
             {
-                if (!IsUnbounded)
+                if (!this.IsUnbounded)
                 {
-                    notFull.Release();
+                    this.notFull.Release();
                 }
             }
 
@@ -148,27 +148,27 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
         public async Task<T> PeekAsync(CancellationToken token = default)
         {
-            if (tryPeekDelegate == null)
+            if (this.tryPeekDelegate == null)
             {
                 throw new NotImplementedException();
             }
 
-            await notEmpty.WaitAsync(token);
+            await this.notEmpty.WaitAsync(token);
             // Do nothing if tryPeekFunc returns false
-            tryPeekDelegate(out T item);
-            notEmpty.Release();
+            this.tryPeekDelegate(out T item);
+            this.notEmpty.Release();
 
             return item;
         }
 
         public bool TryPeek(out T item)
         {
-            if (tryPeekDelegate == null)
+            if (this.tryPeekDelegate == null)
             {
                 throw new NotImplementedException();
             }
 
-            return tryPeekDelegate(out item);
+            return this.tryPeekDelegate(out item);
         }
 
         public async Task<IReadOnlyList<T>> DrainAsync(
@@ -185,9 +185,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
             List<T> elements = new List<T>();
 
             Stopwatch stopWatch = Stopwatch.StartNew();
-            while (elements.Count < maxElements && await notEmpty.WaitAsync(timeout, token))
+            while (elements.Count < maxElements && await this.notEmpty.WaitAsync(timeout, token))
             {
-                if (collection.TryTake(out T item) && (callback == null || callback(item)))
+                if (this.collection.TryTake(out T item) && (callback == null || callback(item)))
                 {
                     elements.Add(item);
                 }
@@ -200,9 +200,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
                 stopWatch.Restart();
             }
 
-            if (!IsUnbounded && elements.Count > 0)
+            if (!this.IsUnbounded && elements.Count > 0)
             {
-                notFull.Release(elements.Count);
+                this.notFull.Release(elements.Count);
             }
 
             return elements;

@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
 {
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Routing;
@@ -42,16 +43,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
         }
 
         [JsonIgnore]
-        public Range<string> PartitionRange => Range;
+        public Range<string> PartitionRange => this.Range;
 
         public object ShallowCopy()
         {
-            return MemberwiseClone();
+            return this.MemberwiseClone();
         }
 
         public static CosmosElement ToCosmosElement(CompositeContinuationToken compositeContinuationToken)
         {
-            CosmosElement token = compositeContinuationToken.Token == null ? CosmosNull.Create() : (CosmosElement)CosmosString.Create(compositeContinuationToken.Token);
+            CosmosElement token = compositeContinuationToken.Token == null ? (CosmosElement)CosmosNull.Create() : (CosmosElement)CosmosString.Create(compositeContinuationToken.Token);
             return CosmosObject.Create(
                 new Dictionary<string, CosmosElement>()
                 {

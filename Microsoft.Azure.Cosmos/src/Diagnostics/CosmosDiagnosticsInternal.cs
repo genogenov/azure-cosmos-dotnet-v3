@@ -5,6 +5,7 @@
 namespace Microsoft.Azure.Cosmos.Diagnostics
 {
     using System.IO;
+    using System.Text;
 
     /// <summary>
     /// Extends <see cref="CosmosDiagnostics"/> to expose internal APIs.
@@ -19,7 +20,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
         {
             using (StringWriter stringWriter = new StringWriter())
             {
-                WriteTo(stringWriter);
+                this.WriteTo(stringWriter);
                 return stringWriter.ToString();
             }
         }
@@ -27,7 +28,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
         public void WriteTo(TextWriter textWriter)
         {
             CosmosDiagnosticsSerializerVisitor cosmosDiagnosticsSerializerVisitor = new CosmosDiagnosticsSerializerVisitor(textWriter);
-            Accept(cosmosDiagnosticsSerializerVisitor);
+            this.Accept(cosmosDiagnosticsSerializerVisitor);
         }
     }
 }

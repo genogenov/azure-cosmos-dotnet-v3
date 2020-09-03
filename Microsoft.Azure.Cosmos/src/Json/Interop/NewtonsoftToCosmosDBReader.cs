@@ -30,43 +30,43 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         public override float GetFloat32Value()
         {
-            return (float)reader.Value;
+            return (float)this.reader.Value;
         }
 
         public override double GetFloat64Value()
         {
-            return (double)reader.Value;
+            return (double)this.reader.Value;
         }
 
         public override Guid GetGuidValue()
         {
-            return (Guid)reader.Value;
+            return (Guid)this.reader.Value;
         }
 
         public override short GetInt16Value()
         {
-            return (short)reader.Value;
+            return (short)this.reader.Value;
         }
 
         public override int GetInt32Value()
         {
-            return (int)reader.Value;
+            return (int)this.reader.Value;
         }
 
         public override long GetInt64Value()
         {
-            return (long)reader.Value;
+            return (long)this.reader.Value;
         }
 
         public override sbyte GetInt8Value()
         {
-            return (sbyte)reader.Value;
+            return (sbyte)this.reader.Value;
         }
 
         public override Number64 GetNumberValue()
         {
             string numberString;
-            object value = reader.Value;
+            object value = this.reader.Value;
             if (value is double doubleValue)
             {
                 numberString = ((double)value).ToString("R");
@@ -81,56 +81,56 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         public override string GetStringValue()
         {
-            return reader.Value.ToString();
+            return this.reader.Value.ToString();
         }
 
         public override uint GetUInt32Value()
         {
-            return (uint)reader.Value;
+            return (uint)this.reader.Value;
         }
 
         public override bool Read()
         {
-            bool succesfullyRead = reader.Read();
+            bool succesfullyRead = this.reader.Read();
             if (succesfullyRead)
             {
-                switch (reader.TokenType)
+                switch (this.reader.TokenType)
                 {
                     case Newtonsoft.Json.JsonToken.StartObject:
-                        JsonObjectState.RegisterToken(JsonTokenType.BeginObject);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.BeginObject);
                         break;
 
                     case Newtonsoft.Json.JsonToken.StartArray:
-                        JsonObjectState.RegisterToken(JsonTokenType.BeginArray);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.BeginArray);
                         break;
 
                     case Newtonsoft.Json.JsonToken.PropertyName:
-                        JsonObjectState.RegisterToken(JsonTokenType.FieldName);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.FieldName);
                         break;
 
                     case Newtonsoft.Json.JsonToken.String:
-                        JsonObjectState.RegisterToken(JsonTokenType.String);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.String);
                         break;
 
                     case Newtonsoft.Json.JsonToken.Integer:
                     case Newtonsoft.Json.JsonToken.Float:
-                        JsonObjectState.RegisterToken(JsonTokenType.Number);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.Number);
                         break;
 
                     case Newtonsoft.Json.JsonToken.Boolean:
-                        JsonObjectState.RegisterToken(reader.Value is true ? JsonTokenType.True : JsonTokenType.False);
+                        this.JsonObjectState.RegisterToken(this.reader.Value is true ? JsonTokenType.True : JsonTokenType.False);
                         break;
 
                     case Newtonsoft.Json.JsonToken.Null:
-                        JsonObjectState.RegisterToken(JsonTokenType.Null);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.Null);
                         break;
 
                     case Newtonsoft.Json.JsonToken.EndObject:
-                        JsonObjectState.RegisterToken(JsonTokenType.EndObject);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.EndObject);
                         break;
 
                     case Newtonsoft.Json.JsonToken.EndArray:
-                        JsonObjectState.RegisterToken(JsonTokenType.EndArray);
+                        this.JsonObjectState.RegisterToken(JsonTokenType.EndArray);
                         break;
 
                     default:

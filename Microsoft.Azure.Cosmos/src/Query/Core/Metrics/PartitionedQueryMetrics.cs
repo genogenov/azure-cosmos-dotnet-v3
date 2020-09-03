@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             foreach (KeyValuePair<string, QueryMetrics> kvp in other)
             {
                 // QueryMetrics is an immutable object so we can get away with a shallow copy here
-                partitionedQueryMetrics[kvp.Key] = kvp.Value;
+                this.partitionedQueryMetrics[kvp.Key] = kvp.Value;
             }
         }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public PartitionedQueryMetrics()
         {
-            partitionedQueryMetrics = new Dictionary<string, QueryMetrics>();
+            this.partitionedQueryMetrics = new Dictionary<string, QueryMetrics>();
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             get
             {
-                return partitionedQueryMetrics.Count;
+                return this.partitionedQueryMetrics.Count;
             }
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             get
             {
-                return partitionedQueryMetrics.Keys;
+                return this.partitionedQueryMetrics.Keys;
             }
         }
 
@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             get
             {
-                return partitionedQueryMetrics.Values;
+                return this.partitionedQueryMetrics.Values;
             }
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             get
             {
-                return partitionedQueryMetrics[key];
+                return this.partitionedQueryMetrics[key];
             }
         }
 
@@ -142,7 +142,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>The string version.</returns>
         public override string ToString()
         {
-            return ToTextString();
+            return this.ToTextString();
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>Whether or not this partitioned query metrics contains a key.</returns>
         public bool ContainsKey(string key)
         {
-            return partitionedQueryMetrics.ContainsKey(key);
+            return this.partitionedQueryMetrics.ContainsKey(key);
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>An enumerator.</returns>
         public IEnumerator<KeyValuePair<string, QueryMetrics>> GetEnumerator()
         {
-            return partitionedQueryMetrics.GetEnumerator();
+            return this.partitionedQueryMetrics.GetEnumerator();
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>true if the key was found, else false.</returns>
         public bool TryGetValue(string key, out QueryMetrics value)
         {
-            return partitionedQueryMetrics.TryGetValue(key, out value);
+            return this.partitionedQueryMetrics.TryGetValue(key, out value);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>The enumerator.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         private string ToTextString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            foreach (KeyValuePair<string, QueryMetrics> kvp in partitionedQueryMetrics.OrderBy((kvp) => kvp.Key))
+            foreach (KeyValuePair<string, QueryMetrics> kvp in this.partitionedQueryMetrics.OrderBy((kvp) => kvp.Key))
             {
                 stringBuilder.AppendFormat("Partition {0}", kvp.Key);
                 stringBuilder.AppendLine();

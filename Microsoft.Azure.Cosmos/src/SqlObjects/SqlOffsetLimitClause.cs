@@ -17,8 +17,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlOffsetLimitClause(SqlOffsetSpec offsetSpec, SqlLimitSpec limitSpec)
         {
-            OffsetSpec = offsetSpec ?? throw new ArgumentNullException(nameof(offsetSpec));
-            LimitSpec = limitSpec ?? throw new ArgumentNullException(nameof(limitSpec));
+            this.OffsetSpec = offsetSpec ?? throw new ArgumentNullException(nameof(offsetSpec));
+            this.LimitSpec = limitSpec ?? throw new ArgumentNullException(nameof(limitSpec));
         }
 
         public SqlOffsetSpec OffsetSpec { get; }

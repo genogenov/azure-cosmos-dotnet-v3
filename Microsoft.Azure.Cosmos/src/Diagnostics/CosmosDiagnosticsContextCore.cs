@@ -5,7 +5,12 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Security.Policy;
     using Microsoft.Azure.Cosmos.Diagnostics;
+    using Microsoft.Azure.Documents.Rntbd;
 
     /// <summary>
     /// This represents the core diagnostics object used in the SDK.
@@ -43,12 +48,12 @@ namespace Microsoft.Azure.Cosmos
             string operationName,
             string userAgentString)
         {
-            UserAgent = userAgentString ?? throw new ArgumentNullException(nameof(userAgentString));
-            OperationName = operationName ?? throw new ArgumentNullException(nameof(operationName));
-            StartUtc = DateTime.UtcNow;
-            ContextList = new List<CosmosDiagnosticsInternal>();
-            Diagnostics = new CosmosDiagnosticsCore(this);
-            overallScope = new CosmosDiagnosticScope("Overall");
+            this.UserAgent = userAgentString ?? throw new ArgumentNullException(nameof(userAgentString));
+            this.OperationName = operationName ?? throw new ArgumentNullException(nameof(operationName));
+            this.StartUtc = DateTime.UtcNow;
+            this.ContextList = new List<CosmosDiagnosticsInternal>();
+            this.Diagnostics = new CosmosDiagnosticsCore(this);
+            this.overallScope = new CosmosDiagnosticScope("Overall");
         }
 
         public override DateTime StartUtc { get; }
@@ -61,46 +66,46 @@ namespace Microsoft.Azure.Cosmos
 
         internal override IDisposable GetOverallScope()
         {
-            return overallScope;
+            return this.overallScope;
         }
 
         internal override TimeSpan GetRunningElapsedTime()
         {
-            return overallScope.GetElapsedTime();
+            return this.overallScope.GetElapsedTime();
         }
 
         internal override bool TryGetTotalElapsedTime(out TimeSpan timeSpan)
         {
-            return overallScope.TryGetElapsedTime(out timeSpan);
+            return this.overallScope.TryGetElapsedTime(out timeSpan);
         }
 
         internal override bool IsComplete()
         {
-            return overallScope.IsComplete();
+            return this.overallScope.IsComplete();
         }
 
         public override int GetTotalRequestCount()
         {
-            return totalRequestCount;
+            return this.totalRequestCount;
         }
 
         public override int GetFailedRequestCount()
         {
-            return failedRequestCount;
+            return this.failedRequestCount;
         }
 
         internal override IDisposable CreateScope(string name)
         {
             CosmosDiagnosticScope scope = new CosmosDiagnosticScope(name);
 
-            ContextList.Add(scope);
+            this.ContextList.Add(scope);
             return scope;
         }
 
         internal override IDisposable CreateRequestHandlerScopeScope(RequestHandler requestHandler)
         {
             RequestHandlerScope requestHandlerScope = new RequestHandlerScope(requestHandler);
-            ContextList.Add(requestHandlerScope);
+            this.ContextList.Add(requestHandlerScope);
             return requestHandlerScope;
         }
 
@@ -111,7 +116,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(processInfo));
             }
 
-            ContextList.Add(processInfo);
+            this.ContextList.Add(processInfo);
         }
 
         internal override void AddDiagnosticsInternal(PointOperationStatistics pointOperationStatistics)
@@ -121,34 +126,34 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(pointOperationStatistics));
             }
 
-            AddRequestCount((int)pointOperationStatistics.StatusCode);
+            this.AddRequestCount((int)pointOperationStatistics.StatusCode);
 
-            ContextList.Add(pointOperationStatistics);
+            this.ContextList.Add(pointOperationStatistics);
         }
 
         internal override void AddDiagnosticsInternal(StoreResponseStatistics storeResponseStatistics)
         {
             if (storeResponseStatistics.StoreResult != null)
             {
-                AddRequestCount((int)storeResponseStatistics.StoreResult.StatusCode);
+                this.AddRequestCount((int)storeResponseStatistics.StoreResult.StatusCode);
             }
 
-            ContextList.Add(storeResponseStatistics);
+            this.ContextList.Add(storeResponseStatistics);
         }
 
         internal override void AddDiagnosticsInternal(AddressResolutionStatistics addressResolutionStatistics)
         {
-            ContextList.Add(addressResolutionStatistics);
+            this.ContextList.Add(addressResolutionStatistics);
         }
 
         internal override void AddDiagnosticsInternal(CosmosClientSideRequestStatistics clientSideRequestStatistics)
         {
-            ContextList.Add(clientSideRequestStatistics);
+            this.ContextList.Add(clientSideRequestStatistics);
         }
 
         internal override void AddDiagnosticsInternal(FeedRangeStatistics feedRangeStatistics)
         {
-            ContextList.Add(feedRangeStatistics);
+            this.ContextList.Add(feedRangeStatistics);
         }
 
         internal override void AddDiagnosticsInternal(QueryPageDiagnostics queryPageDiagnostics)
@@ -160,17 +165,17 @@ namespace Microsoft.Azure.Cosmos
 
             if (queryPageDiagnostics.DiagnosticsContext != null)
             {
-                AddSummaryInfo(queryPageDiagnostics.DiagnosticsContext);
+                this.AddSummaryInfo(queryPageDiagnostics.DiagnosticsContext);
             }
 
-            ContextList.Add(queryPageDiagnostics);
+            this.ContextList.Add(queryPageDiagnostics);
         }
 
         internal override void AddDiagnosticsInternal(CosmosDiagnosticsContext newContext)
         {
-            AddSummaryInfo(newContext);
+            this.AddSummaryInfo(newContext);
 
-            ContextList.AddRange(newContext);
+            this.ContextList.AddRange(newContext);
         }
 
         public override void Accept(CosmosDiagnosticsInternalVisitor cosmosDiagnosticsInternalVisitor)
@@ -188,18 +193,18 @@ namespace Microsoft.Azure.Cosmos
             // Using a for loop with a yield prevents Issue #1467 which causes
             // ThrowInvalidOperationException if a new diagnostics is getting added
             // while the enumerator is being used.
-            for (int i = 0; i < ContextList.Count; i++)
+            for (int i = 0; i < this.ContextList.Count; i++)
             {
-                yield return ContextList[i];
+                yield return this.ContextList[i];
             }
         }
 
         private void AddRequestCount(int statusCode)
         {
-            totalRequestCount++;
+            this.totalRequestCount++;
             if (statusCode < 200 || statusCode > 299)
             {
-                failedRequestCount++;
+                this.failedRequestCount++;
             }
         }
 
@@ -210,8 +215,8 @@ namespace Microsoft.Azure.Cosmos
                 return;
             }
 
-            totalRequestCount += newContext.GetTotalRequestCount();
-            failedRequestCount += newContext.GetFailedRequestCount();
+            this.totalRequestCount += newContext.GetTotalRequestCount();
+            this.failedRequestCount += newContext.GetFailedRequestCount();
         }
     }
 }

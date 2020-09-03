@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(path));
             }
 
-            paths.Add(path);
+            this.paths.Add(path);
             return this;
         }
 
@@ -46,12 +46,12 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of the parent.</returns>
         public ContainerBuilder Attach()
         {
-            attachCallback(new UniqueKey()
+            this.attachCallback(new UniqueKey()
             {
-                Paths = paths
+                Paths = this.paths
             });
 
-            return parent;
+            return this.parent;
         }
     }
 }

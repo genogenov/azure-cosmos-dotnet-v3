@@ -16,43 +16,37 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         static TypeCheckFunctions()
         {
-            TypeCheckFunctionsDefinitions = new Dictionary<string, BuiltinFunctionVisitor>
-            {
-                {
-                    "IsDefined",
-                    new SqlBuiltinFunctionVisitor("IS_DEFINED",
-                    true,
-                    new List<Type[]>()
-                    {
-                        new Type[]{typeof(object)},
-                    })
-                },
+            TypeCheckFunctionsDefinitions = new Dictionary<string, BuiltinFunctionVisitor>();
 
-                {
-                    "IsNull",
-                    new SqlBuiltinFunctionVisitor("IS_NULL",
+            TypeCheckFunctionsDefinitions.Add("IsDefined",
+                new SqlBuiltinFunctionVisitor("IS_DEFINED",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(object)},
-                    })
-                },
+                    }));
 
-                {
-                    "IsPrimitive",
-                    new SqlBuiltinFunctionVisitor("IS_PRIMITIVE",
+            TypeCheckFunctionsDefinitions.Add("IsNull",
+                new SqlBuiltinFunctionVisitor("IS_NULL",
                     true,
                     new List<Type[]>()
                     {
                         new Type[]{typeof(object)},
-                    })
-                }
-            };
+                    }));
+
+            TypeCheckFunctionsDefinitions.Add("IsPrimitive",
+                new SqlBuiltinFunctionVisitor("IS_PRIMITIVE",
+                    true,
+                    new List<Type[]>()
+                    {
+                        new Type[]{typeof(object)},
+                    }));
         }
 
         public static SqlScalarExpression Visit(MethodCallExpression methodCallExpression, TranslationContext context)
         {
-            if (TypeCheckFunctionsDefinitions.TryGetValue(methodCallExpression.Method.Name, out BuiltinFunctionVisitor visitor))
+            BuiltinFunctionVisitor visitor = null;
+            if (TypeCheckFunctionsDefinitions.TryGetValue(methodCallExpression.Method.Name, out visitor))
             {
                 return visitor.Visit(methodCallExpression, context);
             }

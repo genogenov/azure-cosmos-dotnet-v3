@@ -12,6 +12,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Collections;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
@@ -119,7 +120,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                 throw new ArgumentException($"{nameof(collectionRid)} can not be null or empty.");
             }
 
-            Root = new ItemProducer(
+            this.Root = new ItemProducer(
                 queryContext,
                 querySpecForInit,
                 partitionKeyRange,
@@ -129,11 +130,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                 initialPageSize,
                 initialContinuationToken);
 
-            queryClient = queryContext.QueryClient;
-            children = new PriorityQueue<ItemProducerTree>(itemProducerTreeComparer, true);
+            this.queryClient = queryContext.QueryClient;
+            this.children = new PriorityQueue<ItemProducerTree>(itemProducerTreeComparer, true);
             this.deferFirstPage = deferFirstPage;
             this.collectionRid = collectionRid;
-            createItemProducerTreeCallback = ItemProducerTree.CreateItemProducerTreeCallback(
+            this.createItemProducerTreeCallback = ItemProducerTree.CreateItemProducerTreeCallback(
                 queryContext,
                 querySpecForInit,
                 produceAsyncCompleteCallback,
@@ -143,7 +144,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                 deferFirstPage,
                 collectionRid,
                 initialPageSize);
-            executeWithSplitProofingSemaphore = new SemaphoreSlim(1, 1);
+            this.executeWithSplitProofingSemaphore = new SemaphoreSlim(1, 1);
         }
 
         public delegate void ProduceAsyncCompleteDelegate(
@@ -165,13 +166,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.PartitionKeyRange;
+                    return this.Root.PartitionKeyRange;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.PartitionKeyRange;
+                    return this.CurrentItemProducerTree.PartitionKeyRange;
                 }
             }
         }
@@ -183,25 +184,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.Filter;
+                    return this.Root.Filter;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.Filter;
+                    return this.CurrentItemProducerTree.Filter;
                 }
             }
 
             set
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    Root.Filter = value;
+                    this.Root.Filter = value;
                 }
                 else
                 {
-                    CurrentItemProducerTree.Filter = value;
+                    this.CurrentItemProducerTree.Filter = value;
                 }
             }
         }
@@ -213,12 +214,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (HasSplit && !Root.HasMoreResults)
+                if (this.HasSplit && !this.Root.HasMoreResults)
                 {
                     // If the partition has split and there are no more results in the parent buffer
                     // then just pull from the highest priority child (with recursive decent).
 
-                    return children.Peek().CurrentItemProducerTree;
+                    return this.children.Peek().CurrentItemProducerTree;
                 }
                 else
                 {
@@ -236,13 +237,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.IsAtBeginningOfPage;
+                    return this.Root.IsAtBeginningOfPage;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.IsAtBeginningOfPage;
+                    return this.CurrentItemProducerTree.IsAtBeginningOfPage;
                 }
             }
         }
@@ -250,14 +251,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <summary>
         /// Gets a value indicating whether the document producer tree has more results.
         /// </summary>
-        public bool HasMoreResults => Root.HasMoreResults
-                    || (HasSplit && children.Peek().HasMoreResults);
+        public bool HasMoreResults => this.Root.HasMoreResults
+                    || (this.HasSplit && this.children.Peek().HasMoreResults);
 
         /// <summary>
         /// Gets a value indicating whether the document producer tree has more backend results.
         /// </summary>
-        public bool HasMoreBackendResults => Root.HasMoreBackendResults
-                    || (HasSplit && children.Peek().HasMoreBackendResults);
+        public bool HasMoreBackendResults => this.Root.HasMoreBackendResults
+                    || (this.HasSplit && this.children.Peek().HasMoreBackendResults);
 
         /// <summary>
         /// Gets whether there are items left in the current page of the document producer tree.
@@ -266,13 +267,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.ItemsLeftInCurrentPage;
+                    return this.Root.ItemsLeftInCurrentPage;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.ItemsLeftInCurrentPage;
+                    return this.CurrentItemProducerTree.ItemsLeftInCurrentPage;
                 }
             }
         }
@@ -284,13 +285,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.BufferedItemCount;
+                    return this.Root.BufferedItemCount;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.BufferedItemCount;
+                    return this.CurrentItemProducerTree.BufferedItemCount;
                 }
             }
         }
@@ -298,7 +299,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <summary>
         /// Gets a value indicating whether the document producer tree is active.
         /// </summary>
-        public bool IsActive => Root.IsActive || children.Any((child) => child.IsActive);
+        public bool IsActive => this.Root.IsActive || this.children.Any((child) => child.IsActive);
 
         /// <summary>
         /// Gets or sets the page size for this document producer tree.
@@ -307,25 +308,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.PageSize;
+                    return this.Root.PageSize;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.PageSize;
+                    return this.CurrentItemProducerTree.PageSize;
                 }
             }
 
             set
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    Root.PageSize = value;
+                    this.Root.PageSize = value;
                 }
                 else
                 {
-                    CurrentItemProducerTree.PageSize = value;
+                    this.CurrentItemProducerTree.PageSize = value;
                 }
             }
         }
@@ -337,13 +338,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.ActivityId;
+                    return this.Root.ActivityId;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.ActivityId;
+                    return this.CurrentItemProducerTree.ActivityId;
                 }
             }
         }
@@ -352,13 +353,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.CosmosQueryExecutionInfo;
+                    return this.Root.CosmosQueryExecutionInfo;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.CosmosQueryExecutionInfo;
+                    return this.CurrentItemProducerTree.CosmosQueryExecutionInfo;
                 }
             }
         }
@@ -370,13 +371,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             get
             {
-                if (CurrentItemProducerTree == this)
+                if (this.CurrentItemProducerTree == this)
                 {
-                    return Root.Current;
+                    return this.Root.Current;
                 }
                 else
                 {
-                    return CurrentItemProducerTree.Current;
+                    return this.CurrentItemProducerTree.Current;
                 }
             }
         }
@@ -384,7 +385,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <summary>
         /// Gets a value indicating whether the document producer tree has split.
         /// </summary>
-        private bool HasSplit => children.Count != 0;
+        private bool HasSplit => this.children.Count != 0;
 
         /// <summary>
         /// Gets the document producers that need their continuation token return to the user.
@@ -392,24 +393,24 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <returns>The document producers that need their continuation token return to the user.</returns>
         public IEnumerable<ItemProducer> GetActiveItemProducers()
         {
-            if (!HasSplit)
+            if (!this.HasSplit)
             {
-                if (Root.IsActive)
+                if (this.Root.IsActive)
                 {
-                    yield return Root;
+                    yield return this.Root;
                 }
             }
             else
             {
                 // A document producer is "active" if it resumed from a continuation token and has more buffered results.
-                if (Root.IsActive && Root.BufferedItemCount != 0)
+                if (this.Root.IsActive && this.Root.BufferedItemCount != 0)
                 {
                     // has split but need to check if parent is fully drained
-                    yield return Root;
+                    yield return this.Root;
                 }
                 else
                 {
-                    foreach (ItemProducerTree child in children)
+                    foreach (ItemProducerTree child in this.children)
                     {
                         foreach (ItemProducer activeItemProducer in child.GetActiveItemProducers())
                         {
@@ -426,12 +427,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <returns>The enumerator for all the leaf level document producers.</returns>
         public IEnumerator<ItemProducerTree> GetEnumerator()
         {
-            if (children.Count == 0)
+            if (this.children.Count == 0)
             {
                 yield return this;
             }
 
-            foreach (ItemProducerTree child in children)
+            foreach (ItemProducerTree child in this.children)
             {
                 foreach (ItemProducerTree itemProducer in child)
                 {
@@ -446,7 +447,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <returns>The enumerator.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
 
         /// <summary>
@@ -502,17 +503,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
 
         public void UpdatePriority()
         {
-            if (children.Count != 0)
+            if (this.children.Count != 0)
             {
-                children.Enqueue(children.Dequeue());
+                this.children.Enqueue(this.children.Dequeue());
             }
         }
 
         public async Task<(bool movedToNextPage, QueryResponseCore? failureResponse)> TryMoveNextPageAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return await ExecuteWithSplitProofingAsync(
-               function: TryMoveNextPageImplementationAsync,
+            return await this.ExecuteWithSplitProofingAsync(
+               function: this.TryMoveNextPageImplementationAsync,
                functionNeedsBeReexecuted: false,
                cancellationToken: cancellationToken);
         }
@@ -520,8 +521,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         public async Task<(bool movedToNextPage, QueryResponseCore? failureResponse)> TryMoveNextPageIfNotSplitAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return await ExecuteWithSplitProofingAsync(
-                function: TryMoveNextPageIfNotSplitAsyncImplementationAsync,
+            return await this.ExecuteWithSplitProofingAsync(
+                function: this.TryMoveNextPageIfNotSplitAsyncImplementationAsync,
                 functionNeedsBeReexecuted: false,
                 cancellationToken: cancellationToken);
         }
@@ -529,34 +530,34 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         public async Task<(bool bufferedMoreDocuments, QueryResponseCore? failureResponse)> BufferMoreDocumentsAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return await ExecuteWithSplitProofingAsync(
-                function: BufferMoreDocumentsImplementationAsync,
+            return await this.ExecuteWithSplitProofingAsync(
+                function: this.BufferMoreDocumentsImplementationAsync,
                 functionNeedsBeReexecuted: true,
                 cancellationToken: cancellationToken);
         }
 
         public bool TryMoveNextDocumentWithinPage()
         {
-            if (CurrentItemProducerTree == this)
+            if (this.CurrentItemProducerTree == this)
             {
-                return Root.TryMoveNextDocumentWithinPage();
+                return this.Root.TryMoveNextDocumentWithinPage();
             }
             else
             {
-                return CurrentItemProducerTree.TryMoveNextDocumentWithinPage();
+                return this.CurrentItemProducerTree.TryMoveNextDocumentWithinPage();
             }
         }
 
         private async Task<(bool succeeded, QueryResponseCore? failureResponse)> TryMoveNextPageImplementationAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (CurrentItemProducerTree == this)
+            if (this.CurrentItemProducerTree == this)
             {
-                return await Root.TryMoveNextPageAsync(cancellationToken);
+                return await this.Root.TryMoveNextPageAsync(cancellationToken);
             }
             else
             {
-                return await CurrentItemProducerTree.TryMoveNextPageAsync(cancellationToken);
+                return await this.CurrentItemProducerTree.TryMoveNextPageAsync(cancellationToken);
             }
         }
 
@@ -564,31 +565,31 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (HasSplit)
+            if (this.HasSplit)
             {
                 return ItemProducer.IsDoneResponse;
             }
 
-            return await TryMoveNextPageImplementationAsync(cancellationToken);
+            return await this.TryMoveNextPageImplementationAsync(cancellationToken);
         }
 
         private async Task<(bool successfullyMovedNext, QueryResponseCore? failureResponse)> BufferMoreDocumentsImplementationAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (CurrentItemProducerTree == this)
+            if (this.CurrentItemProducerTree == this)
             {
-                if (!HasMoreBackendResults || HasSplit)
+                if (!this.HasMoreBackendResults || this.HasSplit)
                 {
                     // Just no-op, since this method might be called by the scheduler, which doesn't know of the reconfiguration yet.
                     return ItemProducer.IsSuccessResponse;
                 }
 
-                await Root.BufferMoreDocumentsAsync(cancellationToken);
+                await this.Root.BufferMoreDocumentsAsync(cancellationToken);
             }
             else
             {
-                await CurrentItemProducerTree.BufferMoreDocumentsAsync(cancellationToken);
+                await this.CurrentItemProducerTree.BufferMoreDocumentsAsync(cancellationToken);
             }
 
             return ItemProducer.IsSuccessResponse;
@@ -630,7 +631,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
             {
                 try
                 {
-                    await executeWithSplitProofingSemaphore.WaitAsync();
+                    await this.executeWithSplitProofingSemaphore.WaitAsync();
                     (bool successfullyMovedNext, QueryResponseCore? failureResponse) response = await function(cancellationToken);
                     if (response.failureResponse == null || !ItemProducerTree.IsSplitException(response.failureResponse.Value))
                     {
@@ -638,7 +639,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                     }
 
                     // Split just happened
-                    ItemProducerTree splitItemProducerTree = CurrentItemProducerTree;
+                    ItemProducerTree splitItemProducerTree = this.CurrentItemProducerTree;
 
                     if (!functionNeedsBeReexecuted)
                     {
@@ -647,12 +648,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                     }
 
                     // Repair the execution context: Get the replacement document producers and add them to the tree.
-                    IReadOnlyList<Documents.PartitionKeyRange> replacementRanges = await GetReplacementRangesAsync(splitItemProducerTree.PartitionKeyRange, collectionRid);
+                    IReadOnlyList<Documents.PartitionKeyRange> replacementRanges = await this.GetReplacementRangesAsync(splitItemProducerTree.PartitionKeyRange, this.collectionRid);
                     foreach (Documents.PartitionKeyRange replacementRange in replacementRanges)
                     {
-                        ItemProducerTree replacementItemProducerTree = createItemProducerTreeCallback(replacementRange, splitItemProducerTree.Root.BackendContinuationToken);
+                        ItemProducerTree replacementItemProducerTree = this.createItemProducerTreeCallback(replacementRange, splitItemProducerTree.Root.BackendContinuationToken);
 
-                        if (!deferFirstPage)
+                        if (!this.deferFirstPage)
                         {
                             while (true)
                             {
@@ -685,7 +686,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                         }
                     }
 
-                    if (!deferFirstPage)
+                    if (!this.deferFirstPage)
                     {
                         (bool, QueryResponseCore?) fakeResponse;
                         if (splitItemProducerTree.children.Count == 0)
@@ -704,7 +705,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
                 }
                 finally
                 {
-                    executeWithSplitProofingSemaphore.Release();
+                    this.executeWithSplitProofingSemaphore.Release();
                 }
             }
         }
@@ -717,7 +718,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers
         /// <returns>The replacement ranges for the target range that got split.</returns>
         private async Task<IReadOnlyList<Documents.PartitionKeyRange>> GetReplacementRangesAsync(Documents.PartitionKeyRange targetRange, string collectionRid)
         {
-            IReadOnlyList<Documents.PartitionKeyRange> replacementRanges = await queryClient.TryGetOverlappingRangesAsync(
+            IReadOnlyList<Documents.PartitionKeyRange> replacementRanges = await this.queryClient.TryGetOverlappingRangesAsync(
                 collectionRid,
                 targetRange.ToRange(),
                 true);

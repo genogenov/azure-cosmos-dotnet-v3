@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             this.stackTrace = stackTrace;
         }
 
-        public override string StackTrace => stackTrace.ToString();
+        public override string StackTrace => this.stackTrace.ToString();
 
         public override string ToString()
         {
@@ -47,33 +47,33 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             // For now just copying and pasting the 2.x implementation (this can be removed in 3.x)
             string s;
 
-            if ((Message == null) || (Message.Length <= 0))
+            if ((this.Message == null) || (this.Message.Length <= 0))
             {
-                s = GetClassName();
+                s = this.GetClassName();
             }
             else
             {
-                s = GetClassName() + ": " + Message;
+                s = this.GetClassName() + ": " + this.Message;
             }
 
-            if (InnerException != null)
+            if (this.InnerException != null)
             {
                 s = s
                     + " ---> "
-                    + InnerException.ToString()
+                    + this.InnerException.ToString()
                     + Environment.NewLine
                     + "   "
                     + EndOfInnerExceptionString;
 
             }
 
-            s += Environment.NewLine + StackTrace;
+            s += Environment.NewLine + this.StackTrace;
             return s;
         }
 
         private string GetClassName()
         {
-            return GetType().ToString();
+            return this.GetType().ToString();
         }
     }
 }

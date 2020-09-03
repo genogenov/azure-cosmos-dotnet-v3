@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 throw new ArgumentNullException(nameof(lease));
             }
 
-            return leaseUpdater.UpdateLeaseAsync(
+            return this.leaseUpdater.UpdateLeaseAsync(
                 lease,
                 lease.Id,
                 Cosmos.PartitionKey.Null,
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 ContinuationToken = continuationToken,
             };
 
-            bool created = container.TryAdd(
+            bool created = this.container.TryAdd(
                 leaseToken,
                 documentServiceLease);
             if (created)
@@ -74,17 +74,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         public override Task ReleaseAsync(DocumentServiceLease lease)
         {
             if (lease == null)
-            {
                 throw new ArgumentNullException(nameof(lease));
-            }
 
-            if (!container.TryGetValue(lease.CurrentLeaseToken, out DocumentServiceLease refreshedLease))
+            if (!this.container.TryGetValue(lease.CurrentLeaseToken, out DocumentServiceLease refreshedLease))
             {
                 DefaultTrace.TraceInformation("Lease with token {0} failed to release lease. The lease is gone already.", lease.CurrentLeaseToken);
                 throw new LeaseLostException(lease);
             }
 
-            return leaseUpdater.UpdateLeaseAsync(
+            return this.leaseUpdater.UpdateLeaseAsync(
                 refreshedLease,
                 refreshedLease.Id,
                 Cosmos.PartitionKey.Null,
@@ -102,26 +100,24 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 throw new ArgumentNullException(nameof(lease));
             }
 
-            container.TryRemove(lease.CurrentLeaseToken, out DocumentServiceLease removedLease);
+            this.container.TryRemove(lease.CurrentLeaseToken, out DocumentServiceLease removedLease);
             return Task.CompletedTask;
         }
 
         public override Task<DocumentServiceLease> RenewAsync(DocumentServiceLease lease)
         {
             if (lease == null)
-            {
                 throw new ArgumentNullException(nameof(lease));
-            }
 
             // Get fresh lease. The assumption here is that checkpointing is done with higher frequency than lease renewal so almost
             // certainly the lease was updated in between.
-            if (!container.TryGetValue(lease.CurrentLeaseToken, out DocumentServiceLease refreshedLease))
+            if (!this.container.TryGetValue(lease.CurrentLeaseToken, out DocumentServiceLease refreshedLease))
             {
                 DefaultTrace.TraceInformation("Lease with token {0} failed to renew lease. The lease is gone already.", lease.CurrentLeaseToken);
                 throw new LeaseLostException(lease);
             }
 
-            return leaseUpdater.UpdateLeaseAsync(
+            return this.leaseUpdater.UpdateLeaseAsync(
                 refreshedLease,
                 refreshedLease.Id,
                 Cosmos.PartitionKey.Null,
@@ -133,12 +129,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override Task<DocumentServiceLease> UpdatePropertiesAsync(DocumentServiceLease lease)
         {
-            if (lease == null)
-            {
-                throw new ArgumentNullException(nameof(lease));
-            }
+            if (lease == null) throw new ArgumentNullException(nameof(lease));
 
-            return leaseUpdater.UpdateLeaseAsync(
+            return this.leaseUpdater.UpdateLeaseAsync(
                 lease,
                 lease.Id,
                 Cosmos.PartitionKey.Null,

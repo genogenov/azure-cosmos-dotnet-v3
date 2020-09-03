@@ -58,11 +58,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.Parallel
             int autoModeTasksIncrementFactor,
             int numberOfNetworkCallsPerProcessor)
         {
-            ClientInternalMaxItemCount = clientInternalMaxItemCount;
-            DefaultMaximumBufferSize = defaultMaximumBufferSize;
-            ClientInternalPageSize = clientInternalPageSize;
-            AutoModeTasksIncrementFactor = autoModeTasksIncrementFactor;
-            NumberOfNetworkCallsPerProcessor = numberOfNetworkCallsPerProcessor;
+            this.ClientInternalMaxItemCount = clientInternalMaxItemCount;
+            this.DefaultMaximumBufferSize = defaultMaximumBufferSize;
+            this.ClientInternalPageSize = clientInternalPageSize;
+            this.AutoModeTasksIncrementFactor = autoModeTasksIncrementFactor;
+            this.NumberOfNetworkCallsPerProcessor = numberOfNetworkCallsPerProcessor;
         }
 
         /// <summary>

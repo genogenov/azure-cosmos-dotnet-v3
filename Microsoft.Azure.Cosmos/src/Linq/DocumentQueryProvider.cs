@@ -44,13 +44,13 @@ namespace Microsoft.Azure.Cosmos.Linq
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
         {
             return new DocumentQuery<TElement>(
-                client,
-                resourceTypeEnum,
-                resourceType,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.documentsFeedOrDatabaseLink,
                 expression,
-                feedOptions,
-                partitionKey);
+                this.feedOptions,
+                this.partitionKey);
         }
 
         public IQueryable CreateQuery(Expression expression)
@@ -59,13 +59,13 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type documentQueryType = typeof(DocumentQuery<bool>).GetGenericTypeDefinition().MakeGenericType(expressionType);
             return (IQueryable)Activator.CreateInstance(
                 documentQueryType,
-                client,
-                resourceTypeEnum,
-                resourceType,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.documentsFeedOrDatabaseLink,
                 expression,
-                feedOptions,
-                partitionKey);
+                this.feedOptions,
+                this.partitionKey);
         }
 
         //Sync execution of query via direct invoke on IQueryProvider.
@@ -74,14 +74,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type documentQueryType = typeof(DocumentQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(TResult));
             DocumentQuery<TResult> documentQuery = (DocumentQuery<TResult>)Activator.CreateInstance(
                 documentQueryType,
-                client,
-                resourceTypeEnum,
-                resourceType,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.documentsFeedOrDatabaseLink,
                 expression,
-                feedOptions,
-                partitionKey);
-            onExecuteScalarQueryCallback?.Invoke(documentQuery);
+                this.feedOptions,
+                this.partitionKey);
+            this.onExecuteScalarQueryCallback?.Invoke(documentQuery);
 
             return documentQuery.ToList().FirstOrDefault();
         }
@@ -92,14 +92,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type documentQueryType = typeof(DocumentQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(object));
             DocumentQuery<object> documentQuery = (DocumentQuery<object>)Activator.CreateInstance(
                 documentQueryType,
-                client,
-                resourceTypeEnum,
-                resourceType,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.documentsFeedOrDatabaseLink,
                 expression,
-                feedOptions,
-                partitionKey);
-            onExecuteScalarQueryCallback?.Invoke(documentQuery);
+                this.feedOptions,
+                this.partitionKey);
+            this.onExecuteScalarQueryCallback?.Invoke(documentQuery);
 
             return documentQuery.ToList().FirstOrDefault();
         }
@@ -111,14 +111,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type documentQueryType = typeof(DocumentQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(TResult));
             DocumentQuery<TResult> documentQuery = (DocumentQuery<TResult>)Activator.CreateInstance(
                 documentQueryType,
-                client,
-                resourceTypeEnum,
-                resourceType,
-                documentsFeedOrDatabaseLink,
+                this.client,
+                this.resourceTypeEnum,
+                this.resourceType,
+                this.documentsFeedOrDatabaseLink,
                 expression,
-                feedOptions,
-                partitionKey);
-            onExecuteScalarQueryCallback?.Invoke(documentQuery);
+                this.feedOptions,
+                this.partitionKey);
+            this.onExecuteScalarQueryCallback?.Invoke(documentQuery);
 
             List<TResult> result = await documentQuery.ExecuteAllAsync();
             return result.FirstOrDefault();

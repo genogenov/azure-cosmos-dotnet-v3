@@ -34,33 +34,33 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// If the FROM clause uses a parameter name, it will be substituted for the parameter used in 
         /// the lambda expressions for the WHERE and SELECT clauses.
         /// </summary>
-        private readonly ParameterSubstitution substitutions;
+        private ParameterSubstitution substitutions;
         /// <summary>
         /// We are currently visiting these methods.
         /// </summary>
-        private readonly List<MethodCallExpression> methodStack;
+        private List<MethodCallExpression> methodStack;
         /// <summary>
         /// Stack of parameters from lambdas currently in scope.
         /// </summary>
-        private readonly List<ParameterExpression> lambdaParametersStack;
+        private List<ParameterExpression> lambdaParametersStack;
         /// <summary>
         /// Stack of collection-valued inputs.
         /// </summary>
-        private readonly List<Collection> collectionStack;
+        private List<Collection> collectionStack;
         /// <summary>
         /// The stack of subquery binding information.
         /// </summary>
-        private readonly Stack<SubqueryBinding> subqueryBindingStack;
+        private Stack<SubqueryBinding> subqueryBindingStack;
 
         public TranslationContext()
         {
-            InScope = new HashSet<ParameterExpression>();
-            substitutions = new ParameterSubstitution();
-            methodStack = new List<MethodCallExpression>();
-            lambdaParametersStack = new List<ParameterExpression>();
-            collectionStack = new List<Collection>();
-            currentQuery = new QueryUnderConstruction(GetGenFreshParameterFunc());
-            subqueryBindingStack = new Stack<SubqueryBinding>();
+            this.InScope = new HashSet<ParameterExpression>();
+            this.substitutions = new ParameterSubstitution();
+            this.methodStack = new List<MethodCallExpression>();
+            this.lambdaParametersStack = new List<ParameterExpression>();
+            this.collectionStack = new List<Collection>();
+            this.currentQuery = new QueryUnderConstruction(this.GetGenFreshParameterFunc());
+            this.subqueryBindingStack = new Stack<SubqueryBinding>();
         }
 
         public TranslationContext(CosmosSerializationOptions serializationOptions, IDictionary<object, string> parameters = null)
@@ -74,17 +74,17 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public Expression LookupSubstitution(ParameterExpression parameter)
         {
-            return substitutions.Lookup(parameter);
+            return this.substitutions.Lookup(parameter);
         }
 
         public ParameterExpression GenFreshParameter(Type parameterType, string baseParameterName)
         {
-            return Utilities.NewParameter(baseParameterName, parameterType, InScope);
+            return Utilities.NewParameter(baseParameterName, parameterType, this.InScope);
         }
 
         public Func<string, ParameterExpression> GetGenFreshParameterFunc()
         {
-            return (paramName) => GenFreshParameter(typeof(object), paramName);
+            return (paramName) => this.GenFreshParameter(typeof(object), paramName);
         }
 
         /// <summary>
@@ -95,18 +95,18 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <param name="shouldBeOnNewQuery">Indicate if the parameter should be in a new QueryUnderConstruction clause</param>
         public void PushParameter(ParameterExpression parameter, bool shouldBeOnNewQuery)
         {
-            lambdaParametersStack.Add(parameter);
+            this.lambdaParametersStack.Add(parameter);
 
-            Collection last = collectionStack[collectionStack.Count - 1];
+            Collection last = this.collectionStack[this.collectionStack.Count - 1];
             if (last.isOuter)
             {
                 // substitute
-                ParameterExpression inputParam = currentQuery.GetInputParameterInContext(shouldBeOnNewQuery);
-                substitutions.AddSubstitution(parameter, inputParam);
+                ParameterExpression inputParam = this.currentQuery.GetInputParameterInContext(shouldBeOnNewQuery);
+                this.substitutions.AddSubstitution(parameter, inputParam);
             }
             else
             {
-                currentQuery.Bind(parameter, last.inner);
+                this.currentQuery.Bind(parameter, last.inner);
             }
         }
 
@@ -115,8 +115,8 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public void PopParameter()
         {
-            ParameterExpression last = lambdaParametersStack[lambdaParametersStack.Count - 1];
-            lambdaParametersStack.RemoveAt(lambdaParametersStack.Count - 1);
+            ParameterExpression last = this.lambdaParametersStack[this.lambdaParametersStack.Count - 1];
+            this.lambdaParametersStack.RemoveAt(this.lambdaParametersStack.Count - 1);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Cosmos.Linq
                 throw new ArgumentNullException("method");
             }
 
-            methodStack.Add(method);
+            this.methodStack.Add(method);
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public void PopMethod()
         {
-            methodStack.RemoveAt(methodStack.Count - 1);
+            this.methodStack.RemoveAt(this.methodStack.Count - 1);
         }
 
         /// <summary>
@@ -148,8 +148,8 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public MethodCallExpression PeekMethod()
         {
-            return (methodStack.Count > 0) ?
-                methodStack[methodStack.Count - 1] :
+            return (this.methodStack.Count > 0) ?
+                this.methodStack[this.methodStack.Count - 1] :
                 null;
         }
 
@@ -164,12 +164,12 @@ namespace Microsoft.Azure.Cosmos.Linq
                 throw new ArgumentNullException("collection");
             }
 
-            collectionStack.Add(collection);
+            this.collectionStack.Add(collection);
         }
 
         public void PopCollection()
         {
-            collectionStack.RemoveAt(collectionStack.Count - 1);
+            this.collectionStack.RemoveAt(this.collectionStack.Count - 1);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <param name="name">Suggested name for the input parameter.</param>
         public ParameterExpression SetInputParameter(Type type, string name)
         {
-            return currentQuery.fromParameters.SetInputParameter(type, name, InScope);
+            return this.currentQuery.fromParameters.SetInputParameter(type, name, this.InScope);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         public void SetFromParameter(ParameterExpression parameter, SqlCollection collection)
         {
             Binding binding = new Binding(parameter, collection, isInCollection: true);
-            currentQuery.fromParameters.Add(binding);
+            this.currentQuery.fromParameters.Add(binding);
         }
 
         /// <summary>
@@ -199,16 +199,13 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public bool IsInMainBranchSelect()
         {
-            if (methodStack.Count == 0)
-            {
-                return false;
-            }
+            if (this.methodStack.Count == 0) return false;
 
             bool isPositive = true;
-            string bottomMethod = methodStack[0].ToString();
-            for (int i = 1; i < methodStack.Count; ++i)
+            string bottomMethod = this.methodStack[0].ToString();
+            for (int i = 1; i < this.methodStack.Count; ++i)
             {
-                string currentMethod = methodStack[i].ToString();
+                string currentMethod = this.methodStack[i].ToString();
                 if (!bottomMethod.StartsWith(currentMethod, StringComparison.Ordinal))
                 {
                     isPositive = false;
@@ -218,35 +215,35 @@ namespace Microsoft.Azure.Cosmos.Linq
                 bottomMethod = currentMethod;
             }
 
-            string topMethodName = methodStack[methodStack.Count - 1].Method.Name;
+            string topMethodName = this.methodStack[this.methodStack.Count - 1].Method.Name;
             return isPositive && (topMethodName.Equals(LinqMethods.Select) || topMethodName.Equals(LinqMethods.SelectMany));
         }
 
         public void PushSubqueryBinding(bool shouldBeOnNewQuery)
         {
-            subqueryBindingStack.Push(new SubqueryBinding(shouldBeOnNewQuery));
+            this.subqueryBindingStack.Push(new SubqueryBinding(shouldBeOnNewQuery));
         }
 
         public SubqueryBinding PopSubqueryBinding()
         {
-            if (subqueryBindingStack.Count == 0)
+            if (this.subqueryBindingStack.Count == 0)
             {
                 throw new InvalidOperationException("Unexpected empty subquery binding stack.");
             }
 
-            return subqueryBindingStack.Pop();
+            return this.subqueryBindingStack.Pop();
         }
 
         public SubqueryBinding CurrentSubqueryBinding
         {
             get
             {
-                if (subqueryBindingStack.Count == 0)
+                if (this.subqueryBindingStack.Count == 0)
                 {
                     throw new InvalidOperationException("Unexpected empty subquery binding stack.");
                 }
 
-                return subqueryBindingStack.Peek();
+                return this.subqueryBindingStack.Peek();
             }
         }
 
@@ -256,13 +253,13 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>The current QueryUnderConstruction after the package query call if necessary</returns>
         public QueryUnderConstruction PackageCurrentQueryIfNeccessary()
         {
-            if (CurrentSubqueryBinding.ShouldBeOnNewQuery)
+            if (this.CurrentSubqueryBinding.ShouldBeOnNewQuery)
             {
-                currentQuery = currentQuery.PackageQuery(InScope);
-                CurrentSubqueryBinding.ShouldBeOnNewQuery = false;
+                this.currentQuery = this.currentQuery.PackageQuery(this.InScope);
+                this.CurrentSubqueryBinding.ShouldBeOnNewQuery = false;
             }
 
-            return currentQuery;
+            return this.currentQuery;
         }
 
         public class SubqueryBinding
@@ -280,8 +277,8 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             public SubqueryBinding(bool shouldBeOnNewQuery)
             {
-                ShouldBeOnNewQuery = shouldBeOnNewQuery;
-                NewBindings = new List<Binding>();
+                this.ShouldBeOnNewQuery = shouldBeOnNewQuery;
+                this.NewBindings = new List<Binding>();
             }
 
             /// <summary>
@@ -291,8 +288,8 @@ namespace Microsoft.Azure.Cosmos.Linq
             /// <remarks>The binding list is reset after this operation.</remarks>
             public List<Binding> TakeBindings()
             {
-                List<Binding> bindings = NewBindings;
-                NewBindings = new List<Binding>();
+                List<Binding> bindings = this.NewBindings;
+                this.NewBindings = new List<Binding>();
                 return bindings;
             }
         }
@@ -311,11 +308,11 @@ namespace Microsoft.Azure.Cosmos.Linq
         // This class is used to rename parameters, so that the Linq program above generates 
         // the correct SQL program above (modulo alpha-renaming).
 
-        private readonly Dictionary<ParameterExpression, Expression> substitutionTable;
+        private Dictionary<ParameterExpression, Expression> substitutionTable;
 
         public ParameterSubstitution()
         {
-            substitutionTable = new Dictionary<ParameterExpression, Expression>();
+            this.substitutionTable = new Dictionary<ParameterExpression, Expression>();
         }
 
         public void AddSubstitution(ParameterExpression parameter, Expression with)
@@ -325,14 +322,14 @@ namespace Microsoft.Azure.Cosmos.Linq
                 throw new InvalidOperationException("Substitution with self attempted");
             }
 
-            substitutionTable.Add(parameter, with);
+            this.substitutionTable.Add(parameter, with);
         }
 
         public Expression Lookup(ParameterExpression parameter)
         {
-            if (substitutionTable.ContainsKey(parameter))
+            if (this.substitutionTable.ContainsKey(parameter))
             {
-                return substitutionTable[parameter];
+                return this.substitutionTable[parameter];
             }
 
             return null;
@@ -377,10 +374,10 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             public Binding(ParameterExpression parameter, SqlCollection collection, bool isInCollection, bool isInputParameter = true)
             {
-                ParameterDefinition = collection;
-                Parameter = parameter;
-                IsInCollection = isInCollection;
-                IsInputParameter = isInputParameter;
+                this.ParameterDefinition = collection;
+                this.Parameter = parameter;
+                this.IsInCollection = isInCollection;
+                this.IsInputParameter = isInputParameter;
 
                 if (isInCollection && collection == null)
                 {
@@ -393,14 +390,14 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// The list of parameter definitions.  This will generate a FROM clause of the shape:
         /// FROM ParameterDefinitions[0] JOIN ParameterDefinitions[1] ... ParameterDefinitions[n]
         /// </summary>
-        private readonly List<Binding> ParameterDefinitions;
+        private List<Binding> ParameterDefinitions;
 
         /// <summary>
         /// Create empty parameter bindings.
         /// </summary>
         public FromParameterBindings()
         {
-            ParameterDefinitions = new List<Binding>();
+            this.ParameterDefinitions = new List<Binding>();
         }
 
         /// <summary>
@@ -413,7 +410,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// If the name is already set it will return the existing name.</returns>
         public ParameterExpression SetInputParameter(Type parameterType, string parameterName, HashSet<ParameterExpression> inScope)
         {
-            if (ParameterDefinitions.Count > 0)
+            if (this.ParameterDefinitions.Count > 0)
             {
                 throw new InvalidOperationException("First parameter already set");
             }
@@ -421,18 +418,18 @@ namespace Microsoft.Azure.Cosmos.Linq
             ParameterExpression newParam = Expression.Parameter(parameterType, parameterName);
             inScope.Add(newParam);
             Binding def = new Binding(newParam, collection: null, isInCollection: false);
-            ParameterDefinitions.Add(def);
+            this.ParameterDefinitions.Add(def);
             return newParam;
         }
 
         public void Add(Binding binding)
         {
-            ParameterDefinitions.Add(binding);
+            this.ParameterDefinitions.Add(binding);
         }
 
         public IEnumerable<Binding> GetBindings()
         {
-            return ParameterDefinitions;
+            return this.ParameterDefinitions;
         }
 
         /// <summary>
@@ -441,14 +438,11 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>The input parameter.</returns>
         public ParameterExpression GetInputParameter()
         {
-            int i = ParameterDefinitions.Count - 1;
-            while (i > 0 && !ParameterDefinitions[i].IsInputParameter)
-            {
-                i--;
-            }
+            int i = this.ParameterDefinitions.Count - 1;
+            while (i > 0 && !this.ParameterDefinitions[i].IsInputParameter) i--;
 
             // always the first one to be set.
-            return i >= 0 ? ParameterDefinitions[i].Parameter : null;
+            return i >= 0 ? this.ParameterDefinitions[i].Parameter : null;
         }
     }
 
@@ -466,8 +460,8 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// </summary>
         public Collection(string name)
         {
-            isOuter = true;
-            Name = name; // currently the name is not used for anything
+            this.isOuter = true;
+            this.Name = name; // currently the name is not used for anything
         }
 
         public Collection(SqlCollection collection)
@@ -477,8 +471,8 @@ namespace Microsoft.Azure.Cosmos.Linq
                 throw new ArgumentNullException("collection");
             }
 
-            isOuter = false;
-            inner = collection;
+            this.isOuter = false;
+            this.inner = collection;
         }
     }
 }

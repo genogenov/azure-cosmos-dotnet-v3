@@ -6,9 +6,12 @@ namespace Microsoft.Azure.Cosmos
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Net;
     using Microsoft.Azure.Cosmos.CosmosElements;
+    using Microsoft.Azure.Cosmos.Query;
     using Microsoft.Azure.Cosmos.Serializer;
+    using Microsoft.Azure.Documents;
 
     /// <summary>
     /// Represents the template class used by feed methods (enumeration operations) for the Azure Cosmos DB service.
@@ -49,11 +52,11 @@ namespace Microsoft.Azure.Cosmos
                 headers: responseHeaders,
                 diagnostics: diagnostics)
         {
-            CosmosElements = result;
-            Count = count;
-            ResponseLengthBytes = responseLengthBytes;
+            this.CosmosElements = result;
+            this.Count = count;
+            this.ResponseLengthBytes = responseLengthBytes;
             this.memoryStream = memoryStream;
-            CosmosSerializationOptions = serializationOptions;
+            this.CosmosSerializationOptions = serializationOptions;
         }
 
         public int Count { get; }
@@ -62,13 +65,13 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                return memoryStream?.Value;
+                return this.memoryStream?.Value;
             }
         }
 
         internal virtual IReadOnlyList<CosmosElement> CosmosElements { get; }
 
-        internal virtual CosmosQueryResponseMessageHeaders QueryHeaders => (CosmosQueryResponseMessageHeaders)Headers;
+        internal virtual CosmosQueryResponseMessageHeaders QueryHeaders => (CosmosQueryResponseMessageHeaders)this.Headers;
 
         /// <summary>
         /// Gets the response length in bytes
@@ -82,7 +85,7 @@ namespace Microsoft.Azure.Cosmos
 
         internal bool GetHasMoreResults()
         {
-            return !string.IsNullOrEmpty(Headers.ContinuationToken);
+            return !string.IsNullOrEmpty(this.Headers.ContinuationToken);
         }
 
         internal static QueryResponse CreateSuccess(
@@ -175,22 +178,22 @@ namespace Microsoft.Azure.Cosmos
             CosmosSerializerCore serializerCore,
             CosmosSerializationFormatOptions serializationOptions)
         {
-            QueryHeaders = responseMessageHeaders;
-            Diagnostics = diagnostics;
+            this.QueryHeaders = responseMessageHeaders;
+            this.Diagnostics = diagnostics;
             this.serializerCore = serializerCore;
             this.serializationOptions = serializationOptions;
-            StatusCode = httpStatusCode;
-            Count = cosmosElements.Count;
-            Resource = CosmosElementSerializer.GetResources<T>(
+            this.StatusCode = httpStatusCode;
+            this.Count = cosmosElements.Count;
+            this.Resource = CosmosElementSerializer.GetResources<T>(
                 cosmosArray: cosmosElements,
                 serializerCore: serializerCore);
         }
 
-        public override string ContinuationToken => Headers.ContinuationToken;
+        public override string ContinuationToken => this.Headers.ContinuationToken;
 
-        public override double RequestCharge => Headers.RequestCharge;
+        public override double RequestCharge => this.Headers.RequestCharge;
 
-        public override Headers Headers => QueryHeaders;
+        public override Headers Headers => this.QueryHeaders;
 
         public override HttpStatusCode StatusCode { get; }
 
@@ -202,7 +205,7 @@ namespace Microsoft.Azure.Cosmos
 
         public override IEnumerator<T> GetEnumerator()
         {
-            return Resource.GetEnumerator();
+            return this.Resource.GetEnumerator();
         }
 
         public override IEnumerable<T> Resource { get; }

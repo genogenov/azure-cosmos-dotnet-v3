@@ -77,8 +77,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// </remarks>
         public ConsistencyLevel? ConsistencyLevel
         {
-            get => BaseConsistencyLevel;
-            set => BaseConsistencyLevel = value;
+            get => this.BaseConsistencyLevel;
+            set => this.BaseConsistencyLevel = value;
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace Microsoft.Azure.Cosmos.Scripts
         /// <param name="request">The <see cref="RequestMessage"/></param>
         internal override void PopulateRequestOptions(RequestMessage request)
         {
-            if (EnableScriptLogging)
+            if (this.EnableScriptLogging)
             {
                 request.Headers.Add(Documents.HttpConstants.HttpHeaders.EnableLogging, bool.TrueString);
             }
 
-            RequestOptions.SetSessionToken(request, SessionToken);
+            RequestOptions.SetSessionToken(request, this.SessionToken);
 
             base.PopulateRequestOptions(request);
         }

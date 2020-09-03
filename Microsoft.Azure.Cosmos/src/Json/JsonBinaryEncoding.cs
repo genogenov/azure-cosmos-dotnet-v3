@@ -192,7 +192,7 @@ namespace Microsoft.Azure.Cosmos.Json
         public static bool TryGetValueLength(ReadOnlySpan<byte> buffer, out int length)
         {
             // Too lazy to convert this right now.
-            length = JsonBinaryEncoding.GetValueLength(buffer);
+            length = (int)JsonBinaryEncoding.GetValueLength(buffer);
             return true;
         }
 

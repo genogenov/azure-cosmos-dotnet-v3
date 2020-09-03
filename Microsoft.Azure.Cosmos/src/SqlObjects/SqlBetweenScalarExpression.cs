@@ -20,10 +20,10 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression endInclusive,
             bool not)
         {
-            Expression = expression;
-            StartInclusive = startInclusive;
-            EndInclusive = endInclusive;
-            Not = not;
+            this.Expression = expression;
+            this.StartInclusive = startInclusive;
+            this.EndInclusive = endInclusive;
+            this.Not = not;
         }
 
         public SqlScalarExpression Expression { get; }

@@ -33,9 +33,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         {
             get
             {
-                if (!cosmosObject.TryGetValue(ItemName2, out CosmosElement cosmosElement))
+                if (!this.cosmosObject.TryGetValue(ItemName2, out CosmosElement cosmosElement))
                 {
-                    if (!cosmosObject.TryGetValue(ItemName1, out cosmosElement))
+                    if (!this.cosmosObject.TryGetValue(ItemName1, out cosmosElement))
                     {
                         // Undefined
                         cosmosElement = null;

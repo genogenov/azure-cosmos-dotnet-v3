@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </param>
         protected Crs(CrsType type)
         {
-            Type = type;
+            this.Type = type;
         }
 
         /// <summary>

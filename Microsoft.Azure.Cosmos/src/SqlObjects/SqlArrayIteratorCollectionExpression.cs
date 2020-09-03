@@ -20,8 +20,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
            SqlIdentifier identifier,
            SqlCollection collection)
         {
-            Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
-            Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            this.Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            this.Collection = collection ?? throw new ArgumentNullException(nameof(collection));
         }
 
         public SqlIdentifier Identifier { get; }

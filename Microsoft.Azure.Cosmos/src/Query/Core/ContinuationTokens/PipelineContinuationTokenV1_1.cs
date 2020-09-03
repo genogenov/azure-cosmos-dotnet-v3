@@ -24,8 +24,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
             CosmosElement sourceContinuationToken)
             : base(PipelineContinuationTokenV1_1.VersionNumber)
         {
-            QueryPlan = queryPlan;
-            SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
+            this.QueryPlan = queryPlan;
+            this.SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
         }
 
         public CosmosElement SourceContinuationToken { get; }
@@ -34,12 +34,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
 
         public override string ToString()
         {
-            return ToString(int.MaxValue);
+            return this.ToString(int.MaxValue);
         }
 
         public string ToString(int lengthLimitInBytes)
         {
-            string queryPlanString = QueryPlan?.ToString();
+            string queryPlanString = this.QueryPlan?.ToString();
             bool shouldSerializeQueryPlan;
             if (queryPlanString == null)
             {
@@ -47,22 +47,22 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
             }
             else
             {
-                shouldSerializeQueryPlan = (queryPlanString.Length + SourceContinuationToken.ToString().Length) < lengthLimitInBytes;
+                shouldSerializeQueryPlan = (queryPlanString.Length + this.SourceContinuationToken.ToString().Length) < lengthLimitInBytes;
             }
 
             return CosmosObject.Create(new Dictionary<string, CosmosElement>()
             {
                 {
                     PipelineContinuationToken.VersionPropertyName,
-                    CosmosString.Create(Version.ToString())
+                    CosmosString.Create(this.Version.ToString())
                 },
                 {
                     PipelineContinuationTokenV1_1.QueryPlanPropertyName,
-                    shouldSerializeQueryPlan ? CosmosString.Create(queryPlanString) : (CosmosElement)CosmosNull.Create()
+                    shouldSerializeQueryPlan ? (CosmosElement)CosmosString.Create(queryPlanString) : (CosmosElement)CosmosNull.Create()
                 },
                 {
                     PipelineContinuationTokenV1_1.SourceContinuationTokenPropertyName,
-                    SourceContinuationToken
+                    this.SourceContinuationToken
                 },
             }).ToString();
         }

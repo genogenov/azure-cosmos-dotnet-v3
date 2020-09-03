@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 this.jsonNavigator = jsonNavigator;
                 this.jsonNavigatorNode = jsonNavigatorNode;
 
-                lazyCosmosElementArray = new Lazy<Lazy<CosmosElement>[]>(() =>
+                this.lazyCosmosElementArray = new Lazy<Lazy<CosmosElement>[]>(() =>
                 {
                     Lazy<CosmosElement>[] lazyArray = new Lazy<CosmosElement>[this.jsonNavigator.GetArrayItemCount(this.jsonNavigatorNode)];
                     int index = 0;
@@ -53,15 +53,15 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 });
             }
 
-            public override int Count => lazyCosmosElementArray.Value.Length;
+            public override int Count => this.lazyCosmosElementArray.Value.Length;
 
-            public override CosmosElement this[int index] => lazyCosmosElementArray.Value[index].Value;
+            public override CosmosElement this[int index] => this.lazyCosmosElementArray.Value[index].Value;
 
-            public override IEnumerator<CosmosElement> GetEnumerator() => lazyCosmosElementArray.Value.Select(lazyItem => lazyItem.Value).GetEnumerator();
+            public override IEnumerator<CosmosElement> GetEnumerator() => this.lazyCosmosElementArray.Value.Select(lazyItem => lazyItem.Value).GetEnumerator();
 
-            public override void WriteTo(IJsonWriter jsonWriter) => jsonNavigator.WriteTo(jsonNavigatorNode, jsonWriter);
+            public override void WriteTo(IJsonWriter jsonWriter) => this.jsonNavigator.WriteTo(this.jsonNavigatorNode, jsonWriter);
 
-            public override IJsonReader CreateReader() => jsonNavigator.CreateReader(jsonNavigatorNode);
+            public override IJsonReader CreateReader() => this.jsonNavigator.CreateReader(this.jsonNavigatorNode);
         }
     }
 #if INTERNAL

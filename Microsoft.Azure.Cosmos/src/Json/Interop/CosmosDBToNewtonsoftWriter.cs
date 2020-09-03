@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <param name="jsonSerializationFormat">The SerializationFormat to use.</param>
         public CosmosDBToNewtonsoftWriter(JsonSerializationFormat jsonSerializationFormat)
         {
-            jsonWriter = JsonWriter.Create(jsonSerializationFormat);
+            this.jsonWriter = JsonWriter.Create(jsonSerializationFormat);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// </summary>
         public override void Flush()
         {
-            jsonWriter.GetResult();
+            this.jsonWriter.GetResult();
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteEndArray()
         {
             base.WriteEndArray();
-            jsonWriter.WriteArrayEnd();
+            this.jsonWriter.WriteArrayEnd();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteEndObject()
         {
             base.WriteEndObject();
-            jsonWriter.WriteObjectEnd();
+            this.jsonWriter.WriteObjectEnd();
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteNull()
         {
             base.WriteNull();
-            jsonWriter.WriteNullValue();
+            this.jsonWriter.WriteNullValue();
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <param name="name">The name of the property.</param>
         public override void WritePropertyName(string name)
         {
-            WritePropertyName(name, false);
+            this.WritePropertyName(name, false);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WritePropertyName(string name, bool escape)
         {
             base.WritePropertyName(name);
-            jsonWriter.WriteFieldName(name);
+            this.jsonWriter.WriteFieldName(name);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteRaw(string json)
         {
             IJsonReader jsonReader = JsonReader.Create(Encoding.UTF8.GetBytes(json));
-            jsonWriter.WriteAll(jsonReader);
+            this.jsonWriter.WriteAll(jsonReader);
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteRawValue(string json)
         {
             IJsonReader jsonReader = JsonReader.Create(Encoding.UTF8.GetBytes(json));
-            jsonWriter.WriteAll(jsonReader);
+            this.jsonWriter.WriteAll(jsonReader);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteStartArray()
         {
             base.WriteStartArray();
-            jsonWriter.WriteArrayStart();
+            this.jsonWriter.WriteArrayStart();
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         public override void WriteStartObject()
         {
             base.WriteStartObject();
-            jsonWriter.WriteObjectStart();
+            this.jsonWriter.WriteObjectStart();
         }
 
         /// <summary>
@@ -161,158 +161,158 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         #region WriteValue methods
         /// <summary>
-        /// Writes a <see cref="object"/> value.
+        /// Writes a <see cref="Object"/> value.
         /// An error will raised if the value cannot be written as a single JSON token.
         /// </summary>
-        /// <param name="value">The <see cref="object"/> value to write.</param>
+        /// <param name="value">The <see cref="Object"/> value to write.</param>
         public override void WriteValue(object value)
         {
             if (value is string)
             {
-                WriteValue((string)value);
+                this.WriteValue((string)value);
             }
             else
             {
-                WriteValue((double)value);
+                this.WriteValue((double)value);
             }
         }
 
         /// <summary>
-        /// Writes a <see cref="string"/> value.
+        /// Writes a <see cref="String"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="string"/> value to write.</param>
+        /// <param name="value">The <see cref="String"/> value to write.</param>
         public override void WriteValue(string value)
         {
             base.WriteValue(value);
-            jsonWriter.WriteStringValue(value);
+            this.jsonWriter.WriteStringValue(value);
         }
 
         /// <summary>
-        /// Writes a <see cref="int"/> value.
+        /// Writes a <see cref="Int32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="int"/> value to write.</param>
+        /// <param name="value">The <see cref="Int32"/> value to write.</param>
         public override void WriteValue(int value)
         {
-            WriteValue((long)value);
+            this.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="uint"/> value.
+        /// Writes a <see cref="UInt32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="uint"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt32"/> value to write.</param>
         public override void WriteValue(uint value)
         {
-            WriteValue((long)value);
+            this.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="long"/> value.
+        /// Writes a <see cref="Int64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="long"/> value to write.</param>
+        /// <param name="value">The <see cref="Int64"/> value to write.</param>
         public override void WriteValue(long value)
         {
             base.WriteValue(value);
-            jsonWriter.WriteNumber64Value(value);
+            this.jsonWriter.WriteNumber64Value(value);
         }
 
         /// <summary>
-        /// Writes a <see cref="ulong"/> value.
+        /// Writes a <see cref="UInt64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ulong"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt64"/> value to write.</param>
         public override void WriteValue(ulong value)
         {
             if (value <= long.MaxValue)
             {
-                WriteValue((long)value);
+                this.WriteValue((long)value);
             }
             else
             {
-                WriteValue((double)value);
+                this.WriteValue((double)value);
             }
         }
 
         /// <summary>
-        /// Writes a <see cref="float"/> value.
+        /// Writes a <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Single"/> value to write.</param>
         public override void WriteValue(float value)
         {
-            WriteValue((double)value);
+            this.WriteValue((double)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="double"/> value.
+        /// Writes a <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Double"/> value to write.</param>
         public override void WriteValue(double value)
         {
             base.WriteValue(value);
-            jsonWriter.WriteNumber64Value(value);
+            this.jsonWriter.WriteNumber64Value(value);
         }
 
         /// <summary>
-        /// Writes a <see cref="bool"/> value.
+        /// Writes a <see cref="Boolean"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="bool"/> value to write.</param>
+        /// <param name="value">The <see cref="Boolean"/> value to write.</param>
         public override void WriteValue(bool value)
         {
             base.WriteValue(value);
-            jsonWriter.WriteBoolValue(value);
+            this.jsonWriter.WriteBoolValue(value);
         }
 
         /// <summary>
-        /// Writes a <see cref="short"/> value.
+        /// Writes a <see cref="Int16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="short"/> value to write.</param>
+        /// <param name="value">The <see cref="Int16"/> value to write.</param>
         public override void WriteValue(short value)
         {
             base.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="ushort"/> value.
+        /// Writes a <see cref="UInt16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ushort"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt16"/> value to write.</param>
         public override void WriteValue(ushort value)
         {
-            WriteValue((long)value);
+            this.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="char"/> value.
+        /// Writes a <see cref="Char"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="char"/> value to write.</param>
+        /// <param name="value">The <see cref="Char"/> value to write.</param>
         public override void WriteValue(char value)
         {
             base.WriteValue(value);
-            jsonWriter.WriteStringValue(value.ToString());
+            this.jsonWriter.WriteStringValue(value.ToString());
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/> value.
+        /// Writes a <see cref="Byte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/> value to write.</param>
+        /// <param name="value">The <see cref="Byte"/> value to write.</param>
         public override void WriteValue(byte value)
         {
-            WriteValue((long)value);
+            this.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="sbyte"/> value.
+        /// Writes a <see cref="SByte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="sbyte"/> value to write.</param>
+        /// <param name="value">The <see cref="SByte"/> value to write.</param>
         public override void WriteValue(sbyte value)
         {
-            WriteValue((long)value);
+            this.WriteValue((long)value);
         }
 
         /// <summary>
-        /// Writes a <see cref="decimal"/> value.
+        /// Writes a <see cref="Decimal"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="decimal"/> value to write.</param>
+        /// <param name="value">The <see cref="Decimal"/> value to write.</param>
         public override void WriteValue(decimal value)
         {
-            WriteValue((double)value);
+            this.WriteValue((double)value);
         }
 
         /// <summary>
@@ -321,13 +321,13 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <param name="value">The <see cref="DateTime"/> value to write.</param>
         public override void WriteValue(DateTime value)
         {
-            WriteValue(value.ToString());
+            this.WriteValue(value.ToString());
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/>[] value.
+        /// Writes a <see cref="Byte"/>[] value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/>[] value to write.</param>
+        /// <param name="value">The <see cref="Byte"/>[] value to write.</param>
         public override void WriteValue(byte[] value)
         {
             throw new NotSupportedException("Can not write byte arrays");
@@ -339,7 +339,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <param name="value">The <see cref="Guid"/> value to write.</param>
         public override void WriteValue(Guid value)
         {
-            WriteValue(value.ToString());
+            this.WriteValue(value.ToString());
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <param name="value">The <see cref="TimeSpan"/> value to write.</param>
         public override void WriteValue(TimeSpan value)
         {
-            WriteValue(value.ToString());
+            this.WriteValue(value.ToString());
         }
 
         /// <summary>
@@ -359,11 +359,11 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         {
             if (value == null)
             {
-                WriteNull();
+                this.WriteNull();
             }
             else
             {
-                WriteValue(value.ToString());
+                this.WriteValue(value.ToString());
             }
         }
         #endregion
@@ -374,7 +374,7 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
         /// <returns>The result of all the tokens written so far.</returns>
         public ReadOnlyMemory<byte> GetResult()
         {
-            return jsonWriter.GetResult();
+            return this.jsonWriter.GetResult();
         }
     }
 }

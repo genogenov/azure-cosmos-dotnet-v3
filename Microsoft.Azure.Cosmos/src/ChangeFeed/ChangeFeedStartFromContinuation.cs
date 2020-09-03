@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                 throw new ArgumentOutOfRangeException($"{nameof(continuation)} must not be null, empty, or whitespace.");
             }
 
-            Continuation = continuation;
+            this.Continuation = continuation;
         }
 
         /// <summary>

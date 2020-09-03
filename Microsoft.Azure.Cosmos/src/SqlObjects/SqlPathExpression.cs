@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         protected SqlPathExpression(SqlPathExpression parentPath)
         {
-            ParentPath = parentPath;
+            this.ParentPath = parentPath;
         }
 
         public SqlPathExpression ParentPath { get; }

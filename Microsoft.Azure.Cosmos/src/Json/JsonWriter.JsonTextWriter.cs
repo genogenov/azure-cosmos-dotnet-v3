@@ -7,8 +7,11 @@ namespace Microsoft.Azure.Cosmos.Json
     using System.Buffers;
     using System.Buffers.Text;
     using System.Globalization;
+    using System.Linq;
     using System.Numerics;
     using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using System.Text;
     using Microsoft.Azure.Cosmos.Core.Utf8;
 
     /// <summary>
@@ -96,8 +99,8 @@ namespace Microsoft.Azure.Cosmos.Json
             /// </summary>
             public JsonTextWriter(int initialCapacity = 256)
             {
-                firstValue = true;
-                jsonTextMemoryWriter = new JsonTextMemoryWriter(initialCapacity);
+                this.firstValue = true;
+                this.jsonTextMemoryWriter = new JsonTextMemoryWriter(initialCapacity);
             }
 
             /// <inheritdoc />
@@ -114,77 +117,77 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 get
                 {
-                    return jsonTextMemoryWriter.Position;
+                    return this.jsonTextMemoryWriter.Position;
                 }
             }
 
             /// <inheritdoc />
             public override void WriteObjectStart()
             {
-                JsonObjectState.RegisterToken(JsonTokenType.BeginObject);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(ObjectStartToken);
-                firstValue = true;
+                this.JsonObjectState.RegisterToken(JsonTokenType.BeginObject);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(ObjectStartToken);
+                this.firstValue = true;
             }
 
             /// <inheritdoc />
             public override void WriteObjectEnd()
             {
-                JsonObjectState.RegisterToken(JsonTokenType.EndObject);
-                jsonTextMemoryWriter.Write(ObjectEndToken);
+                this.JsonObjectState.RegisterToken(JsonTokenType.EndObject);
+                this.jsonTextMemoryWriter.Write(ObjectEndToken);
 
                 // We reset firstValue here because we'll need a separator before the next value
-                firstValue = false;
+                this.firstValue = false;
             }
 
             /// <inheritdoc />
             public override void WriteArrayStart()
             {
-                JsonObjectState.RegisterToken(JsonTokenType.BeginArray);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(ArrayStartToken);
-                firstValue = true;
+                this.JsonObjectState.RegisterToken(JsonTokenType.BeginArray);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(ArrayStartToken);
+                this.firstValue = true;
             }
 
             /// <inheritdoc />
             public override void WriteArrayEnd()
             {
-                JsonObjectState.RegisterToken(JsonTokenType.EndArray);
-                jsonTextMemoryWriter.Write(ArrayEndToken);
+                this.JsonObjectState.RegisterToken(JsonTokenType.EndArray);
+                this.jsonTextMemoryWriter.Write(ArrayEndToken);
 
                 // We reset firstValue here because we'll need a separator before the next value
-                firstValue = false;
+                this.firstValue = false;
             }
 
             /// <inheritdoc />
             public override void WriteFieldName(Utf8Span fieldName)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.FieldName);
-                PrefixMemberSeparator();
+                this.JsonObjectState.RegisterToken(JsonTokenType.FieldName);
+                this.PrefixMemberSeparator();
 
                 // no separator after property name
-                firstValue = true;
+                this.firstValue = true;
 
-                jsonTextMemoryWriter.Write(PropertyStartToken);
+                this.jsonTextMemoryWriter.Write(PropertyStartToken);
 
-                WriteEscapedString(fieldName);
+                this.WriteEscapedString(fieldName);
 
-                jsonTextMemoryWriter.Write(PropertyEndToken);
+                this.jsonTextMemoryWriter.Write(PropertyEndToken);
 
-                jsonTextMemoryWriter.Write(ValueSeperatorToken);
+                this.jsonTextMemoryWriter.Write(ValueSeperatorToken);
             }
 
             /// <inheritdoc />
             public override void WriteStringValue(Utf8Span value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.String);
-                PrefixMemberSeparator();
+                this.JsonObjectState.RegisterToken(JsonTokenType.String);
+                this.PrefixMemberSeparator();
 
-                jsonTextMemoryWriter.Write(StringStartToken);
+                this.jsonTextMemoryWriter.Write(StringStartToken);
 
-                WriteEscapedString(value);
+                this.WriteEscapedString(value);
 
-                jsonTextMemoryWriter.Write(StringEndToken);
+                this.jsonTextMemoryWriter.Write(StringEndToken);
             }
 
             /// <inheritdoc />
@@ -192,127 +195,127 @@ namespace Microsoft.Azure.Cosmos.Json
             {
                 if (value.IsInteger)
                 {
-                    WriteIntegerInternal(Number64.ToLong(value));
+                    this.WriteIntegerInternal(Number64.ToLong(value));
                 }
                 else
                 {
-                    WriteDoubleInternal(Number64.ToDouble(value));
+                    this.WriteDoubleInternal(Number64.ToDouble(value));
                 }
             }
 
             /// <inheritdoc />
             public override void WriteBoolValue(bool value)
             {
-                JsonObjectState.RegisterToken(value ? JsonTokenType.True : JsonTokenType.False);
-                PrefixMemberSeparator();
+                this.JsonObjectState.RegisterToken(value ? JsonTokenType.True : JsonTokenType.False);
+                this.PrefixMemberSeparator();
 
                 if (value)
                 {
-                    jsonTextMemoryWriter.Write(TrueString.Span);
+                    this.jsonTextMemoryWriter.Write(TrueString.Span);
                 }
                 else
                 {
-                    jsonTextMemoryWriter.Write(FalseString.Span);
+                    this.jsonTextMemoryWriter.Write(FalseString.Span);
                 }
             }
 
             /// <inheritdoc />
             public override void WriteNullValue()
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Null);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(NullString.Span);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Null);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(NullString.Span);
             }
 
             /// <inheritdoc />
             public override void WriteInt8Value(sbyte value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Int8);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(Int8TokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Int8);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(Int8TokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteInt16Value(short value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Int16);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(Int16TokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Int16);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(Int16TokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteInt32Value(int value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Int32);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(Int32TokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Int32);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(Int32TokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteInt64Value(long value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Int64);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(Int32TokenPrefix);
-                jsonTextMemoryWriter.Write(Int32TokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Int64);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(Int32TokenPrefix);
+                this.jsonTextMemoryWriter.Write(Int32TokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteFloat32Value(float value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Float32);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(FloatTokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Float32);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(FloatTokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteFloat64Value(double value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Float64);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(DoubleTokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Float64);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(DoubleTokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteUInt32Value(uint value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.UInt32);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(UnsignedTokenPrefix);
-                jsonTextMemoryWriter.Write(Int32TokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.UInt32);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(UnsignedTokenPrefix);
+                this.jsonTextMemoryWriter.Write(Int32TokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteGuidValue(Guid value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Guid);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(GuidTokenPrefix);
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Guid);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(GuidTokenPrefix);
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             /// <inheritdoc />
             public override void WriteBinaryValue(ReadOnlySpan<byte> value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Binary);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(BinaryTokenPrefix);
-                jsonTextMemoryWriter.WriteBinaryAsBase64(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Binary);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(BinaryTokenPrefix);
+                this.jsonTextMemoryWriter.WriteBinaryAsBase64(value);
             }
 
             /// <inheritdoc />
             public override ReadOnlyMemory<byte> GetResult()
             {
-                return jsonTextMemoryWriter.BufferAsMemory.Slice(
+                return this.jsonTextMemoryWriter.BufferAsMemory.Slice(
                     0,
-                    jsonTextMemoryWriter.Position);
+                    this.jsonTextMemoryWriter.Position);
             }
 
             /// <inheritdoc />
@@ -348,65 +351,65 @@ namespace Microsoft.Azure.Cosmos.Json
                     throw new ArgumentException($"Expected non empty {nameof(rawJsonToken)}.");
                 }
 
-                JsonObjectState.RegisterToken(jsonTokenType);
-                PrefixMemberSeparator();
+                this.JsonObjectState.RegisterToken(jsonTokenType);
+                this.PrefixMemberSeparator();
 
                 // No separator after property name
                 if (jsonTokenType == JsonTokenType.FieldName)
                 {
-                    firstValue = true;
-                    jsonTextMemoryWriter.Write(rawJsonToken);
-                    jsonTextMemoryWriter.Write(ValueSeperatorToken);
+                    this.firstValue = true;
+                    this.jsonTextMemoryWriter.Write(rawJsonToken);
+                    this.jsonTextMemoryWriter.Write(ValueSeperatorToken);
                 }
                 else
                 {
-                    jsonTextMemoryWriter.Write(rawJsonToken);
+                    this.jsonTextMemoryWriter.Write(rawJsonToken);
                 }
             }
 
             private void WriteIntegerInternal(long value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Number);
-                PrefixMemberSeparator();
-                jsonTextMemoryWriter.Write(value);
+                this.JsonObjectState.RegisterToken(JsonTokenType.Number);
+                this.PrefixMemberSeparator();
+                this.jsonTextMemoryWriter.Write(value);
             }
 
             private void WriteDoubleInternal(double value)
             {
-                JsonObjectState.RegisterToken(JsonTokenType.Number);
-                PrefixMemberSeparator();
+                this.JsonObjectState.RegisterToken(JsonTokenType.Number);
+                this.PrefixMemberSeparator();
                 if (double.IsNaN(value))
                 {
-                    jsonTextMemoryWriter.Write(StringStartToken);
-                    jsonTextMemoryWriter.Write(NotANumber.Span);
-                    jsonTextMemoryWriter.Write(StringEndToken);
+                    this.jsonTextMemoryWriter.Write(StringStartToken);
+                    this.jsonTextMemoryWriter.Write(NotANumber.Span);
+                    this.jsonTextMemoryWriter.Write(StringEndToken);
                 }
                 else if (double.IsNegativeInfinity(value))
                 {
-                    jsonTextMemoryWriter.Write(StringStartToken);
-                    jsonTextMemoryWriter.Write(NegativeInfinity.Span);
-                    jsonTextMemoryWriter.Write(StringEndToken);
+                    this.jsonTextMemoryWriter.Write(StringStartToken);
+                    this.jsonTextMemoryWriter.Write(NegativeInfinity.Span);
+                    this.jsonTextMemoryWriter.Write(StringEndToken);
                 }
                 else if (double.IsPositiveInfinity(value))
                 {
-                    jsonTextMemoryWriter.Write(StringStartToken);
-                    jsonTextMemoryWriter.Write(PositiveInfinity.Span);
-                    jsonTextMemoryWriter.Write(StringEndToken);
+                    this.jsonTextMemoryWriter.Write(StringStartToken);
+                    this.jsonTextMemoryWriter.Write(PositiveInfinity.Span);
+                    this.jsonTextMemoryWriter.Write(StringEndToken);
                 }
                 else
                 {
-                    jsonTextMemoryWriter.Write(value);
+                    this.jsonTextMemoryWriter.Write(value);
                 }
             }
 
             private void PrefixMemberSeparator()
             {
-                if (!firstValue)
+                if (!this.firstValue)
                 {
-                    jsonTextMemoryWriter.Write(MemberSeperatorToken);
+                    this.jsonTextMemoryWriter.Write(MemberSeperatorToken);
                 }
 
-                firstValue = false;
+                this.firstValue = false;
             }
 
             private void WriteEscapedString(Utf8Span unescapedString)
@@ -421,7 +424,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     }
 
                     // Write as much of the string as possible
-                    jsonTextMemoryWriter.Write(
+                    this.jsonTextMemoryWriter.Write(
                         unescapedString.Span.Slice(
                             start: 0,
                             length: indexOfFirstCharacterThatNeedsEscaping.Value));
@@ -436,54 +439,54 @@ namespace Microsoft.Azure.Cosmos.Json
                         switch (character)
                         {
                             case (byte)'\\':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
                                 break;
 
                             case (byte)'"':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'"');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'"');
                                 break;
 
                             case (byte)'/':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'/');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'/');
                                 break;
 
                             case (byte)'\b':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'b');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'b');
                                 break;
 
                             case (byte)'\f':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'f');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'f');
                                 break;
 
                             case (byte)'\n':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'n');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'n');
                                 break;
 
                             case (byte)'\r':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'r');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'r');
                                 break;
 
                             case (byte)'\t':
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'t');
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'t');
                                 break;
 
                             default:
                                 char wideCharToEscape = (char)character;
                                 // We got a control character (U+0000 through U+001F).
-                                jsonTextMemoryWriter.Write((byte)'\\');
-                                jsonTextMemoryWriter.Write((byte)'u');
-                                jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 12) & 0xF));
-                                jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 8) & 0xF));
-                                jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 4) & 0xF));
-                                jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 0) & 0xF));
+                                this.jsonTextMemoryWriter.Write((byte)'\\');
+                                this.jsonTextMemoryWriter.Write((byte)'u');
+                                this.jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 12) & 0xF));
+                                this.jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 8) & 0xF));
+                                this.jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 4) & 0xF));
+                                this.jsonTextMemoryWriter.Write(GetHexDigit((wideCharToEscape >> 0) & 0xF));
                                 break;
                         }
                     }
@@ -580,130 +583,130 @@ namespace Microsoft.Azure.Cosmos.Json
                 public void Write(bool value)
                 {
                     const int MaxBoolLength = 5;
-                    EnsureRemainingBufferSpace(MaxBoolLength);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxBoolLength);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(bool).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(byte value)
                 {
-                    EnsureRemainingBufferSpace(1);
-                    buffer[Position] = value;
-                    Position++;
+                    this.EnsureRemainingBufferSpace(1);
+                    this.buffer[this.Position] = value;
+                    this.Position++;
                 }
 
                 public void Write(sbyte value)
                 {
                     const int MaxInt8Length = 4;
-                    EnsureRemainingBufferSpace(MaxInt8Length);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxInt8Length);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(sbyte).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(short value)
                 {
                     const int MaxInt16Length = 6;
-                    EnsureRemainingBufferSpace(MaxInt16Length);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxInt16Length);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(short).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(int value)
                 {
                     const int MaxInt32Length = 11;
-                    EnsureRemainingBufferSpace(MaxInt32Length);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxInt32Length);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(int).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(uint value)
                 {
                     const int MaxInt32Length = 11;
-                    EnsureRemainingBufferSpace(MaxInt32Length);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxInt32Length);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(int).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(long value)
                 {
                     const int MaxInt64Length = 20;
-                    EnsureRemainingBufferSpace(MaxInt64Length);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(MaxInt64Length);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(long).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void Write(float value)
                 {
                     const int MaxNumberLength = 32;
-                    EnsureRemainingBufferSpace(MaxNumberLength);
+                    this.EnsureRemainingBufferSpace(MaxNumberLength);
                     // Can't use Utf8Formatter until we bump to core 3.0, since they don't support float.ToString("G9")
                     // Also for the 2.0 shim they are creating an intermediary string anyways
                     string floatString = value.ToString("R", CultureInfo.InvariantCulture);
                     for (int index = 0; index < floatString.Length; index++)
                     {
                         // we can cast to byte, since it's all ascii
-                        buffer[Position] = (byte)floatString[index];
-                        Position++;
+                        this.buffer[this.Position] = (byte)floatString[index];
+                        this.Position++;
                     }
                 }
 
                 public void Write(double value)
                 {
                     const int MaxNumberLength = 32;
-                    EnsureRemainingBufferSpace(MaxNumberLength);
+                    this.EnsureRemainingBufferSpace(MaxNumberLength);
                     // Can't use Utf8Formatter until we bump to core 3.0, since they don't support float.ToString("R")
                     // Also for the 2.0 shim they are creating an intermediary string anyways
                     string doubleString = value.ToString("R", CultureInfo.InvariantCulture);
                     for (int index = 0; index < doubleString.Length; index++)
                     {
                         // we can cast to byte, since it's all ascii
-                        buffer[Position] = (byte)doubleString[index];
-                        Position++;
+                        this.buffer[this.Position] = (byte)doubleString[index];
+                        this.Position++;
                     }
                 }
 
                 public void Write(Guid value)
                 {
                     const int GuidLength = 38;
-                    EnsureRemainingBufferSpace(GuidLength);
-                    if (!Utf8Formatter.TryFormat(value, Cursor, out int bytesWritten))
+                    this.EnsureRemainingBufferSpace(GuidLength);
+                    if (!Utf8Formatter.TryFormat(value, this.Cursor, out int bytesWritten))
                     {
                         throw new InvalidOperationException($"Failed to {nameof(this.Write)}({typeof(double).FullName}{value})");
                     }
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
 
                 public void WriteBinaryAsBase64(ReadOnlySpan<byte> binary)
                 {
-                    EnsureRemainingBufferSpace(Base64.GetMaxEncodedToUtf8Length(binary.Length));
-                    Base64.EncodeToUtf8(binary, Cursor, out int bytesConsumed, out int bytesWritten);
+                    this.EnsureRemainingBufferSpace(Base64.GetMaxEncodedToUtf8Length(binary.Length));
+                    Base64.EncodeToUtf8(binary, this.Cursor, out int bytesConsumed, out int bytesWritten);
 
-                    Position += bytesWritten;
+                    this.Position += bytesWritten;
                 }
             }
         }

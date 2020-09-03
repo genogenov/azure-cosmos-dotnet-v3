@@ -101,7 +101,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// but we eventually used the whole page for the next continuation; which continuation reports the cost?
         /// Basically the only thing we can ensure is if you drain a query fully you should get back the same query metrics by the end.
         /// </remarks>
-        private readonly ConcurrentBag<QueryPageDiagnostics> diagnosticsPages;
+        private ConcurrentBag<QueryPageDiagnostics> diagnosticsPages;
 
         /// <summary>
         /// Total number of buffered items to determine if we can go for another prefetch while still honoring the MaxBufferedItemCount.
@@ -142,46 +142,46 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             }
 
             this.queryContext = queryContext ?? throw new ArgumentNullException(nameof(queryContext));
-            queryClient = queryContext.QueryClient ?? throw new ArgumentNullException(nameof(queryContext.QueryClient));
-            itemProducerForest = new PriorityQueue<ItemProducerTree>(moveNextComparer, isSynchronized: true);
+            this.queryClient = queryContext.QueryClient ?? throw new ArgumentNullException(nameof(queryContext.QueryClient));
+            this.itemProducerForest = new PriorityQueue<ItemProducerTree>(moveNextComparer, isSynchronized: true);
             this.fetchPrioirtyFunction = fetchPrioirtyFunction ?? throw new ArgumentNullException(nameof(fetchPrioirtyFunction));
-            comparableTaskScheduler = new ComparableTaskScheduler(maxConcurrency.GetValueOrDefault(0));
+            this.comparableTaskScheduler = new ComparableTaskScheduler(maxConcurrency.GetValueOrDefault(0));
             this.equalityComparer = equalityComparer ?? throw new ArgumentNullException(nameof(equalityComparer));
             this.testSettings = testSettings;
-            requestChargeTracker = new RequestChargeTracker();
-            diagnosticsPages = new ConcurrentBag<QueryPageDiagnostics>();
-            actualMaxPageSize = maxItemCount.GetValueOrDefault(ParallelQueryConfig.GetConfig().ClientInternalMaxItemCount);
+            this.requestChargeTracker = new RequestChargeTracker();
+            this.diagnosticsPages = new ConcurrentBag<QueryPageDiagnostics>();
+            this.actualMaxPageSize = maxItemCount.GetValueOrDefault(ParallelQueryConfig.GetConfig().ClientInternalMaxItemCount);
 
-            if (actualMaxPageSize < 0)
+            if (this.actualMaxPageSize < 0)
             {
                 throw new ArgumentOutOfRangeException("actualMaxPageSize should never be less than 0");
             }
 
-            if (actualMaxPageSize > int.MaxValue)
+            if (this.actualMaxPageSize > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException("actualMaxPageSize should never be greater than int.MaxValue");
             }
 
             if (maxBufferedItemCount.HasValue)
             {
-                actualMaxBufferedItemCount = maxBufferedItemCount.Value;
+                this.actualMaxBufferedItemCount = maxBufferedItemCount.Value;
             }
             else
             {
-                actualMaxBufferedItemCount = ParallelQueryConfig.GetConfig().DefaultMaximumBufferSize;
+                this.actualMaxBufferedItemCount = ParallelQueryConfig.GetConfig().DefaultMaximumBufferSize;
             }
 
-            if (actualMaxBufferedItemCount < 0)
+            if (this.actualMaxBufferedItemCount < 0)
             {
                 throw new ArgumentOutOfRangeException("actualMaxBufferedItemCount should never be less than 0");
             }
 
-            if (actualMaxBufferedItemCount > int.MaxValue)
+            if (this.actualMaxBufferedItemCount > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException("actualMaxBufferedItemCount should never be greater than int.MaxValue");
             }
 
-            CanPrefetch = maxConcurrency.HasValue && maxConcurrency.Value != 0;
+            this.CanPrefetch = maxConcurrency.HasValue && maxConcurrency.Value != 0;
 
             this.returnResultsInDeterministicOrder = returnResultsInDeterministicOrder;
         }
@@ -189,11 +189,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <summary>
         /// Gets a value indicating whether this context is done having documents drained.
         /// </summary>
-        public override bool IsDone => !HasMoreResults;
+        public override bool IsDone => !this.HasMoreResults;
 
-        protected int ActualMaxBufferedItemCount => (int)actualMaxBufferedItemCount;
+        protected int ActualMaxBufferedItemCount => (int)this.actualMaxBufferedItemCount;
 
-        protected int ActualMaxPageSize => (int)actualMaxPageSize;
+        protected int ActualMaxPageSize => (int)this.actualMaxPageSize;
 
         /// <summary>
         /// Gets the continuation token for the context.
@@ -212,12 +212,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <summary>
         /// Gets a value indicating whether the context still has more results.
         /// </summary>
-        private bool HasMoreResults => (itemProducerForest.Count != 0) && CurrentItemProducerTree().HasMoreResults;
+        private bool HasMoreResults => (this.itemProducerForest.Count != 0) && this.CurrentItemProducerTree().HasMoreResults;
 
         /// <summary>
         /// Gets the number of documents we can still buffer.
         /// </summary>
-        private long FreeItemSpace => actualMaxBufferedItemCount - Interlocked.Read(ref totalBufferedItems);
+        private long FreeItemSpace => this.actualMaxBufferedItemCount - Interlocked.Read(ref this.totalBufferedItems);
 
         /// <summary>
         /// After a split you need to maintain the continuation tokens for all the child document producers until a condition is met.
@@ -245,9 +245,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// </returns>
         public IEnumerable<ItemProducer> GetActiveItemProducers()
         {
-            if (returnResultsInDeterministicOrder)
+            if (this.returnResultsInDeterministicOrder)
             {
-                ItemProducerTree current = itemProducerForest.Peek().CurrentItemProducerTree;
+                ItemProducerTree current = this.itemProducerForest.Peek().CurrentItemProducerTree;
                 if (current.HasMoreResults && !current.IsActive)
                 {
                     // If the current document producer tree has more results, but isn't active.
@@ -255,7 +255,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                     yield return current.Root;
                 }
 
-                foreach (ItemProducerTree itemProducerTree in itemProducerForest)
+                foreach (ItemProducerTree itemProducerTree in this.itemProducerForest)
                 {
                     foreach (ItemProducer itemProducer in itemProducerTree.GetActiveItemProducers())
                     {
@@ -266,7 +266,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             else
             {
                 // Just return all item producers that have a continuation token
-                foreach (ItemProducerTree itemProducerTree in itemProducerForest)
+                foreach (ItemProducerTree itemProducerTree in this.itemProducerForest)
                 {
                     foreach (ItemProducerTree leaf in itemProducerTree)
                     {
@@ -285,7 +285,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <returns>The current document producer tree that should be drained from.</returns>
         public ItemProducerTree CurrentItemProducerTree()
         {
-            return itemProducerForest.Peek();
+            return this.itemProducerForest.Peek();
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         public void PushCurrentItemProducerTree(ItemProducerTree itemProducerTree)
         {
             itemProducerTree.UpdatePriority();
-            itemProducerForest.Enqueue(itemProducerTree);
+            this.itemProducerForest.Enqueue(itemProducerTree);
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <returns>The current document producer tree that should be drained from.</returns>
         public ItemProducerTree PopCurrentItemProducerTree()
         {
-            return itemProducerForest.Dequeue();
+            return this.itemProducerForest.Dequeue();
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// </summary>
         public override void Dispose()
         {
-            comparableTaskScheduler.Dispose();
+            this.comparableTaskScheduler.Dispose();
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// </summary>
         public override void Stop()
         {
-            comparableTaskScheduler.Stop();
+            this.comparableTaskScheduler.Stop();
         }
 
         protected async Task<TryCatch> TryInitializeAsync(
@@ -360,13 +360,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                 PartitionKeyRange partitionKeyRange = rangeAndContinuationToken.Key;
                 string continuationToken = rangeAndContinuationToken.Value;
                 ItemProducerTree itemProducerTree = new ItemProducerTree(
-                    queryContext,
+                    this.queryContext,
                     querySpecForInit,
                     partitionKeyRange,
-                    OnItemProducerTreeCompleteFetching,
-                    itemProducerForest.Comparer,
-                    equalityComparer,
-                    testSettings,
+                    this.OnItemProducerTreeCompleteFetching,
+                    this.itemProducerForest.Comparer as IComparer<ItemProducerTree>,
+                    this.equalityComparer,
+                    this.testSettings,
                     deferFirstPage,
                     collectionRid,
                     initialPageSize,
@@ -376,9 +376,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                 };
 
                 // Prefetch if necessary, and populate consume queue.
-                if (CanPrefetch)
+                if (this.CanPrefetch)
                 {
-                    TryScheduleFetch(itemProducerTree);
+                    this.TryScheduleFetch(itemProducerTree);
                 }
 
                 itemProducerTrees.Add(itemProducerTree);
@@ -425,7 +425,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                     }
                 }
 
-                itemProducerForest.Enqueue(itemProducerTree);
+                this.itemProducerForest.Enqueue(itemProducerTree);
             }
 
             return TryCatch.FromResult();
@@ -556,12 +556,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
 
         protected virtual long GetAndResetResponseLengthBytes()
         {
-            return Interlocked.Exchange(ref totalResponseLengthBytes, 0);
+            return Interlocked.Exchange(ref this.totalResponseLengthBytes, 0);
         }
 
         protected virtual long IncrementResponseLengthBytes(long incrementValue)
         {
-            return Interlocked.Add(ref totalResponseLengthBytes, incrementValue);
+            return Interlocked.Add(ref this.totalResponseLengthBytes, incrementValue);
         }
 
         /// <summary>
@@ -571,10 +571,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <returns>Whether or not the fetch was successfully scheduled.</returns>
         private bool TryScheduleFetch(ItemProducerTree itemProducerTree)
         {
-            return comparableTaskScheduler.TryQueueTask(
+            return this.comparableTaskScheduler.TryQueueTask(
                 new ItemProducerTreeComparableTask(
                     itemProducerTree,
-                    fetchPrioirtyFunction),
+                    this.fetchPrioirtyFunction),
                 default);
         }
 
@@ -599,12 +599,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             CancellationToken token)
         {
             // Update charge and states
-            requestChargeTracker.AddCharge(resourceUnitUsage);
-            Interlocked.Add(ref totalBufferedItems, itemsBuffered);
-            IncrementResponseLengthBytes(responseLengthBytes);
+            this.requestChargeTracker.AddCharge(resourceUnitUsage);
+            Interlocked.Add(ref this.totalBufferedItems, itemsBuffered);
+            this.IncrementResponseLengthBytes(responseLengthBytes);
 
             // Adjust the producer page size so that we reach the optimal page size.
-            producer.PageSize = Math.Min((long)(producer.PageSize * DynamicPageSizeAdjustmentFactor), actualMaxPageSize);
+            producer.PageSize = Math.Min((long)(producer.PageSize * DynamicPageSizeAdjustmentFactor), this.actualMaxPageSize);
 
             // Adjust Max Degree Of Parallelism if necessary
             // (needs to wait for comparable task scheduler refactor).
@@ -614,9 +614,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             {
                 // 4mb is the max response size
                 long expectedResponseSize = Math.Min(producer.PageSize, 4 * 1024 * 1024);
-                if (CanPrefetch && FreeItemSpace > expectedResponseSize)
+                if (this.CanPrefetch && this.FreeItemSpace > expectedResponseSize)
                 {
-                    TryScheduleFetch(producer);
+                    this.TryScheduleFetch(producer);
                 }
             }
         }
@@ -627,8 +627,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         {
             public InitInfo(int targetIndex, IReadOnlyDictionary<string, TContinuationToken> continuationTokens)
             {
-                TargetIndex = targetIndex;
-                ContinuationTokens = continuationTokens;
+                this.TargetIndex = targetIndex;
+                this.ContinuationTokens = continuationTokens;
             }
 
             public int TargetIndex { get; }
@@ -643,9 +643,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                 IReadOnlyDictionary<PartitionKeyRange, T> targetPartition,
                 IReadOnlyDictionary<PartitionKeyRange, T> partitionsRightOfTarget)
             {
-                PartitionsLeftOfTarget = partitionsLeftOfTarget ?? throw new ArgumentNullException(nameof(partitionsLeftOfTarget));
-                TargetPartition = targetPartition ?? throw new ArgumentNullException(nameof(targetPartition));
-                PartitionsRightOfTarget = partitionsRightOfTarget ?? throw new ArgumentNullException(nameof(partitionsRightOfTarget));
+                this.PartitionsLeftOfTarget = partitionsLeftOfTarget ?? throw new ArgumentNullException(nameof(partitionsLeftOfTarget));
+                this.TargetPartition = targetPartition ?? throw new ArgumentNullException(nameof(targetPartition));
+                this.PartitionsRightOfTarget = partitionsRightOfTarget ?? throw new ArgumentNullException(nameof(partitionsRightOfTarget));
             }
 
             public IReadOnlyDictionary<PartitionKeyRange, T> PartitionsLeftOfTarget { get; }
@@ -709,16 +709,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                 }
 
                 //// Request continuation is allowed to be null
-                SqlQuerySpec = sqlQuerySpec ?? throw new ArgumentNullException($"{nameof(sqlQuerySpec)} can not be null.");
-                CollectionRid = collectionRid;
-                PartitionedQueryExecutionInfo = partitionedQueryExecutionInfo ?? throw new ArgumentNullException($"{nameof(partitionedQueryExecutionInfo)} can not be null.");
-                PartitionKeyRanges = partitionKeyRanges;
-                InitialPageSize = initialPageSize;
-                MaxBufferedItemCount = maxBufferedItemCount;
-                MaxConcurrency = maxConcurrency;
-                MaxItemCount = maxItemCount;
-                ReturnResultsInDeterministicOrder = returnResultsInDeterministicOrder;
-                TestSettings = testSettings;
+                this.SqlQuerySpec = sqlQuerySpec ?? throw new ArgumentNullException($"{nameof(sqlQuerySpec)} can not be null.");
+                this.CollectionRid = collectionRid;
+                this.PartitionedQueryExecutionInfo = partitionedQueryExecutionInfo ?? throw new ArgumentNullException($"{nameof(partitionedQueryExecutionInfo)} can not be null.");
+                this.PartitionKeyRanges = partitionKeyRanges;
+                this.InitialPageSize = initialPageSize;
+                this.MaxBufferedItemCount = maxBufferedItemCount;
+                this.MaxConcurrency = maxConcurrency;
+                this.MaxItemCount = maxItemCount;
+                this.ReturnResultsInDeterministicOrder = returnResultsInDeterministicOrder;
+                this.TestSettings = testSettings;
             }
 
             /// <summary>
@@ -798,7 +798,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             /// <returns>A task to await on.</returns>
             public override Task StartAsync(CancellationToken token)
             {
-                return producer.BufferMoreDocumentsAsync(token);
+                return this.producer.BufferMoreDocumentsAsync(token);
             }
 
             /// <summary>
@@ -808,7 +808,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             /// <returns>Whether this class is equal to another task.</returns>
             public override bool Equals(IComparableTask other)
             {
-                return Equals(other as ItemProducerTreeComparableTask);
+                return this.Equals(other as ItemProducerTreeComparableTask);
             }
 
             /// <summary>
@@ -817,7 +817,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             /// <returns>The hash code for this task.</returns>
             public override int GetHashCode()
             {
-                return producer.PartitionKeyRange.GetHashCode();
+                return this.producer.PartitionKeyRange.GetHashCode();
             }
 
             /// <summary>
@@ -827,7 +827,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             /// <returns>Whether or not the comparable tasks are equal.</returns>
             private bool Equals(ItemProducerTreeComparableTask other)
             {
-                return producer.PartitionKeyRange.Equals(other.producer.PartitionKeyRange);
+                return this.producer.PartitionKeyRange.Equals(other.producer.PartitionKeyRange);
             }
         }
         #endregion
