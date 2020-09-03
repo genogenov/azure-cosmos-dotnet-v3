@@ -34,7 +34,16 @@ namespace Microsoft.Azure.Cosmos
         /// Application opted Cosmos request context that flow through with the <see cref="RequestMessage" />.
         /// Context will be available through handlers.
         /// </summary>
+<<<<<<< HEAD
         public IReadOnlyDictionary<string, object> Properties { get; set; }
+=======
+#if PREVIEW
+        public
+#else
+        internal
+#endif
+        IReadOnlyDictionary<string, object> Properties { get; set; }
+>>>>>>> parent of 50895f9f4... Switched to error and applied it to the SDK project
 
         /// <summary>
         /// Gets or sets the boolean to use effective partition key routing in the cosmos db request.

@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Diagnostics;
     using System.IO;
     using System.Net.Http;
-    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -475,6 +474,26 @@ namespace Microsoft.Azure.Cosmos
                 || operationType == OperationType.Patch);
         }
 
+<<<<<<< HEAD
+=======
+        private static HttpClientHandler CreateHttpClientHandler(CosmosClientOptions clientOptions)
+        {
+            if (clientOptions == null)
+            {
+                throw new ArgumentNullException(nameof(clientOptions));
+            }
+            
+            // https://docs.microsoft.com/en-us/archive/blogs/timomta/controlling-the-number-of-outgoing-connections-from-httpclient-net-core-or-full-framework
+            HttpClientHandler httpClientHandler = new HttpClientHandler
+            {
+                Proxy = clientOptions.WebProxy,
+                MaxConnectionsPerServer = clientOptions.GatewayModeMaxConnectionLimit
+            };
+
+            return httpClientHandler;
+        }
+
+>>>>>>> parent of 50895f9f4... Switched to error and applied it to the SDK project
         private static CosmosClientOptions CreateOrCloneClientOptions(CosmosClientOptions clientOptions)
         {
             if (clientOptions == null)
