@@ -32,27 +32,27 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             public HashSet<Expression> Nominate(Expression expression)
             {
-                this.candidates = new HashSet<Expression>();
-                this.Visit(expression);
-                return this.candidates;
+                candidates = new HashSet<Expression>();
+                Visit(expression);
+                return candidates;
             }
 
             public override Expression Visit(Expression expression)
             {
                 if (expression != null)
                 {
-                    bool lastCanBeEvaluated = this.canBeEvaluated;
-                    this.canBeEvaluated = true;
+                    bool lastCanBeEvaluated = canBeEvaluated;
+                    canBeEvaluated = true;
                     base.Visit(expression);
-                    if (this.canBeEvaluated)
+                    if (canBeEvaluated)
                     {
-                        this.canBeEvaluated = this.fnCanBeEvaluated(expression);
-                        if (this.canBeEvaluated)
+                        canBeEvaluated = fnCanBeEvaluated(expression);
+                        if (canBeEvaluated)
                         {
-                            this.candidates.Add(expression);
+                            candidates.Add(expression);
                         }
                     }
-                    this.canBeEvaluated &= lastCanBeEvaluated;
+                    canBeEvaluated &= lastCanBeEvaluated;
                 }
                 return expression;
             }

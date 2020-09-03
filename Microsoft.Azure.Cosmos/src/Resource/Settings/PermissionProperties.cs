@@ -26,16 +26,16 @@ namespace Microsoft.Azure.Cosmos
             Container container,
             PartitionKey? resourcePartitionKey = null)
         {
-            this.Id = id;
-            this.PermissionMode = permissionMode;
-            this.ResourceUri = ((ContainerInlineCore)container).LinkUri;
+            Id = id;
+            PermissionMode = permissionMode;
+            ResourceUri = ((ContainerInlineCore)container).LinkUri;
             if (resourcePartitionKey == null)
             {
-                this.InternalResourcePartitionKey = null;
+                InternalResourcePartitionKey = null;
             }
             else
             {
-                this.InternalResourcePartitionKey = resourcePartitionKey?.InternalKey;
+                InternalResourcePartitionKey = resourcePartitionKey?.InternalKey;
             }
         }
 
@@ -53,13 +53,13 @@ namespace Microsoft.Azure.Cosmos
             PartitionKey resourcePartitionKey,
             string itemId)
         {
-            this.Id = id;
-            this.PermissionMode = permissionMode;
-            this.ResourceUri = ((ContainerInlineCore)container).ClientContext.CreateLink(
+            Id = id;
+            PermissionMode = permissionMode;
+            ResourceUri = ((ContainerInlineCore)container).ClientContext.CreateLink(
                     parentLink: ((ContainerInlineCore)container).LinkUri,
                     uriPathSegment: Paths.DocumentsPathSegment,
                     id: itemId);
-            this.InternalResourcePartitionKey = resourcePartitionKey.InternalKey;
+            InternalResourcePartitionKey = resourcePartitionKey.InternalKey;
         }
 
         /// <summary>
@@ -112,13 +112,13 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.InternalResourcePartitionKey == null)
+                if (InternalResourcePartitionKey == null)
                 {
                     return null;
                 }
-                if (this.InternalResourcePartitionKey.ToObjectArray().Length > 0)
+                if (InternalResourcePartitionKey.ToObjectArray().Length > 0)
                 {
-                    return new PartitionKey(this.InternalResourcePartitionKey.ToObjectArray()[0]);
+                    return new PartitionKey(InternalResourcePartitionKey.ToObjectArray()[0]);
                 }
                 return null;
             }
@@ -126,11 +126,11 @@ namespace Microsoft.Azure.Cosmos
             {
                 if (value == null || (value.HasValue && value.Value.IsNone))
                 {
-                    this.InternalResourcePartitionKey = null;
+                    InternalResourcePartitionKey = null;
                 }
                 else
                 {
-                    this.InternalResourcePartitionKey = value.Value.InternalKey;
+                    InternalResourcePartitionKey = value.Value.InternalKey;
                 }
             }
         }

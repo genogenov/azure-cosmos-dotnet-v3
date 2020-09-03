@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
         public PriorityQueue(IEnumerable<T> enumerable, IComparer<T> comparer, bool isSynchronized = false)
             : this(new List<T>(enumerable), comparer, isSynchronized)
         {
-            this.Heapify();
+            Heapify();
         }
 
         public PriorityQueue(int initialCapacity, IComparer<T> comparer, bool isSynchronized = false)
@@ -50,16 +50,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
         private PriorityQueue(List<T> queue, IComparer<T> comparer, bool isSynchronized)
         {
-            this.IsSynchronized = isSynchronized;
+            IsSynchronized = isSynchronized;
             this.queue = queue ?? throw new ArgumentNullException(nameof(queue));
-            this.Comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            Comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
         }
 
         public int Count
         {
             get
             {
-                return this.queue.Count;
+                return queue.Count;
             }
         }
 
@@ -74,48 +74,48 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
         public void CopyTo(T[] array, int index)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    this.CopyToPrivate(array, index);
+                    CopyToPrivate(array, index);
                     return;
                 }
             }
 
-            this.CopyToPrivate(array, index);
+            CopyToPrivate(array, index);
         }
 
         public bool TryAdd(T item)
         {
-            this.Enqueue(item);
+            Enqueue(item);
             return true;
         }
 
         public bool TryTake(out T item)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.TryTakePrivate(out item);
+                    return TryTakePrivate(out item);
                 }
             }
 
-            return this.TryTakePrivate(out item);
+            return TryTakePrivate(out item);
         }
 
         public bool TryPeek(out T item)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.TryPeekPrivate(out item);
+                    return TryPeekPrivate(out item);
                 }
             }
 
-            return this.TryPeekPrivate(out item);
+            return TryPeekPrivate(out item);
         }
 
         public void CopyTo(Array array, int index)
@@ -125,225 +125,225 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
 
         public void Clear()
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    this.ClearPrivate();
+                    ClearPrivate();
                     return;
                 }
             }
 
-            this.ClearPrivate();
+            ClearPrivate();
         }
 
         public bool Contains(T item)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.ContainsPrivate(item);
+                    return ContainsPrivate(item);
                 }
             }
 
-            return this.ContainsPrivate(item);
+            return ContainsPrivate(item);
         }
 
         public T Dequeue()
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.DequeuePrivate();
+                    return DequeuePrivate();
                 }
             }
 
-            return this.DequeuePrivate();
+            return DequeuePrivate();
         }
 
         public void Enqueue(T item)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    this.EnqueuePrivate(item);
+                    EnqueuePrivate(item);
                     return;
                 }
             }
 
-            this.EnqueuePrivate(item);
+            EnqueuePrivate(item);
         }
 
         public void EnqueueRange(IEnumerable<T> items)
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    this.EnqueueRangePrivate(items);
+                    EnqueueRangePrivate(items);
                     return;
                 }
             }
 
-            this.EnqueueRangePrivate(items);
+            EnqueueRangePrivate(items);
         }
 
         public T Peek()
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.PeekPrivate();
+                    return PeekPrivate();
                 }
             }
 
-            return this.PeekPrivate();
+            return PeekPrivate();
         }
 
         public T[] ToArray()
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.ToArrayPrivate();
+                    return ToArrayPrivate();
                 }
             }
 
-            return this.ToArrayPrivate();
+            return ToArrayPrivate();
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            if (this.IsSynchronized)
+            if (IsSynchronized)
             {
-                lock (this.SyncRoot)
+                lock (SyncRoot)
                 {
-                    return this.GetEnumeratorPrivate();
+                    return GetEnumeratorPrivate();
                 }
             }
 
-            return this.GetEnumeratorPrivate();
+            return GetEnumeratorPrivate();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         private void CopyToPrivate(T[] array, int index)
         {
-            this.queue.CopyTo(array, index);
+            queue.CopyTo(array, index);
         }
 
         private bool TryTakePrivate(out T item)
         {
-            if (this.queue.Count <= 0)
+            if (queue.Count <= 0)
             {
                 item = default;
                 return false;
             }
 
-            item = this.DequeuePrivate();
+            item = DequeuePrivate();
             return true;
         }
 
         private bool TryPeekPrivate(out T item)
         {
-            if (this.queue.Count <= 0)
+            if (queue.Count <= 0)
             {
                 item = default;
                 return false;
             }
 
-            item = this.PeekPrivate();
+            item = PeekPrivate();
             return true;
         }
 
         private void ClearPrivate()
         {
-            this.queue.Clear();
+            queue.Clear();
         }
 
         private bool ContainsPrivate(T item)
         {
-            return this.queue.Contains(item);
+            return queue.Contains(item);
         }
 
         private T DequeuePrivate()
         {
-            if (this.queue.Count <= 0)
+            if (queue.Count <= 0)
             {
                 throw new InvalidOperationException("No more elements");
             }
 
-            T result = this.queue[0];
-            this.queue[0] = this.queue[this.queue.Count - 1];
-            this.queue.RemoveAt(this.queue.Count - 1);
-            this.DownHeap(0);
+            T result = queue[0];
+            queue[0] = queue[queue.Count - 1];
+            queue.RemoveAt(queue.Count - 1);
+            DownHeap(0);
             return result;
         }
 
         private void EnqueuePrivate(T item)
         {
-            this.queue.Add(item);
-            this.UpHeap(this.queue.Count - 1);
+            queue.Add(item);
+            UpHeap(queue.Count - 1);
         }
 
         private void EnqueueRangePrivate(IEnumerable<T> items)
         {
-            this.queue.AddRange(items);
-            this.Heapify();
+            queue.AddRange(items);
+            Heapify();
         }
 
         private T PeekPrivate()
         {
-            if (this.queue.Count <= 0)
+            if (queue.Count <= 0)
             {
                 throw new InvalidOperationException("No more elements");
             }
 
-            return this.queue[0];
+            return queue[0];
         }
 
         private T[] ToArrayPrivate()
         {
-            return this.queue.ToArray();
+            return queue.ToArray();
         }
 
         private IEnumerator<T> GetEnumeratorPrivate()
         {
-            return new List<T>(this.queue).GetEnumerator();
+            return new List<T>(queue).GetEnumerator();
         }
 
         private void Heapify()
         {
-            for (int index = this.GetParentIndex(this.Count); index >= 0; --index)
+            for (int index = GetParentIndex(Count); index >= 0; --index)
             {
-                this.DownHeap(index);
+                DownHeap(index);
             }
         }
 
         private void DownHeap(int itemIndex)
         {
-            while (itemIndex < this.queue.Count)
+            while (itemIndex < queue.Count)
             {
-                int smallestChildIndex = this.GetSmallestChildIndex(itemIndex);
+                int smallestChildIndex = GetSmallestChildIndex(itemIndex);
 
                 if (smallestChildIndex == itemIndex)
                 {
                     break;
                 }
 
-                T item = this.queue[itemIndex];
+                T item = queue[itemIndex];
 
-                this.queue[itemIndex] = this.queue[smallestChildIndex];
+                queue[itemIndex] = queue[smallestChildIndex];
                 itemIndex = smallestChildIndex;
-                this.queue[itemIndex] = item;
+                queue[itemIndex] = item;
             }
         }
 
@@ -351,19 +351,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
         {
             while (itemIndex > 0)
             {
-                int parentIndex = this.GetParentIndex(itemIndex);
-                T parent = this.queue[parentIndex];
+                int parentIndex = GetParentIndex(itemIndex);
+                T parent = queue[parentIndex];
 
-                T item = this.queue[itemIndex];
+                T item = queue[itemIndex];
 
-                if (this.Comparer.Compare(item, parent) >= 0)
+                if (Comparer.Compare(item, parent) >= 0)
                 {
                     break;
                 }
 
-                this.queue[itemIndex] = parent;
+                queue[itemIndex] = parent;
                 itemIndex = parentIndex;
-                this.queue[itemIndex] = item;
+                queue[itemIndex] = item;
             }
         }
 
@@ -373,14 +373,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Collections
             int rightChildIndex = leftChildIndex + 1;
             int smallestChildIndex = parentIndex;
 
-            if (leftChildIndex < this.queue.Count
-                && this.Comparer.Compare(this.queue[smallestChildIndex], this.queue[leftChildIndex]) > 0)
+            if (leftChildIndex < queue.Count
+                && Comparer.Compare(queue[smallestChildIndex], queue[leftChildIndex]) > 0)
             {
                 smallestChildIndex = leftChildIndex;
             }
 
-            if (rightChildIndex < this.queue.Count
-                && this.Comparer.Compare(this.queue[smallestChildIndex], this.queue[rightChildIndex]) > 0)
+            if (rightChildIndex < queue.Count
+                && Comparer.Compare(queue[smallestChildIndex], queue[rightChildIndex]) > 0)
             {
                 smallestChildIndex = rightChildIndex;
             }

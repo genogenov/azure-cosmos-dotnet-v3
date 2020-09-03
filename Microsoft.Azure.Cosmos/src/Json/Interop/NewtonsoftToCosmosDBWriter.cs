@@ -41,17 +41,17 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         public override ReadOnlyMemory<byte> GetResult()
         {
-            return this.getResultCallback();
+            return getResultCallback();
         }
 
         public override void WriteArrayEnd()
         {
-            this.writer.WriteEndArray();
+            writer.WriteEndArray();
         }
 
         public override void WriteArrayStart()
         {
-            this.writer.WriteStartArray();
+            writer.WriteStartArray();
         }
 
         public override void WriteBinaryValue(ReadOnlySpan<byte> value)
@@ -61,84 +61,84 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         public override void WriteBoolValue(bool value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteFieldName(string fieldName)
         {
-            this.writer.WritePropertyName(fieldName);
+            writer.WritePropertyName(fieldName);
         }
 
         public override void WriteFloat32Value(float value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteFloat64Value(double value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteGuidValue(Guid value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteInt16Value(short value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteInt32Value(int value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteInt64Value(long value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteInt8Value(sbyte value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteNullValue()
         {
-            this.writer.WriteNull();
+            writer.WriteNull();
         }
 
         public override void WriteNumber64Value(Number64 value)
         {
             if (value.IsInteger)
             {
-                this.writer.WriteValue(Number64.ToLong(value));
+                writer.WriteValue(Number64.ToLong(value));
             }
             else
             {
-                this.writer.WriteValue(Number64.ToDouble(value));
+                writer.WriteValue(Number64.ToDouble(value));
             }
         }
 
         public override void WriteObjectEnd()
         {
-            this.writer.WriteEndObject();
+            writer.WriteEndObject();
         }
 
         public override void WriteObjectStart()
         {
-            this.writer.WriteStartObject();
+            writer.WriteStartObject();
         }
 
         public override void WriteStringValue(string value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteUInt32Value(uint value)
         {
-            this.writer.WriteValue(value);
+            writer.WriteValue(value);
         }
 
         public override void WriteRawJsonToken(
@@ -155,48 +155,48 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
             {
                 if (jsonTokenType == JsonTokenType.FieldName)
                 {
-                    this.writer.WritePropertyName(jsonTextReader.Value as string);
+                    writer.WritePropertyName(jsonTextReader.Value as string);
                 }
                 else
                 {
                     switch (jsonTextReader.TokenType)
                     {
                         case Newtonsoft.Json.JsonToken.StartObject:
-                            this.writer.WriteStartObject();
+                            writer.WriteStartObject();
                             break;
 
                         case Newtonsoft.Json.JsonToken.StartArray:
-                            this.writer.WriteStartArray();
+                            writer.WriteStartArray();
                             break;
 
                         case Newtonsoft.Json.JsonToken.PropertyName:
-                            this.writer.WritePropertyName(jsonTextReader.Value as string);
+                            writer.WritePropertyName(jsonTextReader.Value as string);
                             break;
 
                         case Newtonsoft.Json.JsonToken.Integer:
                         case Newtonsoft.Json.JsonToken.Float:
                         case Newtonsoft.Json.JsonToken.String:
                         case Newtonsoft.Json.JsonToken.Boolean:
-                            this.writer.WriteValue(jsonTextReader.Value);
+                            writer.WriteValue(jsonTextReader.Value);
                             break;
 
                         case Newtonsoft.Json.JsonToken.Null:
-                            this.writer.WriteNull();
+                            writer.WriteNull();
                             break;
 
                         case Newtonsoft.Json.JsonToken.EndObject:
-                            this.writer.WriteEndObject();
+                            writer.WriteEndObject();
                             break;
 
                         case Newtonsoft.Json.JsonToken.EndArray:
-                            this.writer.WriteEndArray();
+                            writer.WriteEndArray();
                             break;
 
                         default:
                             throw new ArgumentOutOfRangeException($"Unknown {nameof(JsonToken)}: {jsonTextReader.TokenType}.");
                     }
                 }
-                
+
             }
         }
 
@@ -222,12 +222,12 @@ namespace Microsoft.Azure.Cosmos.Json.Interop
 
         public override void WriteFieldName(Utf8Span utf8FieldName)
         {
-            this.WriteFieldName(Encoding.UTF8.GetString(utf8FieldName.Span));
+            WriteFieldName(Encoding.UTF8.GetString(utf8FieldName.Span));
         }
 
         public override void WriteStringValue(Utf8Span utf8StringValue)
         {
-            this.WriteStringValue(Encoding.UTF8.GetString(utf8StringValue.Span));
+            WriteStringValue(Encoding.UTF8.GetString(utf8StringValue.Span));
         }
     }
 }

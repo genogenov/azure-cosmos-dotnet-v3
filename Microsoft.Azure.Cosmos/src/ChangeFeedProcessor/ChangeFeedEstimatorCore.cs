@@ -37,8 +37,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangesEstimationHandler initialEstimateDelegate,
             TimeSpan? estimatorPeriod)
         {
-            if (initialEstimateDelegate == null) throw new ArgumentNullException(nameof(initialEstimateDelegate));
-            if (estimatorPeriod.HasValue && estimatorPeriod.Value <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(estimatorPeriod));
+            if (initialEstimateDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(initialEstimateDelegate));
+            }
+
+            if (estimatorPeriod.HasValue && estimatorPeriod.Value <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(estimatorPeriod));
+            }
 
             this.initialEstimateDelegate = initialEstimateDelegate;
             this.estimatorPeriod = estimatorPeriod;
@@ -62,10 +69,17 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             ChangeFeedProcessorOptions changeFeedProcessorOptions,
             ContainerInternal monitoredContainer)
         {
-            if (monitoredContainer == null) throw new ArgumentNullException(nameof(monitoredContainer));
-            if (leaseContainer == null && customDocumentServiceLeaseStoreManager == null) throw new ArgumentNullException(nameof(leaseContainer));
+            if (monitoredContainer == null)
+            {
+                throw new ArgumentNullException(nameof(monitoredContainer));
+            }
 
-            this.documentServiceLeaseStoreManager = customDocumentServiceLeaseStoreManager;
+            if (leaseContainer == null && customDocumentServiceLeaseStoreManager == null)
+            {
+                throw new ArgumentNullException(nameof(leaseContainer));
+            }
+
+            documentServiceLeaseStoreManager = customDocumentServiceLeaseStoreManager;
             this.leaseContainer = leaseContainer;
             this.monitoredContainerRid = monitoredContainerRid;
             this.monitoredContainer = monitoredContainer;
@@ -74,23 +88,23 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         public override async Task StartAsync()
         {
-            if (!this.initialized)
+            if (!initialized)
             {
-                await this.InitializeAsync().ConfigureAwait(false);
+                await InitializeAsync().ConfigureAwait(false);
             }
 
-            this.shutdownCts = new CancellationTokenSource();
+            shutdownCts = new CancellationTokenSource();
             DefaultTrace.TraceInformation("Starting estimator...");
-            this.runAsync = this.feedEstimator.RunAsync(this.shutdownCts.Token);
+            runAsync = feedEstimator.RunAsync(shutdownCts.Token);
         }
 
         public override async Task StopAsync()
         {
             DefaultTrace.TraceInformation("Stopping estimator...");
-            this.shutdownCts.Cancel();
+            shutdownCts.Cancel();
             try
             {
-                await this.runAsync.ConfigureAwait(false);
+                await runAsync.ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
@@ -100,16 +114,16 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         private async Task InitializeAsync()
         {
-            string monitoredContainerRid = await this.monitoredContainer.GetMonitoredContainerRidAsync(this.monitoredContainerRid);
-            this.monitoredContainerRid = this.monitoredContainer.GetLeasePrefix(this.changeFeedLeaseOptions, monitoredContainerRid);
-            this.documentServiceLeaseStoreManager = await ChangeFeedProcessorCore<dynamic>.InitializeLeaseStoreManagerAsync(this.documentServiceLeaseStoreManager, this.leaseContainer, this.monitoredContainerRid, ChangeFeedEstimatorCore.EstimatorDefaultHostName).ConfigureAwait(false);
-            this.feedEstimator = this.BuildFeedEstimator();
-            this.initialized = true;
+            string monitoredContainerRid = await monitoredContainer.GetMonitoredContainerRidAsync(this.monitoredContainerRid);
+            this.monitoredContainerRid = monitoredContainer.GetLeasePrefix(changeFeedLeaseOptions, monitoredContainerRid);
+            documentServiceLeaseStoreManager = await ChangeFeedProcessorCore<dynamic>.InitializeLeaseStoreManagerAsync(documentServiceLeaseStoreManager, leaseContainer, this.monitoredContainerRid, ChangeFeedEstimatorCore.EstimatorDefaultHostName).ConfigureAwait(false);
+            feedEstimator = BuildFeedEstimator();
+            initialized = true;
         }
 
         private FeedEstimator BuildFeedEstimator()
         {
-            if (this.remainingWorkEstimator == null)
+            if (remainingWorkEstimator == null)
             {
                 Func<string, string, bool, FeedIterator> feedCreator = (string partitionKeyRangeId, string continuationToken, bool startFromBeginning) =>
                 {
@@ -117,20 +131,20 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                         partitionKeyRangeId: partitionKeyRangeId,
                         continuationToken: continuationToken,
                         maxItemCount: 1,
-                        container: this.monitoredContainer,
+                        container: monitoredContainer,
                         startTime: null,
                         startFromBeginning: string.IsNullOrEmpty(continuationToken));
                 };
 
-                this.remainingWorkEstimator = new RemainingWorkEstimatorCore(
-                   this.documentServiceLeaseStoreManager.LeaseContainer,
+                remainingWorkEstimator = new RemainingWorkEstimatorCore(
+                   documentServiceLeaseStoreManager.LeaseContainer,
                    feedCreator,
-                   this.monitoredContainer.ClientContext.Client.ClientOptions?.GatewayModeMaxConnectionLimit ?? 1);
+                   monitoredContainer.ClientContext.Client.ClientOptions?.GatewayModeMaxConnectionLimit ?? 1);
             }
 
-            ChangeFeedEstimatorDispatcher estimatorDispatcher = new ChangeFeedEstimatorDispatcher(this.initialEstimateDelegate, this.estimatorPeriod);
+            ChangeFeedEstimatorDispatcher estimatorDispatcher = new ChangeFeedEstimatorDispatcher(initialEstimateDelegate, estimatorPeriod);
 
-            return new FeedEstimatorCore(estimatorDispatcher, this.remainingWorkEstimator);
+            return new FeedEstimatorCore(estimatorDispatcher, remainingWorkEstimator);
         }
     }
 }

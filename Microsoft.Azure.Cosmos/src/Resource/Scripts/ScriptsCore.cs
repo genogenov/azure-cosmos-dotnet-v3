@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             CosmosClientContext clientContext)
         {
             this.container = container;
-            this.ClientContext = clientContext;
+            ClientContext = clientContext;
         }
 
         protected CosmosClientContext ClientContext { get; }
@@ -30,14 +30,14 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return this.ProcessScriptsCreateOperationAsync(
+            return ProcessScriptsCreateOperationAsync(
                 diagnosticsContext: diagnosticsContext,
-                resourceUri: this.container.LinkUri,
+                resourceUri: container.LinkUri,
                 resourceType: ResourceType.StoredProcedure,
                 operationType: OperationType.Create,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(storedProcedureProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(storedProcedureProperties),
                 requestOptions: requestOptions,
-                responseFunc: this.ClientContext.ResponseFactory.CreateStoredProcedureResponse,
+                responseFunc: ClientContext.ResponseFactory.CreateStoredProcedureResponse,
                 cancellationToken: cancellationToken);
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetStoredProcedureQueryStreamIterator(
+            return GetStoredProcedureQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -69,7 +69,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetStoredProcedureQueryIterator<T>(
+            return GetStoredProcedureQueryIterator<T>(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -81,8 +81,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorCore(
-               clientContext: this.ClientContext,
-               this.container.LinkUri,
+               clientContext: ClientContext,
+               container.LinkUri,
                resourceType: ResourceType.StoredProcedure,
                queryDefinition: queryDefinition,
                continuationToken: continuationToken,
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             string continuationToken = null,
             QueryRequestOptions requestOptions = null)
         {
-            if (!(this.GetStoredProcedureQueryStreamIterator(
+            if (!(GetStoredProcedureQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions) is FeedIteratorInternal databaseStreamIterator))
@@ -104,7 +104,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
 
             return new FeedIteratorCore<T>(
                 databaseStreamIterator,
-                (response) => this.ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
+                (response) => ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
                     responseMessage: response,
                     resourceType: ResourceType.StoredProcedure));
         }
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessStoredProcedureOperationAsync(
+            return ProcessStoredProcedureOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Read,
@@ -135,11 +135,11 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return this.ProcessStoredProcedureOperationAsync(
+            return ProcessStoredProcedureOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: storedProcedureProperties.Id,
                 operationType: OperationType.Replace,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(storedProcedureProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(storedProcedureProperties),
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
         }
@@ -155,7 +155,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessStoredProcedureOperationAsync(
+            return ProcessStoredProcedureOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Delete,
@@ -172,7 +172,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             StoredProcedureRequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            ResponseMessage response = await this.ExecuteStoredProcedureStreamAsync(
+            ResponseMessage response = await ExecuteStoredProcedureStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 storedProcedureId: storedProcedureId,
                 partitionKey: partitionKey,
@@ -180,7 +180,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
 
-            return this.ClientContext.ResponseFactory.CreateStoredProcedureExecuteResponse<TOutput>(response);
+            return ClientContext.ResponseFactory.CreateStoredProcedureExecuteResponse<TOutput>(response);
         }
 
         public Task<ResponseMessage> ExecuteStoredProcedureStreamAsync(
@@ -194,10 +194,10 @@ namespace Microsoft.Azure.Cosmos.Scripts
             Stream streamPayload = null;
             if (parameters != null)
             {
-                streamPayload = this.ClientContext.SerializerCore.ToStream<dynamic[]>(parameters);
+                streamPayload = ClientContext.SerializerCore.ToStream<dynamic[]>(parameters);
             }
 
-            return this.ExecuteStoredProcedureStreamAsync(
+            return ExecuteStoredProcedureStreamAsync(
                 diagnosticsContext: diagnosticsContext,
                 storedProcedureId: storedProcedureId,
                 partitionKey: partitionKey,
@@ -220,13 +220,13 @@ namespace Microsoft.Azure.Cosmos.Scripts
             }
 
             ContainerInternal.ValidatePartitionKey(partitionKey, requestOptions);
-            
-            string linkUri = this.ClientContext.CreateLink(
-                parentLink: this.container.LinkUri,
+
+            string linkUri = ClientContext.CreateLink(
+                parentLink: container.LinkUri,
                 uriPathSegment: Paths.StoredProceduresPathSegment,
                 id: storedProcedureId);
 
-            return this.ProcessStreamOperationAsync(
+            return ProcessStreamOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 resourceUri: linkUri,
                 resourceType: ResourceType.StoredProcedure,
@@ -258,14 +258,14 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(triggerProperties.Body));
             }
 
-            return this.ProcessScriptsCreateOperationAsync(
+            return ProcessScriptsCreateOperationAsync(
                 diagnosticsContext: diagnosticsContext,
-                resourceUri: this.container.LinkUri,
+                resourceUri: container.LinkUri,
                 resourceType: ResourceType.Trigger,
                 operationType: OperationType.Create,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(triggerProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(triggerProperties),
                 requestOptions: requestOptions,
-                responseFunc: this.ClientContext.ResponseFactory.CreateTriggerResponse,
+                responseFunc: ClientContext.ResponseFactory.CreateTriggerResponse,
                 cancellationToken: cancellationToken);
         }
 
@@ -280,7 +280,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetTriggerQueryStreamIterator(
+            return GetTriggerQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -297,7 +297,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetTriggerQueryIterator<T>(
+            return GetTriggerQueryIterator<T>(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -309,8 +309,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorCore(
-               clientContext: this.ClientContext,
-               this.container.LinkUri,
+               clientContext: ClientContext,
+               container.LinkUri,
                resourceType: ResourceType.Trigger,
                queryDefinition: queryDefinition,
                continuationToken: continuationToken,
@@ -322,7 +322,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             string continuationToken = null,
             QueryRequestOptions requestOptions = null)
         {
-            if (!(this.GetTriggerQueryStreamIterator(
+            if (!(GetTriggerQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions) is FeedIteratorInternal databaseStreamIterator))
@@ -332,7 +332,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
 
             return new FeedIteratorCore<T>(
                 databaseStreamIterator,
-                (response) => this.ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
+                (response) => ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
                     responseMessage: response,
                     resourceType: ResourceType.Trigger));
         }
@@ -348,7 +348,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessTriggerOperationAsync(
+            return ProcessTriggerOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Read,
@@ -378,11 +378,11 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(triggerProperties.Body));
             }
 
-            return this.ProcessTriggerOperationAsync(
+            return ProcessTriggerOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: triggerProperties.Id,
                 operationType: OperationType.Replace,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(triggerProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(triggerProperties),
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
         }
@@ -398,7 +398,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessTriggerOperationAsync(
+            return ProcessTriggerOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Delete,
@@ -428,14 +428,14 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(userDefinedFunctionProperties.Body));
             }
 
-            return this.ProcessScriptsCreateOperationAsync(
+            return ProcessScriptsCreateOperationAsync(
                 diagnosticsContext: diagnosticsContext,
-                resourceUri: this.container.LinkUri,
+                resourceUri: container.LinkUri,
                 resourceType: ResourceType.UserDefinedFunction,
                 operationType: OperationType.Create,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(userDefinedFunctionProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(userDefinedFunctionProperties),
                 requestOptions: requestOptions,
-                responseFunc: this.ClientContext.ResponseFactory.CreateUserDefinedFunctionResponse,
+                responseFunc: ClientContext.ResponseFactory.CreateUserDefinedFunctionResponse,
                 cancellationToken: cancellationToken);
         }
 
@@ -450,7 +450,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetUserDefinedFunctionQueryStreamIterator(
+            return GetUserDefinedFunctionQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -467,7 +467,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 queryDefinition = new QueryDefinition(queryText);
             }
 
-            return this.GetUserDefinedFunctionQueryIterator<T>(
+            return GetUserDefinedFunctionQueryIterator<T>(
                 queryDefinition,
                 continuationToken,
                 requestOptions);
@@ -479,8 +479,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorCore(
-               clientContext: this.ClientContext,
-               this.container.LinkUri,
+               clientContext: ClientContext,
+               container.LinkUri,
                resourceType: ResourceType.UserDefinedFunction,
                queryDefinition: queryDefinition,
                continuationToken: continuationToken,
@@ -492,7 +492,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             string continuationToken = null,
             QueryRequestOptions requestOptions = null)
         {
-            if (!(this.GetUserDefinedFunctionQueryStreamIterator(
+            if (!(GetUserDefinedFunctionQueryStreamIterator(
                 queryDefinition,
                 continuationToken,
                 requestOptions) is FeedIteratorInternal databaseStreamIterator))
@@ -502,7 +502,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
 
             return new FeedIteratorCore<T>(
                 databaseStreamIterator,
-                (response) => this.ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
+                (response) => ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
                     responseMessage: response,
                     resourceType: ResourceType.UserDefinedFunction));
         }
@@ -518,7 +518,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessUserDefinedFunctionOperationAsync(
+            return ProcessUserDefinedFunctionOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Read,
@@ -548,11 +548,11 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(userDefinedFunctionProperties.Body));
             }
 
-            return this.ProcessUserDefinedFunctionOperationAsync(
+            return ProcessUserDefinedFunctionOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: userDefinedFunctionProperties.Id,
                 operationType: OperationType.Replace,
-                streamPayload: this.ClientContext.SerializerCore.ToStream(userDefinedFunctionProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream(userDefinedFunctionProperties),
                 requestOptions: requestOptions,
                 cancellationToken: cancellationToken);
         }
@@ -568,7 +568,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ProcessUserDefinedFunctionOperationAsync(
+            return ProcessUserDefinedFunctionOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 id: id,
                 operationType: OperationType.Delete,
@@ -585,12 +585,12 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            string linkUri = this.ClientContext.CreateLink(
-                parentLink: this.container.LinkUri,
+            string linkUri = ClientContext.CreateLink(
+                parentLink: container.LinkUri,
                 uriPathSegment: Paths.StoredProceduresPathSegment,
                 id: id);
 
-            ResponseMessage response = await this.ProcessStreamOperationAsync(
+            ResponseMessage response = await ProcessStreamOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 resourceUri: linkUri,
                 resourceType: ResourceType.StoredProcedure,
@@ -600,7 +600,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 streamPayload: streamPayload,
                 cancellationToken: cancellationToken);
 
-            return this.ClientContext.ResponseFactory.CreateStoredProcedureResponse(response);
+            return ClientContext.ResponseFactory.CreateStoredProcedureResponse(response);
         }
 
         private async Task<TriggerResponse> ProcessTriggerOperationAsync(
@@ -611,12 +611,12 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            string linkUri = this.ClientContext.CreateLink(
-                parentLink: this.container.LinkUri,
+            string linkUri = ClientContext.CreateLink(
+                parentLink: container.LinkUri,
                 uriPathSegment: Paths.TriggersPathSegment,
                 id: id);
 
-            ResponseMessage response = await this.ProcessStreamOperationAsync(
+            ResponseMessage response = await ProcessStreamOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 resourceUri: linkUri,
                 resourceType: ResourceType.Trigger,
@@ -626,7 +626,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 streamPayload: streamPayload,
                 cancellationToken: cancellationToken);
 
-            return this.ClientContext.ResponseFactory.CreateTriggerResponse(response);
+            return ClientContext.ResponseFactory.CreateTriggerResponse(response);
         }
 
         private Task<ResponseMessage> ProcessStreamOperationAsync(
@@ -639,12 +639,12 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return this.ClientContext.ProcessResourceOperationStreamAsync(
+            return ClientContext.ProcessResourceOperationStreamAsync(
                 resourceUri: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
                 requestOptions: requestOptions,
-                cosmosContainerCore: this.container,
+                cosmosContainerCore: container,
                 partitionKey: partitionKey,
                 streamPayload: streamPayload,
                 requestEnricher: null,
@@ -662,7 +662,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             Func<ResponseMessage, T> responseFunc,
             CancellationToken cancellationToken)
         {
-            ResponseMessage response = await this.ProcessStreamOperationAsync(
+            ResponseMessage response = await ProcessStreamOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 resourceUri: resourceUri,
                 resourceType: resourceType,
@@ -683,12 +683,12 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            string linkUri = this.ClientContext.CreateLink(
-                parentLink: this.container.LinkUri,
+            string linkUri = ClientContext.CreateLink(
+                parentLink: container.LinkUri,
                 uriPathSegment: Paths.UserDefinedFunctionsPathSegment,
                 id: id);
 
-            ResponseMessage response = await this.ProcessStreamOperationAsync(
+            ResponseMessage response = await ProcessStreamOperationAsync(
                 diagnosticsContext: diagnosticsContext,
                 resourceUri: linkUri,
                 resourceType: ResourceType.UserDefinedFunction,
@@ -698,7 +698,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
                 streamPayload: streamPayload,
                 cancellationToken: cancellationToken);
 
-            return this.ClientContext.ResponseFactory.CreateUserDefinedFunctionResponse(response);
+            return ClientContext.ResponseFactory.CreateUserDefinedFunctionResponse(response);
         }
     }
 }

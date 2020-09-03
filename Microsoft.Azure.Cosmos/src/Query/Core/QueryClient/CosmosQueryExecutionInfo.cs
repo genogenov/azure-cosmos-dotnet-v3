@@ -11,8 +11,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryClient
         [JsonConstructor]
         public CosmosQueryExecutionInfo(bool reverseRidEnabled, bool reverseIndexScan)
         {
-            this.ReverseRidEnabled = reverseRidEnabled;
-            this.ReverseIndexScan = reverseIndexScan;
+            ReverseRidEnabled = reverseRidEnabled;
+            ReverseIndexScan = reverseIndexScan;
         }
 
         /// <summary>

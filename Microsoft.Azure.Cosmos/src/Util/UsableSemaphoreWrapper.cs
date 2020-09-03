@@ -18,13 +18,13 @@ namespace Microsoft.Azure.Cosmos
 
         public void Dispose()
         {
-            if (this.disposed)
+            if (disposed)
             {
                 return;
             }
 
-            this.semaphore.Release();
-            this.disposed = true;
+            semaphore.Release();
+            disposed = true;
         }
     }
 }

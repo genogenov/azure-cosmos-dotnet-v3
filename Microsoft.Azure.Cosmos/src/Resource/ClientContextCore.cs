@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Cosmos
             this.client = client;
             this.clientOptions = clientOptions;
             this.serializerCore = serializerCore;
-            this.responseFactory = cosmosResponseFactory;
+            responseFactory = cosmosResponseFactory;
             this.requestHandler = requestHandler;
             this.documentClient = documentClient;
             this.userAgent = userAgent;
@@ -130,19 +130,19 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The Cosmos client that is used for the request
         /// </summary>
-        internal override CosmosClient Client => this.ThrowIfDisposed(this.client);
+        internal override CosmosClient Client => ThrowIfDisposed(client);
 
-        internal override DocumentClient DocumentClient => this.ThrowIfDisposed(this.documentClient);
+        internal override DocumentClient DocumentClient => ThrowIfDisposed(documentClient);
 
-        internal override CosmosSerializerCore SerializerCore => this.ThrowIfDisposed(this.serializerCore);
+        internal override CosmosSerializerCore SerializerCore => ThrowIfDisposed(serializerCore);
 
-        internal override CosmosResponseFactoryInternal ResponseFactory => this.ThrowIfDisposed(this.responseFactory);
+        internal override CosmosResponseFactoryInternal ResponseFactory => ThrowIfDisposed(responseFactory);
 
-        internal override RequestInvokerHandler RequestHandler => this.ThrowIfDisposed(this.requestHandler);
+        internal override RequestInvokerHandler RequestHandler => ThrowIfDisposed(requestHandler);
 
-        internal override CosmosClientOptions ClientOptions => this.ThrowIfDisposed(this.clientOptions);
+        internal override CosmosClientOptions ClientOptions => ThrowIfDisposed(clientOptions);
 
-        internal override string UserAgent => this.ThrowIfDisposed(this.userAgent);
+        internal override string UserAgent => ThrowIfDisposed(userAgent);
 
         /// <summary>
         /// Generates the URI link for the resource
@@ -156,7 +156,7 @@ namespace Microsoft.Azure.Cosmos
             string uriPathSegment,
             string id)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             int parentLinkLength = parentLink?.Length ?? 0;
             string idUriEscaped = Uri.EscapeUriString(id);
 
@@ -177,8 +177,8 @@ namespace Microsoft.Azure.Cosmos
 
         internal override void ValidateResource(string resourceId)
         {
-            this.ThrowIfDisposed();
-            this.DocumentClient.ValidateResource(resourceId);
+            ThrowIfDisposed();
+            DocumentClient.ValidateResource(resourceId);
         }
 
         internal override Task<TResult> OperationHelperAsync<TResult>(
@@ -186,18 +186,18 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             Func<CosmosDiagnosticsContext, Task<TResult>> task)
         {
-            CosmosDiagnosticsContext diagnosticsContext = this.CreateDiagnosticContext(
+            CosmosDiagnosticsContext diagnosticsContext = CreateDiagnosticContext(
                operationName,
                requestOptions);
 
             if (SynchronizationContext.Current == null)
             {
-                return this.RunWithDiagnosticsHelperAsync(
+                return RunWithDiagnosticsHelperAsync(
                     diagnosticsContext,
                     task);
             }
 
-            return this.RunWithSynchronizationContextAndDiagnosticsHelperAsync(
+            return RunWithSynchronizationContextAndDiagnosticsHelperAsync(
                     diagnosticsContext,
                     task);
         }
@@ -209,7 +209,7 @@ namespace Microsoft.Azure.Cosmos
             return CosmosDiagnosticsContextCore.Create(
                 operationName,
                 requestOptions,
-                this.UserAgent);
+                UserAgent);
         }
 
         internal override Task<ResponseMessage> ProcessResourceOperationStreamAsync(
@@ -225,8 +225,8 @@ namespace Microsoft.Azure.Cosmos
             CosmosDiagnosticsContext diagnosticsContext,
             CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
-            if (this.IsBulkOperationSupported(resourceType, operationType))
+            ThrowIfDisposed();
+            if (IsBulkOperationSupported(resourceType, operationType))
             {
                 if (!partitionKey.HasValue)
                 {
@@ -238,7 +238,7 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentException($"Bulk does not support {nameof(requestEnricher)}");
                 }
 
-                return this.ProcessResourceOperationAsBulkStreamAsync(
+                return ProcessResourceOperationAsBulkStreamAsync(
                     operationType: operationType,
                     requestOptions: requestOptions,
                     cosmosContainerCore: cosmosContainerCore,
@@ -249,7 +249,7 @@ namespace Microsoft.Azure.Cosmos
                     cancellationToken: cancellationToken);
             }
 
-            return this.ProcessResourceOperationStreamAsync(
+            return ProcessResourceOperationStreamAsync(
                 resourceUri: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
@@ -274,8 +274,8 @@ namespace Microsoft.Azure.Cosmos
             CosmosDiagnosticsContext diagnosticsContext,
             CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
-            return this.RequestHandler.SendAsync(
+            ThrowIfDisposed();
+            return RequestHandler.SendAsync(
                 resourceUriString: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
@@ -301,9 +301,9 @@ namespace Microsoft.Azure.Cosmos
             CosmosDiagnosticsContext diagnosticsScope,
             CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
-            return this.RequestHandler.SendAsync<T>(
+            return RequestHandler.SendAsync<T>(
                 resourceUri: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
@@ -321,11 +321,11 @@ namespace Microsoft.Azure.Cosmos
             string containerUri,
             CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             CosmosDiagnosticsContext diagnosticsContext = CosmosDiagnosticsContextCore.Create(requestOptions: null);
             using (diagnosticsContext.GetOverallScope())
             {
-                ClientCollectionCache collectionCache = await this.DocumentClient.GetCollectionCacheAsync();
+                ClientCollectionCache collectionCache = await DocumentClient.GetCollectionCacheAsync();
                 try
                 {
                     using (diagnosticsContext.CreateScope("ContainerCache.ResolveByNameAsync"))
@@ -346,19 +346,19 @@ namespace Microsoft.Azure.Cosmos
 
         internal override BatchAsyncContainerExecutor GetExecutorForContainer(ContainerInternal container)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
-            if (!this.ClientOptions.AllowBulkExecution)
+            if (!ClientOptions.AllowBulkExecution)
             {
                 return null;
             }
 
-            return this.batchExecutorCache.GetExecutorForContainer(container, this);
+            return batchExecutorCache.GetExecutorForContainer(container, this);
         }
 
         public override void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         /// <summary>
@@ -367,15 +367,15 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="disposing">True if disposing</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.isDisposed)
+            if (!isDisposed)
             {
                 if (disposing)
                 {
-                    this.batchExecutorCache.Dispose();
-                    this.DocumentClient.Dispose();
+                    batchExecutorCache.Dispose();
+                    DocumentClient.Dispose();
                 }
 
-                this.isDisposed = true;
+                isDisposed = true;
             }
         }
 
@@ -394,7 +394,7 @@ namespace Microsoft.Azure.Cosmos
                     // The goal of synchronizationContextScope is to log how much latency the Task.Run added to the latency.
                     // Dispose of it here so it only measures the latency added by the Task.Run.
                     synchronizationContextScope.Dispose();
-                    return this.RunWithDiagnosticsHelperAsync<TResult>(
+                    return RunWithDiagnosticsHelperAsync<TResult>(
                         diagnosticsContext,
                         task);
                 }
@@ -431,7 +431,7 @@ namespace Microsoft.Azure.Cosmos
             CosmosDiagnosticsContext diagnosticsContext,
             CancellationToken cancellationToken)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             ItemRequestOptions itemRequestOptions = requestOptions as ItemRequestOptions;
             TransactionalBatchItemRequestOptions batchItemRequestOptions = TransactionalBatchItemRequestOptions.FromItemRequestOptions(itemRequestOptions);
             ItemBatchOperation itemBatchOperation = new ItemBatchOperation(
@@ -455,8 +455,8 @@ namespace Microsoft.Azure.Cosmos
             ResourceType resourceType,
             OperationType operationType)
         {
-            this.ThrowIfDisposed();
-            if (!this.ClientOptions.AllowBulkExecution)
+            ThrowIfDisposed();
+            if (!ClientOptions.AllowBulkExecution)
             {
                 return false;
             }
@@ -476,7 +476,7 @@ namespace Microsoft.Azure.Cosmos
             {
                 throw new ArgumentNullException(nameof(clientOptions));
             }
-            
+
             // https://docs.microsoft.com/en-us/archive/blogs/timomta/controlling-the-number-of-outgoing-connections-from-httpclient-net-core-or-full-framework
             HttpClientHandler httpClientHandler = new HttpClientHandler
             {
@@ -499,14 +499,14 @@ namespace Microsoft.Azure.Cosmos
 
         internal T ThrowIfDisposed<T>(T input)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             return input;
         }
 
         private void ThrowIfDisposed()
         {
-            if (this.isDisposed)
+            if (isDisposed)
             {
                 throw new ObjectDisposedException($"Accessing {nameof(CosmosClient)} after it is disposed is invalid.");
             }

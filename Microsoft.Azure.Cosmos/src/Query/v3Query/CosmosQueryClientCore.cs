@@ -41,18 +41,18 @@ namespace Microsoft.Azure.Cosmos
         {
             this.clientContext = clientContext ?? throw new ArgumentException(nameof(clientContext));
             this.cosmosContainerCore = cosmosContainerCore;
-            this.documentClient = this.clientContext.DocumentClient;
-            this.semaphore = new SemaphoreSlim(1, 1);
+            documentClient = this.clientContext.DocumentClient;
+            semaphore = new SemaphoreSlim(1, 1);
         }
 
-        public override Action<IQueryable> OnExecuteScalarQueryCallback => this.documentClient.OnExecuteScalarQueryCallback;
+        public override Action<IQueryable> OnExecuteScalarQueryCallback => documentClient.OnExecuteScalarQueryCallback;
 
         public override async Task<ContainerQueryProperties> GetCachedContainerQueryPropertiesAsync(
             string containerLink,
             PartitionKey? partitionKey,
             CancellationToken cancellationToken)
         {
-            ContainerProperties containerProperties = await this.clientContext.GetCachedContainerPropertiesAsync(
+            ContainerProperties containerProperties = await clientContext.GetCachedContainerPropertiesAsync(
                 containerLink,
                 cancellationToken);
 
@@ -88,26 +88,26 @@ namespace Microsoft.Azure.Cosmos
             bool hasLogicalPartitionKey,
             CancellationToken cancellationToken)
         {
-            if (this.queryPartitionProvider == null)
+            if (queryPartitionProvider == null)
             {
                 try
                 {
-                    await this.semaphore.WaitAsync(cancellationToken);
+                    await semaphore.WaitAsync(cancellationToken);
 
-                    if (this.queryPartitionProvider == null)
+                    if (queryPartitionProvider == null)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        IDictionary<string, object> queryConfiguration = await this.documentClient.GetQueryEngineConfigurationAsync();
-                        this.queryPartitionProvider = new QueryPartitionProvider(queryConfiguration);
+                        IDictionary<string, object> queryConfiguration = await documentClient.GetQueryEngineConfigurationAsync();
+                        queryPartitionProvider = new QueryPartitionProvider(queryConfiguration);
                     }
                 }
                 finally
                 {
-                    this.semaphore.Release();
+                    semaphore.Release();
                 }
             }
 
-            return this.queryPartitionProvider.TryGetPartitionedQueryExecutionInfo(
+            return queryPartitionProvider.TryGetPartitionedQueryExecutionInfo(
                 sqlQuerySpec,
                 partitionKeyDefinition,
                 requireFormattableOrderByQuery,
@@ -132,17 +132,17 @@ namespace Microsoft.Azure.Cosmos
         {
             requestOptions.MaxItemCount = pageSize;
 
-            ResponseMessage message = await this.clientContext.ProcessResourceOperationStreamAsync(
+            ResponseMessage message = await clientContext.ProcessResourceOperationStreamAsync(
                 resourceUri: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
                 requestOptions: requestOptions,
                 partitionKey: requestOptions.PartitionKey,
-                cosmosContainerCore: this.cosmosContainerCore,
-                streamPayload: this.clientContext.SerializerCore.ToStreamSqlQuerySpec(sqlQuerySpec, resourceType),
+                cosmosContainerCore: cosmosContainerCore,
+                streamPayload: clientContext.SerializerCore.ToStreamSqlQuerySpec(sqlQuerySpec, resourceType),
                 requestEnricher: (cosmosRequestMessage) =>
                 {
-                    this.PopulatePartitionKeyRangeInfo(cosmosRequestMessage, partitionKeyRange);
+                    PopulatePartitionKeyRangeInfo(cosmosRequestMessage, partitionKeyRange);
                     cosmosRequestMessage.Headers.Add(
                         HttpConstants.HttpHeaders.IsContinuationExpected,
                         isContinuationExpected.ToString());
@@ -175,14 +175,14 @@ namespace Microsoft.Azure.Cosmos
             CancellationToken cancellationToken)
         {
             PartitionedQueryExecutionInfo partitionedQueryExecutionInfo;
-            using (ResponseMessage message = await this.clientContext.ProcessResourceOperationStreamAsync(
+            using (ResponseMessage message = await clientContext.ProcessResourceOperationStreamAsync(
                 resourceUri: resourceUri,
                 resourceType: resourceType,
                 operationType: operationType,
                 requestOptions: null,
                 partitionKey: partitionKey,
-                cosmosContainerCore: this.cosmosContainerCore,
-                streamPayload: this.clientContext.SerializerCore.ToStreamSqlQuerySpec(sqlQuerySpec, resourceType),
+                cosmosContainerCore: cosmosContainerCore,
+                streamPayload: clientContext.SerializerCore.ToStreamSqlQuerySpec(sqlQuerySpec, resourceType),
                 requestEnricher: (requestMessage) =>
                 {
                     requestMessage.Headers.Add(HttpConstants.HttpHeaders.ContentType, RuntimeConstants.MediaTypes.QueryJson);
@@ -196,7 +196,7 @@ namespace Microsoft.Azure.Cosmos
             {
                 // Syntax exception are argument exceptions and thrown to the user.
                 message.EnsureSuccessStatusCode();
-                partitionedQueryExecutionInfo = this.clientContext.SerializerCore.FromStream<PartitionedQueryExecutionInfo>(message.Content);
+                partitionedQueryExecutionInfo = clientContext.SerializerCore.FromStream<PartitionedQueryExecutionInfo>(message.Content);
             }
 
             return partitionedQueryExecutionInfo;
@@ -207,7 +207,7 @@ namespace Microsoft.Azure.Cosmos
             string collectionResourceId,
             string effectivePartitionKeyString)
         {
-            return this.GetTargetPartitionKeyRangesAsync(
+            return GetTargetPartitionKeyRangesAsync(
                 resourceLink,
                 collectionResourceId,
                 new List<Range<string>>
@@ -222,10 +222,10 @@ namespace Microsoft.Azure.Cosmos
             PartitionKeyDefinition partitionKeyDefinition,
             FeedRangeInternal feedRangeInternal)
         {
-            IRoutingMapProvider routingMapProvider = await this.GetRoutingMapProviderAsync();
+            IRoutingMapProvider routingMapProvider = await GetRoutingMapProviderAsync();
             List<Range<string>> ranges = await feedRangeInternal.GetEffectiveRangesAsync(routingMapProvider, collectionResourceId, partitionKeyDefinition);
 
-            return await this.GetTargetPartitionKeyRangesAsync(
+            return await GetTargetPartitionKeyRangesAsync(
                 resourceLink,
                 collectionResourceId,
                 ranges);
@@ -248,7 +248,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(providedRanges));
             }
 
-            IRoutingMapProvider routingMapProvider = await this.GetRoutingMapProviderAsync();
+            IRoutingMapProvider routingMapProvider = await GetRoutingMapProviderAsync();
 
             List<PartitionKeyRange> ranges = await routingMapProvider.TryGetOverlappingRangesAsync(collectionResourceId, providedRanges);
             if (ranges == null && PathsHelper.IsNameBased(resourceLink))
@@ -258,7 +258,7 @@ namespace Microsoft.Azure.Cosmos
                 // Return NotFoundException this time. Next query will succeed.
                 // This can only happen if collection is deleted/created with same name and client was not restarted
                 // in between.
-                CollectionCache collectionCache = await this.documentClient.GetCollectionCacheAsync();
+                CollectionCache collectionCache = await documentClient.GetCollectionCacheAsync();
                 collectionCache.Refresh(resourceLink);
             }
 
@@ -277,7 +277,7 @@ namespace Microsoft.Azure.Cosmos
 
         public override void ClearSessionTokenCache(string collectionFullName)
         {
-            ISessionContainer sessionContainer = this.clientContext.DocumentClient.sessionContainer;
+            ISessionContainer sessionContainer = clientContext.DocumentClient.sessionContainer;
             sessionContainer.ClearTokenByCollectionFullname(collectionFullName);
         }
 
@@ -368,9 +368,9 @@ namespace Microsoft.Azure.Cosmos
 
         public override async Task ForceRefreshCollectionCacheAsync(string collectionLink, CancellationToken cancellationToken)
         {
-            this.ClearSessionTokenCache(collectionLink);
+            ClearSessionTokenCache(collectionLink);
 
-            CollectionCache collectionCache = await this.documentClient.GetCollectionCacheAsync();
+            CollectionCache collectionCache = await documentClient.GetCollectionCacheAsync();
             using (Documents.DocumentServiceRequest request = Documents.DocumentServiceRequest.Create(
                Documents.OperationType.Query,
                Documents.ResourceType.Collection,
@@ -387,13 +387,13 @@ namespace Microsoft.Azure.Cosmos
             Range<string> range,
             bool forceRefresh = false)
         {
-            PartitionKeyRangeCache partitionKeyRangeCache = await this.GetRoutingMapProviderAsync();
+            PartitionKeyRangeCache partitionKeyRangeCache = await GetRoutingMapProviderAsync();
             return await partitionKeyRangeCache.TryGetOverlappingRangesAsync(collectionResourceId, range, forceRefresh);
         }
 
         private Task<PartitionKeyRangeCache> GetRoutingMapProviderAsync()
         {
-            return this.documentClient.GetPartitionKeyRangeCacheAsync();
+            return documentClient.GetPartitionKeyRangeCacheAsync();
         }
 
         /// <summary>

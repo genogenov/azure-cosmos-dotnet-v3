@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlParameter(string name)
         {
-            this.Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
         public string Name { get; }

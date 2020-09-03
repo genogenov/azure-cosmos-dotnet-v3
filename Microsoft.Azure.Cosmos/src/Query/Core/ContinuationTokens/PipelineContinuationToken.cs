@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
 
         protected PipelineContinuationToken(Version version)
         {
-            this.Version = version;
+            Version = version;
         }
 
         public Version Version { get; }

@@ -17,13 +17,13 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
 
         internal ChangeFeedObserverContextCore(string leaseToken)
         {
-            this.LeaseToken = leaseToken;
+            LeaseToken = leaseToken;
         }
 
         internal ChangeFeedObserverContextCore(string leaseToken, ResponseMessage feedResponse, PartitionCheckpointer checkpointer)
         {
-            this.LeaseToken = leaseToken;
-            this.DocumentFeedResponse = feedResponse;
+            LeaseToken = leaseToken;
+            DocumentFeedResponse = feedResponse;
             this.checkpointer = checkpointer;
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         /// <exception cref="Exceptions.LeaseLostException">Thrown if other host acquired the lease or the lease was deleted</exception>
         public override Task CheckpointAsync()
         {
-            return this.checkpointer.CheckpointPartitionAsync(this.DocumentFeedResponse.Headers.ContinuationToken);
+            return checkpointer.CheckpointPartitionAsync(DocumentFeedResponse.Headers.ContinuationToken);
         }
     }
 }

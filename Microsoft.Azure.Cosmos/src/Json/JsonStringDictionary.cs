@@ -33,8 +33,8 @@ namespace Microsoft.Azure.Cosmos.Json
                 throw new ArgumentOutOfRangeException($"{nameof(capacity)} must be a non negative integer.");
             }
 
-            this.strings = new UtfAllString[capacity];
-            this.utf8StringToIndex = new Trie<byte, int>(capacity);
+            strings = new UtfAllString[capacity];
+            utf8StringToIndex = new Trie<byte, int>(capacity);
         }
 
         public bool TryAddString(string value, out int index)
@@ -43,41 +43,41 @@ namespace Microsoft.Azure.Cosmos.Json
             Span<byte> utfString = utf8Length < JsonStringDictionary.MaxStackAllocSize ? stackalloc byte[utf8Length] : new byte[utf8Length];
             Encoding.UTF8.GetBytes(value, utfString);
 
-            return this.TryAddString(Utf8Span.UnsafeFromUtf8BytesNoValidation(utfString), out index);
+            return TryAddString(Utf8Span.UnsafeFromUtf8BytesNoValidation(utfString), out index);
         }
 
         public bool TryAddString(Utf8Span value, out int index)
         {
             // If the string already exists, then just return that index.
-            if (this.utf8StringToIndex.TryGetValue(value.Span, out index))
+            if (utf8StringToIndex.TryGetValue(value.Span, out index))
             {
                 return true;
             }
 
             // If we are at capacity just return false.
-            if (this.size == this.strings.Length)
+            if (size == strings.Length)
             {
                 index = default;
                 return false;
             }
 
-            index = this.size;
-            this.strings[this.size] = UtfAllString.Create(value.ToString());
-            this.utf8StringToIndex.AddOrUpdate(value.Span, index);
-            this.size++;
+            index = size;
+            strings[size] = UtfAllString.Create(value.ToString());
+            utf8StringToIndex.AddOrUpdate(value.Span, index);
+            size++;
 
             return true;
         }
 
         public bool TryGetStringAtIndex(int index, out UtfAllString value)
         {
-            if ((index < 0) || (index >= this.size))
+            if ((index < 0) || (index >= size))
             {
                 value = default;
                 return false;
             }
 
-            value = this.strings[index];
+            value = strings[index];
             return true;
         }
 

@@ -23,12 +23,12 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlOrderbyClause orderbyClause,
             SqlOffsetLimitClause offsetLimitClause)
         {
-            this.SelectClause = selectClause ?? throw new ArgumentNullException(nameof(selectClause));
-            this.FromClause = fromClause;
-            this.WhereClause = whereClause;
-            this.GroupByClause = groupByClause;
-            this.OrderbyClause = orderbyClause;
-            this.OffsetLimitClause = offsetLimitClause;
+            SelectClause = selectClause ?? throw new ArgumentNullException(nameof(selectClause));
+            FromClause = fromClause;
+            WhereClause = whereClause;
+            GroupByClause = groupByClause;
+            OrderbyClause = orderbyClause;
+            OffsetLimitClause = offsetLimitClause;
         }
 
         public SqlSelectClause SelectClause { get; }

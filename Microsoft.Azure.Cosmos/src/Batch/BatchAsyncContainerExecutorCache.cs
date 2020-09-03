@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Cosmos
     {
         // Keeping same performance tuned value of Bulk V2.
         internal const int DefaultMaxBulkRequestBodySizeInBytes = 220201;
-        private ConcurrentDictionary<string, BatchAsyncContainerExecutor> executorsPerContainer = new ConcurrentDictionary<string, BatchAsyncContainerExecutor>();
+        private readonly ConcurrentDictionary<string, BatchAsyncContainerExecutor> executorsPerContainer = new ConcurrentDictionary<string, BatchAsyncContainerExecutor>();
 
         public BatchAsyncContainerExecutor GetExecutorForContainer(
             ContainerInternal container,
@@ -28,7 +28,7 @@ namespace Microsoft.Azure.Cosmos
             }
 
             string containerLink = container.LinkUri.ToString();
-            if (this.executorsPerContainer.TryGetValue(containerLink, out BatchAsyncContainerExecutor executor))
+            if (executorsPerContainer.TryGetValue(containerLink, out BatchAsyncContainerExecutor executor))
             {
                 return executor;
             }
@@ -38,17 +38,17 @@ namespace Microsoft.Azure.Cosmos
                 cosmosClientContext,
                 Constants.MaxOperationsInDirectModeBatchRequest,
                 DefaultMaxBulkRequestBodySizeInBytes);
-            if (!this.executorsPerContainer.TryAdd(containerLink, newExecutor))
+            if (!executorsPerContainer.TryAdd(containerLink, newExecutor))
             {
                 newExecutor.Dispose();
             }
 
-            return this.executorsPerContainer[containerLink];
+            return executorsPerContainer[containerLink];
         }
 
         public void Dispose()
         {
-            foreach (KeyValuePair<string, BatchAsyncContainerExecutor> cacheEntry in this.executorsPerContainer)
+            foreach (KeyValuePair<string, BatchAsyncContainerExecutor> cacheEntry in executorsPerContainer)
             {
                 cacheEntry.Value.Dispose();
             }

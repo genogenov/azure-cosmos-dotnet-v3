@@ -39,41 +39,45 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public override async Task InitializeAsync()
         {
-            this.shutdownCts = new CancellationTokenSource();
-            await this.LoadLeasesAsync().ConfigureAwait(false);
+            shutdownCts = new CancellationTokenSource();
+            await LoadLeasesAsync().ConfigureAwait(false);
         }
 
         public override async Task AddOrUpdateLeaseAsync(DocumentServiceLease lease)
         {
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
 
-            if (!this.currentlyOwnedPartitions.TryAdd(lease.CurrentLeaseToken, tcs))
+            if (!currentlyOwnedPartitions.TryAdd(lease.CurrentLeaseToken, tcs))
             {
-                await this.leaseManager.UpdatePropertiesAsync(lease).ConfigureAwait(false);
+                await leaseManager.UpdatePropertiesAsync(lease).ConfigureAwait(false);
                 DefaultTrace.TraceVerbose("Lease with token {0}: updated", lease.CurrentLeaseToken);
                 return;
             }
 
             try
             {
-                DocumentServiceLease updatedLease = await this.leaseManager.AcquireAsync(lease).ConfigureAwait(false);
-                if (updatedLease != null) lease = updatedLease;
+                DocumentServiceLease updatedLease = await leaseManager.AcquireAsync(lease).ConfigureAwait(false);
+                if (updatedLease != null)
+                {
+                    lease = updatedLease;
+                }
+
                 DefaultTrace.TraceInformation("Lease with token {0}: acquired", lease.CurrentLeaseToken);
             }
             catch (Exception)
             {
-                await this.RemoveLeaseAsync(lease).ConfigureAwait(false);
+                await RemoveLeaseAsync(lease).ConfigureAwait(false);
                 throw;
             }
 
-            PartitionSupervisor supervisor = this.partitionSupervisorFactory.Create(lease);
-            this.ProcessPartitionAsync(supervisor, lease).LogException();
+            PartitionSupervisor supervisor = partitionSupervisorFactory.Create(lease);
+            ProcessPartitionAsync(supervisor, lease).LogException();
         }
 
         public override async Task ShutdownAsync()
         {
-            this.shutdownCts.Cancel();
-            IEnumerable<Task> leases = this.currentlyOwnedPartitions.Select(pair => pair.Value.Task).ToList();
+            shutdownCts.Cancel();
+            IEnumerable<Task> leases = currentlyOwnedPartitions.Select(pair => pair.Value.Task).ToList();
             await Task.WhenAll(leases).ConfigureAwait(false);
         }
 
@@ -81,10 +85,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             DefaultTrace.TraceVerbose("Starting renew leases assigned to this host on initialize.");
             List<Task> addLeaseTasks = new List<Task>();
-            foreach (DocumentServiceLease lease in await this.leaseContainer.GetOwnedLeasesAsync().ConfigureAwait(false))
+            foreach (DocumentServiceLease lease in await leaseContainer.GetOwnedLeasesAsync().ConfigureAwait(false))
             {
                 DefaultTrace.TraceInformation("Acquired lease with token '{0}' on startup.", lease.CurrentLeaseToken);
-                addLeaseTasks.Add(this.AddOrUpdateLeaseAsync(lease));
+                addLeaseTasks.Add(AddOrUpdateLeaseAsync(lease));
             }
 
             await Task.WhenAll(addLeaseTasks.ToArray()).ConfigureAwait(false);
@@ -92,8 +96,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         private async Task RemoveLeaseAsync(DocumentServiceLease lease)
         {
-            TaskCompletionSource<bool> worker;
-            if (!this.currentlyOwnedPartitions.TryRemove(lease.CurrentLeaseToken, out worker))
+            if (!currentlyOwnedPartitions.TryRemove(lease.CurrentLeaseToken, out TaskCompletionSource<bool> worker))
             {
                 return;
             }
@@ -102,7 +105,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
             try
             {
-                await this.leaseManager.ReleaseAsync(lease).ConfigureAwait(false);
+                await leaseManager.ReleaseAsync(lease).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -119,11 +122,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             try
             {
-                await partitionSupervisor.RunAsync(this.shutdownCts.Token).ConfigureAwait(false);
+                await partitionSupervisor.RunAsync(shutdownCts.Token).ConfigureAwait(false);
             }
             catch (FeedSplitException ex)
             {
-                await this.HandleSplitAsync(lease, ex.LastContinuation).ConfigureAwait(false);
+                await HandleSplitAsync(lease, ex.LastContinuation).ConfigureAwait(false);
             }
             catch (TaskCanceledException)
             {
@@ -135,7 +138,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 DefaultTrace.TraceWarning("Lease with token {0}: processing failed", lease.CurrentLeaseToken);
             }
 
-            await this.RemoveLeaseAsync(lease).ConfigureAwait(false);
+            await RemoveLeaseAsync(lease).ConfigureAwait(false);
         }
 
         private async Task HandleSplitAsync(DocumentServiceLease lease, string lastContinuationToken)
@@ -143,14 +146,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
             try
             {
                 lease.ContinuationToken = lastContinuationToken;
-                IEnumerable<DocumentServiceLease> addedLeases = await this.synchronizer.SplitPartitionAsync(lease).ConfigureAwait(false);
+                IEnumerable<DocumentServiceLease> addedLeases = await synchronizer.SplitPartitionAsync(lease).ConfigureAwait(false);
                 Task[] addLeaseTasks = addedLeases.Select(l =>
                     {
                         l.Properties = lease.Properties;
-                        return this.AddOrUpdateLeaseAsync(l);
+                        return AddOrUpdateLeaseAsync(l);
                     }).ToArray();
 
-                await this.leaseManager.DeleteAsync(lease).ConfigureAwait(false);
+                await leaseManager.DeleteAsync(lease).ConfigureAwait(false);
                 await Task.WhenAll(addLeaseTasks).ConfigureAwait(false);
             }
             catch (Exception e)

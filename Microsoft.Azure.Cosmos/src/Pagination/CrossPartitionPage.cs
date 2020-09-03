@@ -11,7 +11,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
         public CrossPartitionPage(TBackendPage backendEndPage, CrossPartitionState<TBackendState> state)
             : base(state)
         {
-            this.Page = backendEndPage;
+            Page = backendEndPage;
         }
 
         public TBackendPage Page { get; }

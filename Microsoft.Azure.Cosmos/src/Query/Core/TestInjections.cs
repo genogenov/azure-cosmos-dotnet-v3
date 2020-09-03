@@ -14,9 +14,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core
 
         public TestInjections(bool simulate429s, bool simulateEmptyPages, ResponseStats responseStats = null)
         {
-            this.SimulateThrottles = simulate429s;
-            this.SimulateEmptyPages = simulateEmptyPages;
-            this.Stats = responseStats;
+            SimulateThrottles = simulate429s;
+            SimulateEmptyPages = simulateEmptyPages;
+            Stats = responseStats;
         }
 
         public bool SimulateThrottles { get; }

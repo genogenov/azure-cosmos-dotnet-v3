@@ -143,10 +143,10 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         public override SqlObject Visit(SqlIdentifier sqlIdentifier)
         {
             return SqlIdentifier.Create(
-                this.GetObfuscatedString(
+                GetObfuscatedString(
                     sqlIdentifier.Value,
                     "ident",
-                    ref this.identifierSequenceNumber));
+                    ref identifierSequenceNumber));
         }
 
         public override SqlObject Visit(SqlIdentifierPathExpression sqlIdentifierPathExpression)
@@ -211,7 +211,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         {
             return SqlNumberLiteral.Create(
                 Number64.ToDouble(
-                    this.GetObfuscatedNumber(sqlNumberLiteral.Value)));
+                    GetObfuscatedNumber(sqlNumberLiteral.Value)));
         }
 
         public override SqlObject Visit(SqlNumberPathExpression sqlNumberPathExpression)
@@ -272,10 +272,10 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         public override SqlObject Visit(SqlParameter sqlParameter)
         {
             return SqlParameter.Create(
-                this.GetObfuscatedString(
+                GetObfuscatedString(
                     sqlParameter.Name,
                     "param",
-                    ref this.paramaterSequenceNumber));
+                    ref paramaterSequenceNumber));
         }
 
         public override SqlObject Visit(SqlParameterRefScalarExpression sqlObject)
@@ -291,10 +291,10 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         public override SqlObject Visit(SqlPropertyName sqlPropertyName)
         {
             return SqlPropertyName.Create(
-                this.GetObfuscatedString(
+                GetObfuscatedString(
                     sqlPropertyName.Value,
                     "p",
-                    ref this.fieldNameSequenceNumber));
+                    ref fieldNameSequenceNumber));
         }
 
         public override SqlObject Visit(SqlPropertyRefScalarExpression sqlPropertyRefScalarExpression)
@@ -355,10 +355,10 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         public override SqlObject Visit(SqlStringLiteral sqlStringLiteral)
         {
             return SqlStringLiteral.Create(
-                this.GetObfuscatedString(
+                GetObfuscatedString(
                     sqlStringLiteral.Value,
                     "str",
-                    ref this.stringSequenceNumber));
+                    ref stringSequenceNumber));
         }
 
         public override SqlObject Visit(SqlStringPathExpression sqlStringPathExpression)
@@ -409,23 +409,23 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
                 || (value.IsInteger && (Number64.ToLong(value) == long.MinValue))
                 || (value.IsInteger && (Math.Abs(Number64.ToLong(value)) < 100))
                 || (value.IsDouble && (Math.Abs(Number64.ToDouble(value)) < 100) && ((long)Number64.ToDouble(value) == Number64.ToDouble(value)))
-                || (value.IsDouble && (Math.Abs(Number64.ToDouble(value)) <= Double.Epsilon)))
+                || (value.IsDouble && (Math.Abs(Number64.ToDouble(value)) <= double.Epsilon)))
             {
                 obfuscatedNumber = value;
             }
             else
             {
-                if (!this.obfuscatedNumbers.TryGetValue(value, out obfuscatedNumber))
+                if (!obfuscatedNumbers.TryGetValue(value, out obfuscatedNumber))
                 {
                     double doubleValue = Number64.ToDouble(value);
 
-                    int sequenceNumber = ++this.numberSequenceNumber;
+                    int sequenceNumber = ++numberSequenceNumber;
 
                     double log10 = Math.Floor(Math.Log10(Math.Abs(doubleValue)));
                     double adjustedSequence = Math.Pow(10, log10) * sequenceNumber / 1e4;
 
                     obfuscatedNumber = Math.Round(doubleValue, 2) + adjustedSequence;
-                    this.obfuscatedNumbers.Add(value, obfuscatedNumber);
+                    obfuscatedNumbers.Add(value, obfuscatedNumber);
                 }
             }
 
@@ -448,11 +448,11 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             }
             else
             {
-                if (!this.obfuscatedStrings.TryGetValue(value, out obfuscatedString))
+                if (!obfuscatedStrings.TryGetValue(value, out obfuscatedString))
                 {
                     int sequenceNumber = ++sequence;
                     obfuscatedString = value.Length < 10 ? $"{prefix}{sequence}" : $"{prefix}{sequence}__{value.Length}";
-                    this.obfuscatedStrings.Add(value, obfuscatedString);
+                    obfuscatedStrings.Add(value, obfuscatedString);
                 }
             }
 

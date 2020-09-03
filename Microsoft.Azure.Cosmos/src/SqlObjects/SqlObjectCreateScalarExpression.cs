@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.Cosmos.SqlObjects
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.Immutable;
     using Microsoft.Azure.Cosmos.SqlObjects.Visitors;
 
@@ -32,7 +31,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            this.Properties = properties;
+            Properties = properties;
         }
 
         public ImmutableArray<SqlObjectProperty> Properties { get; }

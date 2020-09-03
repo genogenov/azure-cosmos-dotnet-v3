@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         private CosmosBoolean(bool value)
             : base()
         {
-            this.Value = value;
+            Value = value;
         }
 
         public bool Value { get; }
@@ -38,17 +38,17 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosBoolean cosmosBoolean && this.Equals(cosmosBoolean);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosBoolean cosmosBoolean && Equals(cosmosBoolean);
 
-        public bool Equals(CosmosBoolean cosmosBoolean) => this.Value == cosmosBoolean.Value;
+        public bool Equals(CosmosBoolean cosmosBoolean) => Value == cosmosBoolean.Value;
 
-        public override int GetHashCode() => this.Value ? TrueHash : FalseHash;
+        public override int GetHashCode() => Value ? TrueHash : FalseHash;
 
-        public int CompareTo(CosmosBoolean cosmosBoolean) => this.Value.CompareTo(cosmosBoolean.Value);
+        public int CompareTo(CosmosBoolean cosmosBoolean) => Value.CompareTo(cosmosBoolean.Value);
 
         public static CosmosBoolean Create(bool boolean) => boolean ? CosmosBoolean.True : CosmosBoolean.False;
 
-        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteBoolValue(this.Value);
+        public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteBoolValue(Value);
 
         public static new CosmosBoolean CreateFromBuffer(ReadOnlyMemory<byte> buffer) => CosmosElement.CreateFromBuffer<CosmosBoolean>(buffer);
 

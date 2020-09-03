@@ -5,7 +5,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 {
     using System;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
@@ -54,9 +53,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
                 hash = DistinctHash.GetHash(cosmosElement);
 
                 bool added;
-                if (this.lastHash != hash)
+                if (lastHash != hash)
                 {
-                    this.lastHash = hash;
+                    lastHash = hash;
                     added = true;
                 }
                 else
@@ -69,12 +68,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
             public override string GetContinuationToken()
             {
-                return this.lastHash.ToString();
+                return lastHash.ToString();
             }
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                return CosmosBinary.Create(UInt128.ToByteArray(this.lastHash));
+                return CosmosBinary.Create(UInt128.ToByteArray(lastHash));
             }
 
             public static TryCatch<DistinctMap> TryCreate(CosmosElement requestContinuationToken)

@@ -63,32 +63,32 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         protected override void WriteRetrievedDocumentCount(long retrievedDocumentCount)
         {
-            this.AppendKeyValuePair(QueryMetricsDelimitedStringWriter.RetrievedDocumentCount, retrievedDocumentCount);
+            AppendKeyValuePair(QueryMetricsDelimitedStringWriter.RetrievedDocumentCount, retrievedDocumentCount);
         }
 
         protected override void WriteRetrievedDocumentSize(long retrievedDocumentSize)
         {
-            this.AppendKeyValuePair(QueryMetricsDelimitedStringWriter.RetrievedDocumentSize, retrievedDocumentSize);
+            AppendKeyValuePair(QueryMetricsDelimitedStringWriter.RetrievedDocumentSize, retrievedDocumentSize);
         }
 
         protected override void WriteOutputDocumentCount(long outputDocumentCount)
         {
-            this.AppendKeyValuePair(QueryMetricsDelimitedStringWriter.OutputDocumentCount, outputDocumentCount);
+            AppendKeyValuePair(QueryMetricsDelimitedStringWriter.OutputDocumentCount, outputDocumentCount);
         }
 
         protected override void WriteOutputDocumentSize(long outputDocumentSize)
         {
-            this.AppendKeyValuePair(QueryMetricsDelimitedStringWriter.OutputDocumentSize, outputDocumentSize);
+            AppendKeyValuePair(QueryMetricsDelimitedStringWriter.OutputDocumentSize, outputDocumentSize);
         }
 
         protected override void WriteIndexHitRatio(double indexHitRatio)
         {
-            this.AppendKeyValuePair(QueryMetricsDelimitedStringWriter.IndexHitRatio, indexHitRatio);
+            AppendKeyValuePair(QueryMetricsDelimitedStringWriter.IndexHitRatio, indexHitRatio);
         }
 
         protected override void WriteTotalQueryExecutionTime(TimeSpan totalQueryExecutionTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.TotalQueryExecutionTimeInMs, totalQueryExecutionTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.TotalQueryExecutionTimeInMs, totalQueryExecutionTime);
         }
 
         #region QueryPreparationTimes
@@ -99,22 +99,22 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         protected override void WriteQueryCompilationTime(TimeSpan queryCompilationTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryCompileTimeInMs, queryCompilationTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryCompileTimeInMs, queryCompilationTime);
         }
 
         protected override void WriteLogicalPlanBuildTime(TimeSpan logicalPlanBuildTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.LogicalPlanBuildTimeInMs, logicalPlanBuildTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.LogicalPlanBuildTimeInMs, logicalPlanBuildTime);
         }
 
         protected override void WritePhysicalPlanBuildTime(TimeSpan physicalPlanBuildTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.PhysicalPlanBuildTimeInMs, physicalPlanBuildTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.PhysicalPlanBuildTimeInMs, physicalPlanBuildTime);
         }
 
         protected override void WriteQueryOptimizationTime(TimeSpan queryOptimizationTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryOptimizationTimeInMs, queryOptimizationTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryOptimizationTimeInMs, queryOptimizationTime);
         }
 
         protected override void WriteAfterQueryPreparationTimes()
@@ -125,17 +125,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         protected override void WriteIndexLookupTime(TimeSpan indexLookupTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.IndexLookupTimeInMs, indexLookupTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.IndexLookupTimeInMs, indexLookupTime);
         }
 
         protected override void WriteDocumentLoadTime(TimeSpan documentLoadTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.DocumentLoadTimeInMs, documentLoadTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.DocumentLoadTimeInMs, documentLoadTime);
         }
 
         protected override void WriteVMExecutionTime(TimeSpan vmExecutionTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.VMExecutionTimeInMs, vmExecutionTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.VMExecutionTimeInMs, vmExecutionTime);
         }
 
         #region RuntimeExecutionTimes
@@ -146,17 +146,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         protected override void WriteQueryEngineExecutionTime(TimeSpan queryEngineExecutionTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryEngineTimes, queryEngineExecutionTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.QueryEngineTimes, queryEngineExecutionTime);
         }
 
         protected override void WriteSystemFunctionExecutionTime(TimeSpan systemFunctionExecutionTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.SystemFunctionExecuteTimeInMs, systemFunctionExecutionTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.SystemFunctionExecuteTimeInMs, systemFunctionExecutionTime);
         }
 
         protected override void WriteUserDefinedFunctionExecutionTime(TimeSpan userDefinedFunctionExecutionTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.UserDefinedFunctionExecutionTimeInMs, userDefinedFunctionExecutionTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.UserDefinedFunctionExecutionTimeInMs, userDefinedFunctionExecutionTime);
         }
 
         protected override void WriteAfterRuntimeExecutionTimes()
@@ -167,7 +167,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         protected override void WriteDocumentWriteTime(TimeSpan documentWriteTime)
         {
-            this.AppendTimeSpan(QueryMetricsDelimitedStringWriter.DocumentWriteTimeInMs, documentWriteTime);
+            AppendTimeSpan(QueryMetricsDelimitedStringWriter.DocumentWriteTimeInMs, documentWriteTime);
         }
 
         #region ClientSideMetrics
@@ -312,20 +312,20 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         protected override void WriteAfterQueryMetrics()
         {
             // Remove last ";" symbol
-            this.stringBuilder.Length--;
+            stringBuilder.Length--;
         }
 
         private void AppendKeyValuePair<T>(string name, T value)
         {
-            this.stringBuilder.Append(name);
-            this.stringBuilder.Append(KeyValueDelimiter);
-            this.stringBuilder.Append(value);
-            this.stringBuilder.Append(KeyValuePairDelimiter);
+            stringBuilder.Append(name);
+            stringBuilder.Append(KeyValueDelimiter);
+            stringBuilder.Append(value);
+            stringBuilder.Append(KeyValuePairDelimiter);
         }
 
         private void AppendTimeSpan(string name, TimeSpan dateTime)
         {
-            this.AppendKeyValuePair(name, dateTime.TotalMilliseconds.ToString("0.00"));
+            AppendKeyValuePair(name, dateTime.TotalMilliseconds.ToString("0.00"));
         }
     }
 }

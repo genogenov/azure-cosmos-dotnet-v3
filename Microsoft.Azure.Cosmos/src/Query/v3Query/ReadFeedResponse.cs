@@ -14,16 +14,16 @@ namespace Microsoft.Azure.Cosmos
             Headers responseMessageHeaders,
             CosmosDiagnostics diagnostics)
         {
-            this.Count = resources?.Count ?? 0;
-            this.Headers = responseMessageHeaders;
-            this.StatusCode = httpStatusCode;
-            this.Diagnostics = diagnostics;
-            this.Resource = resources;
+            Count = resources?.Count ?? 0;
+            Headers = responseMessageHeaders;
+            StatusCode = httpStatusCode;
+            Diagnostics = diagnostics;
+            Resource = resources;
         }
 
         public override int Count { get; }
 
-        public override string ContinuationToken => this.Headers?.ContinuationToken;
+        public override string ContinuationToken => Headers?.ContinuationToken;
 
         public override Headers Headers { get; }
 
@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Cosmos
 
         public override IEnumerator<T> GetEnumerator()
         {
-            return this.Resource.GetEnumerator();
+            return Resource.GetEnumerator();
         }
 
         internal static ReadFeedResponse<TInput> CreateResponse<TInput>(

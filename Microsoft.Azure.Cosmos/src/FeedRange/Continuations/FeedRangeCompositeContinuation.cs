@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Cosmos
             FeedRangeInternal feedRange)
             : base(containerRid, feedRange)
         {
-            this.CompositeContinuationTokens = new Queue<CompositeContinuationToken>();
+            CompositeContinuationTokens = new Queue<CompositeContinuationToken>();
         }
 
         public FeedRangeCompositeContinuation(
@@ -56,14 +56,14 @@ namespace Microsoft.Azure.Cosmos
 
             foreach (Documents.Routing.Range<string> range in ranges)
             {
-                this.CompositeContinuationTokens.Enqueue(
+                CompositeContinuationTokens.Enqueue(
                     FeedRangeCompositeContinuation.CreateCompositeContinuationTokenForRange(
                         range.Min,
                         range.Max,
                         continuation));
             }
 
-            this.CurrentToken = this.CompositeContinuationTokens.Peek();
+            CurrentToken = CompositeContinuationTokens.Peek();
         }
 
         /// <summary>
@@ -87,24 +87,24 @@ namespace Microsoft.Azure.Cosmos
 
             foreach (CompositeContinuationToken token in deserializedTokens)
             {
-                this.CompositeContinuationTokens.Enqueue(token);
+                CompositeContinuationTokens.Enqueue(token);
             }
 
-            this.CurrentToken = this.CompositeContinuationTokens.Peek();
+            CurrentToken = CompositeContinuationTokens.Peek();
         }
 
-        public override string GetContinuation() => this.CurrentToken?.Token;
+        public override string GetContinuation() => CurrentToken?.Token;
 
         public override FeedRange GetFeedRange()
         {
-            if (!(this.FeedRange is FeedRangeEpk))
+            if (!(FeedRange is FeedRangeEpk))
             {
-                return this.FeedRange;
+                return FeedRange;
             }
 
-            if (this.CurrentToken != null)
+            if (CurrentToken != null)
             {
-                return new FeedRangeEpk(this.CurrentToken.Range);
+                return new FeedRangeEpk(CurrentToken.Range);
             }
 
             return null;
@@ -117,20 +117,20 @@ namespace Microsoft.Azure.Cosmos
 
         public override void ReplaceContinuation(string continuationToken)
         {
-            this.CurrentToken.Token = continuationToken;
-            this.MoveToNextToken();
+            CurrentToken.Token = continuationToken;
+            MoveToNextToken();
         }
 
         public override TryCatch ValidateContainer(string containerRid)
         {
-            if (!string.IsNullOrEmpty(this.ContainerRid) &&
-                !this.ContainerRid.Equals(containerRid, StringComparison.Ordinal))
+            if (!string.IsNullOrEmpty(ContainerRid) &&
+                !ContainerRid.Equals(containerRid, StringComparison.Ordinal))
             {
                 return TryCatch.FromException(
                     new ArgumentException(
                         string.Format(
                             ClientResources.FeedToken_InvalidFeedTokenForContainer,
-                            this.ContainerRid,
+                            ContainerRid,
                             containerRid)));
             }
 
@@ -140,30 +140,30 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The concept of Done is only for ReadFeed. Change Feed is never done, it is an infinite stream.
         /// </summary>
-        public override bool IsDone => this.CompositeContinuationTokens.Count == 0;
+        public override bool IsDone => CompositeContinuationTokens.Count == 0;
 
         public override Documents.ShouldRetryResult HandleChangeFeedNotModified(ResponseMessage responseMessage)
         {
             if (responseMessage.IsSuccessStatusCode)
             {
-                this.initialNoResultsRange = null;
+                initialNoResultsRange = null;
                 return FeedRangeCompositeContinuation.NoRetry;
             }
 
             // If the current response is NotModified (ChangeFeed), try and skip to a next range in case this continuation contains multiple ranges due to split (Breath-First)
             if (responseMessage.StatusCode == HttpStatusCode.NotModified
-                && this.CompositeContinuationTokens.Count > 1)
+                && CompositeContinuationTokens.Count > 1)
             {
-                if (this.initialNoResultsRange == null)
+                if (initialNoResultsRange == null)
                 {
-                    this.initialNoResultsRange = this.CurrentToken.Range.Min;
-                    this.ReplaceContinuation(responseMessage.Headers.ETag);
+                    initialNoResultsRange = CurrentToken.Range.Min;
+                    ReplaceContinuation(responseMessage.Headers.ETag);
                     return FeedRangeCompositeContinuation.Retry;
                 }
 
-                if (!this.initialNoResultsRange.Equals(this.CurrentToken.Range.Min, StringComparison.OrdinalIgnoreCase))
+                if (!initialNoResultsRange.Equals(CurrentToken.Range.Min, StringComparison.OrdinalIgnoreCase))
                 {
-                    this.ReplaceContinuation(responseMessage.Headers.ETag);
+                    ReplaceContinuation(responseMessage.Headers.ETag);
                     return FeedRangeCompositeContinuation.Retry;
                 }
             }
@@ -185,10 +185,10 @@ namespace Microsoft.Azure.Cosmos
             }
 
             Routing.PartitionKeyRangeCache partitionKeyRangeCache = await containerCore.ClientContext.DocumentClient.GetPartitionKeyRangeCacheAsync();
-            IReadOnlyList<Documents.PartitionKeyRange> resolvedRanges = await this.TryGetOverlappingRangesAsync(partitionKeyRangeCache, this.CurrentToken.Range.Min, this.CurrentToken.Range.Max, forceRefresh: true);
+            IReadOnlyList<Documents.PartitionKeyRange> resolvedRanges = await TryGetOverlappingRangesAsync(partitionKeyRangeCache, CurrentToken.Range.Min, CurrentToken.Range.Max, forceRefresh: true);
             if (resolvedRanges.Count > 0)
             {
-                this.CreateChildRanges(resolvedRanges);
+                CreateChildRanges(resolvedRanges);
             }
 
             return FeedRangeCompositeContinuation.Retry;
@@ -254,36 +254,39 @@ namespace Microsoft.Azure.Cosmos
 
         private void MoveToNextToken()
         {
-            CompositeContinuationToken recentToken = this.CompositeContinuationTokens.Dequeue();
+            CompositeContinuationToken recentToken = CompositeContinuationTokens.Dequeue();
             if (recentToken.Token != null)
             {
                 // Normal ReadFeed can signal termination by CT null, not NotModified
                 // Change Feed never lands here, as it always provides a CT
                 // Consider current range done, if this FeedToken contains multiple ranges due to splits, all of them need to be considered done
-                this.CompositeContinuationTokens.Enqueue(recentToken);
+                CompositeContinuationTokens.Enqueue(recentToken);
             }
 
-            this.CurrentToken = this.CompositeContinuationTokens.Count > 0 ? this.CompositeContinuationTokens.Peek() : null;
+            CurrentToken = CompositeContinuationTokens.Count > 0 ? CompositeContinuationTokens.Peek() : null;
         }
 
         private void CreateChildRanges(IReadOnlyList<Documents.PartitionKeyRange> keyRanges)
         {
-            if (keyRanges == null) throw new ArgumentNullException(nameof(keyRanges));
+            if (keyRanges == null)
+            {
+                throw new ArgumentNullException(nameof(keyRanges));
+            }
             // Update current
             Documents.PartitionKeyRange firstRange = keyRanges[0];
-            this.CurrentToken.Range = new Documents.Routing.Range<string>(firstRange.MinInclusive, firstRange.MaxExclusive, true, false);
+            CurrentToken.Range = new Documents.Routing.Range<string>(firstRange.MinInclusive, firstRange.MaxExclusive, true, false);
             if (FeedRangeCompositeContinuation.TryParseAsCompositeContinuationToken(
-                this.CurrentToken.Token,
+                CurrentToken.Token,
                 out CompositeContinuationToken continuationAsComposite))
             {
                 // Update the internal composite continuation
-                continuationAsComposite.Range = this.CurrentToken.Range;
-                this.CurrentToken.Token = JsonConvert.SerializeObject(continuationAsComposite);
+                continuationAsComposite.Range = CurrentToken.Range;
+                CurrentToken.Token = JsonConvert.SerializeObject(continuationAsComposite);
                 // Add children
                 foreach (Documents.PartitionKeyRange keyRange in keyRanges.Skip(1))
                 {
                     continuationAsComposite.Range = keyRange.ToRange();
-                    this.CompositeContinuationTokens.Enqueue(
+                    CompositeContinuationTokens.Enqueue(
                         FeedRangeCompositeContinuation.CreateCompositeContinuationTokenForRange(
                             keyRange.MinInclusive,
                             keyRange.MaxExclusive,
@@ -295,11 +298,11 @@ namespace Microsoft.Azure.Cosmos
                 // Add children
                 foreach (Documents.PartitionKeyRange keyRange in keyRanges.Skip(1))
                 {
-                    this.CompositeContinuationTokens.Enqueue(
+                    CompositeContinuationTokens.Enqueue(
                         FeedRangeCompositeContinuation.CreateCompositeContinuationTokenForRange(
                             keyRange.MinInclusive,
                             keyRange.MaxExclusive,
-                            this.CurrentToken.Token));
+                            CurrentToken.Token));
                 }
             }
         }
@@ -311,7 +314,7 @@ namespace Microsoft.Azure.Cosmos
             bool forceRefresh = false)
         {
             IReadOnlyList<Documents.PartitionKeyRange> keyRanges = await partitionKeyRangeCache.TryGetOverlappingRangesAsync(
-                this.ContainerRid,
+                ContainerRid,
                 new Documents.Routing.Range<string>(
                     min,
                     max,

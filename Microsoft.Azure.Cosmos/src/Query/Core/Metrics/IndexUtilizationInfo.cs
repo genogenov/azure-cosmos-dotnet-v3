@@ -62,8 +62,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 }
             }
 
-            this.UtilizedIndexes = utilizedIndexesCopy;
-            this.PotentialIndexes = potentialIndexesCopy;
+            UtilizedIndexes = utilizedIndexesCopy;
+            PotentialIndexes = potentialIndexesCopy;
         }
 
         /// <summary>
@@ -113,8 +113,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 IEnumerable<IndexUtilizationData> utilizedIndexes,
                 IEnumerable<IndexUtilizationData> potentialIndexes)
             {
-                this.UtilizedIndexes = utilizedIndexes;
-                this.PotentialIndexes = potentialIndexes;
+                UtilizedIndexes = utilizedIndexes;
+                PotentialIndexes = potentialIndexes;
             }
 
             public IEnumerable<IndexUtilizationData> UtilizedIndexes { get; }
@@ -123,8 +123,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             public Accumulator Accumulate(IndexUtilizationInfo indexUtilizationInfo)
             {
                 return new Accumulator(
-                    utilizedIndexes: (this.UtilizedIndexes ?? Enumerable.Empty<IndexUtilizationData>()).Concat(indexUtilizationInfo.UtilizedIndexes),
-                    potentialIndexes: (this.PotentialIndexes ?? Enumerable.Empty<IndexUtilizationData>()).Concat(indexUtilizationInfo.PotentialIndexes));
+                    utilizedIndexes: (UtilizedIndexes ?? Enumerable.Empty<IndexUtilizationData>()).Concat(indexUtilizationInfo.UtilizedIndexes),
+                    potentialIndexes: (PotentialIndexes ?? Enumerable.Empty<IndexUtilizationData>()).Concat(indexUtilizationInfo.PotentialIndexes));
             }
 
             public static IndexUtilizationInfo ToIndexUtilizationInfo(Accumulator accumulator)

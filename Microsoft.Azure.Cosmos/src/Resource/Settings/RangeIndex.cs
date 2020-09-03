@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
         public RangeIndex(DataType dataType)
             : this()
         {
-            this.DataType = dataType;
+            DataType = dataType;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Microsoft.Azure.Cosmos
         public RangeIndex(DataType dataType, short precision)
             : this(dataType)
         {
-            this.Precision = precision;
+            Precision = precision;
         }
 
         /// <summary>
@@ -89,9 +89,9 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>A clone of the range index.</returns>
         public object Clone()
         {
-            return new RangeIndex(this.DataType)
+            return new RangeIndex(DataType)
             {
-                Precision = this.Precision
+                Precision = Precision
             };
         }
     }

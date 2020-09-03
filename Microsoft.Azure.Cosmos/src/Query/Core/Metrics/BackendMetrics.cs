@@ -50,18 +50,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
            RuntimeExecutionTimes runtimeExecutionTimes,
            TimeSpan documentWriteTime)
         {
-            this.RetrievedDocumentCount = retrievedDocumentCount;
-            this.RetrievedDocumentSize = retrievedDocumentSize;
-            this.OutputDocumentCount = outputDocumentCount;
-            this.OutputDocumentSize = outputDocumentSize;
-            this.IndexHitRatio = indexHitRatio;
-            this.TotalTime = totalQueryExecutionTime;
-            this.QueryPreparationTimes = queryPreparationTimes ?? throw new ArgumentNullException($"{nameof(queryPreparationTimes)} can not be null.");
-            this.IndexLookupTime = indexLookupTime;
-            this.DocumentLoadTime = documentLoadTime;
-            this.VMExecutionTime = vmExecutionTime;
-            this.RuntimeExecutionTimes = runtimeExecutionTimes ?? throw new ArgumentNullException($"{nameof(runtimeExecutionTimes)} can not be null.");
-            this.DocumentWriteTime = documentWriteTime;
+            RetrievedDocumentCount = retrievedDocumentCount;
+            RetrievedDocumentSize = retrievedDocumentSize;
+            OutputDocumentCount = outputDocumentCount;
+            OutputDocumentSize = outputDocumentSize;
+            IndexHitRatio = indexHitRatio;
+            TotalTime = totalQueryExecutionTime;
+            QueryPreparationTimes = queryPreparationTimes ?? throw new ArgumentNullException($"{nameof(queryPreparationTimes)} can not be null.");
+            IndexLookupTime = indexLookupTime;
+            DocumentLoadTime = documentLoadTime;
+            VMExecutionTime = vmExecutionTime;
+            RuntimeExecutionTimes = runtimeExecutionTimes ?? throw new ArgumentNullException($"{nameof(runtimeExecutionTimes)} can not be null.");
+            DocumentWriteTime = documentWriteTime;
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         public override string ToString()
         {
-            return $"totalExecutionTimeInMs={this.TotalTime.TotalMilliseconds};queryCompileTimeInMs={this.QueryPreparationTimes.QueryCompilationTime.TotalMilliseconds};queryLogicalPlanBuildTimeInMs={this.QueryPreparationTimes.LogicalPlanBuildTime.TotalMilliseconds};queryPhysicalPlanBuildTimeInMs={this.QueryPreparationTimes.PhysicalPlanBuildTime.TotalMilliseconds};queryOptimizationTimeInMs={this.QueryPreparationTimes.QueryOptimizationTime.TotalMilliseconds};indexLookupTimeInMs={this.IndexLookupTime.TotalMilliseconds};documentLoadTimeInMs={this.DocumentLoadTime.TotalMilliseconds};systemFunctionExecuteTimeInMs={this.RuntimeExecutionTimes.SystemFunctionExecutionTime.TotalMilliseconds};userFunctionExecuteTimeInMs={this.RuntimeExecutionTimes.UserDefinedFunctionExecutionTime.TotalMilliseconds};retrievedDocumentCount={this.RetrievedDocumentCount};retrievedDocumentSize={this.RetrievedDocumentSize};outputDocumentCount={this.OutputDocumentCount};outputDocumentSize={this.OutputDocumentSize};writeOutputTimeInMs={this.DocumentWriteTime.TotalMilliseconds};indexUtilizationRatio={this.IndexHitRatio}";
+            return $"totalExecutionTimeInMs={TotalTime.TotalMilliseconds};queryCompileTimeInMs={QueryPreparationTimes.QueryCompilationTime.TotalMilliseconds};queryLogicalPlanBuildTimeInMs={QueryPreparationTimes.LogicalPlanBuildTime.TotalMilliseconds};queryPhysicalPlanBuildTimeInMs={QueryPreparationTimes.PhysicalPlanBuildTime.TotalMilliseconds};queryOptimizationTimeInMs={QueryPreparationTimes.QueryOptimizationTime.TotalMilliseconds};indexLookupTimeInMs={IndexLookupTime.TotalMilliseconds};documentLoadTimeInMs={DocumentLoadTime.TotalMilliseconds};systemFunctionExecuteTimeInMs={RuntimeExecutionTimes.SystemFunctionExecutionTime.TotalMilliseconds};userFunctionExecuteTimeInMs={RuntimeExecutionTimes.UserDefinedFunctionExecutionTime.TotalMilliseconds};retrievedDocumentCount={RetrievedDocumentCount};retrievedDocumentSize={RetrievedDocumentSize};outputDocumentCount={OutputDocumentCount};outputDocumentSize={OutputDocumentSize};writeOutputTimeInMs={DocumentWriteTime.TotalMilliseconds};indexUtilizationRatio={IndexHitRatio}";
         }
 
         public static BackendMetrics CreateFromIEnumerable(IEnumerable<BackendMetrics> backendMetricsEnumerable)
@@ -171,18 +171,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 TimeSpan documentWriteTime,
                 TimeSpan vmExecutionTime)
             {
-                this.TotalTime = totalTime;
-                this.RetrievedDocumentCount = retrievedDocumentCount;
-                this.RetrievedDocumentSize = retrievedDocumentSize;
-                this.OutputDocumentCount = outputDocumentCount;
-                this.OutputDocumentSize = outputDocumentSize;
-                this.IndexHitRatio = indexHitRatio;
-                this.QueryPreparationTimesAccumulator = queryPreparationTimesAccumulator;
-                this.IndexLookupTime = indexLookupTime;
-                this.DocumentLoadTime = documentLoadTime;
-                this.RuntimeExecutionTimesAccumulator = runtimeExecutionTimesAccumulator;
-                this.DocumentWriteTime = documentWriteTime;
-                this.VMExecutionTime = vmExecutionTime;
+                TotalTime = totalTime;
+                RetrievedDocumentCount = retrievedDocumentCount;
+                RetrievedDocumentSize = retrievedDocumentSize;
+                OutputDocumentCount = outputDocumentCount;
+                OutputDocumentSize = outputDocumentSize;
+                IndexHitRatio = indexHitRatio;
+                QueryPreparationTimesAccumulator = queryPreparationTimesAccumulator;
+                IndexLookupTime = indexLookupTime;
+                DocumentLoadTime = documentLoadTime;
+                RuntimeExecutionTimesAccumulator = runtimeExecutionTimesAccumulator;
+                DocumentWriteTime = documentWriteTime;
+                VMExecutionTime = vmExecutionTime;
             }
 
             public TimeSpan TotalTime { get; }
@@ -201,18 +201,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             public Accumulator Accumulate(BackendMetrics backendMetrics)
             {
                 return new Accumulator(
-                    totalTime: this.TotalTime + backendMetrics.TotalTime,
-                    retrievedDocumentCount: this.RetrievedDocumentCount + backendMetrics.RetrievedDocumentCount,
-                    retrievedDocumentSize: this.RetrievedDocumentSize + backendMetrics.RetrievedDocumentSize,
-                    outputDocumentCount: this.OutputDocumentCount + backendMetrics.OutputDocumentCount,
-                    outputDocumentSize: this.OutputDocumentSize + backendMetrics.OutputDocumentSize,
-                    indexHitRatio: ((this.OutputDocumentCount * this.IndexHitRatio) + (backendMetrics.OutputDocumentCount * backendMetrics.IndexHitRatio)) / (this.RetrievedDocumentCount + backendMetrics.RetrievedDocumentCount),
-                    queryPreparationTimesAccumulator: this.QueryPreparationTimesAccumulator.Accumulate(backendMetrics.QueryPreparationTimes),
-                    indexLookupTime: this.IndexLookupTime + backendMetrics.IndexLookupTime,
-                    documentLoadTime: this.DocumentLoadTime + backendMetrics.DocumentLoadTime,
-                    runtimeExecutionTimesAccumulator: this.RuntimeExecutionTimesAccumulator.Accumulate(backendMetrics.RuntimeExecutionTimes),
-                    documentWriteTime: this.DocumentWriteTime + backendMetrics.DocumentWriteTime,
-                    vmExecutionTime: this.VMExecutionTime + backendMetrics.VMExecutionTime);
+                    totalTime: TotalTime + backendMetrics.TotalTime,
+                    retrievedDocumentCount: RetrievedDocumentCount + backendMetrics.RetrievedDocumentCount,
+                    retrievedDocumentSize: RetrievedDocumentSize + backendMetrics.RetrievedDocumentSize,
+                    outputDocumentCount: OutputDocumentCount + backendMetrics.OutputDocumentCount,
+                    outputDocumentSize: OutputDocumentSize + backendMetrics.OutputDocumentSize,
+                    indexHitRatio: ((OutputDocumentCount * IndexHitRatio) + (backendMetrics.OutputDocumentCount * backendMetrics.IndexHitRatio)) / (RetrievedDocumentCount + backendMetrics.RetrievedDocumentCount),
+                    queryPreparationTimesAccumulator: QueryPreparationTimesAccumulator.Accumulate(backendMetrics.QueryPreparationTimes),
+                    indexLookupTime: IndexLookupTime + backendMetrics.IndexLookupTime,
+                    documentLoadTime: DocumentLoadTime + backendMetrics.DocumentLoadTime,
+                    runtimeExecutionTimesAccumulator: RuntimeExecutionTimesAccumulator.Accumulate(backendMetrics.RuntimeExecutionTimes),
+                    documentWriteTime: DocumentWriteTime + backendMetrics.DocumentWriteTime,
+                    vmExecutionTime: VMExecutionTime + backendMetrics.VMExecutionTime);
 
             }
 

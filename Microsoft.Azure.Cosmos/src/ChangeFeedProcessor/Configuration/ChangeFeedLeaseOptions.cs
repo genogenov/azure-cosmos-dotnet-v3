@@ -18,9 +18,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Configuration
         /// <summary>Initializes a new instance of the <see cref="ChangeFeedLeaseOptions" /> class.</summary>
         public ChangeFeedLeaseOptions()
         {
-            this.LeaseRenewInterval = DefaultRenewInterval;
-            this.LeaseAcquireInterval = DefaultAcquireInterval;
-            this.LeaseExpirationInterval = DefaultExpirationInterval;
+            LeaseRenewInterval = DefaultRenewInterval;
+            LeaseAcquireInterval = DefaultAcquireInterval;
+            LeaseExpirationInterval = DefaultExpirationInterval;
         }
 
         /// <summary>

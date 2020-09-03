@@ -10,7 +10,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Collections.Specialized;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using Microsoft.Azure.Documents.Collections;
 
     /// <summary>
@@ -28,14 +27,14 @@ namespace Microsoft.Azure.Cosmos
 
         public CosmosMessageHeadersInternal(int capacity)
         {
-            this.headers = new Dictionary<string, string>(
+            headers = new Dictionary<string, string>(
                 capacity,
                 StringComparer.OrdinalIgnoreCase);
         }
 
         public void Add(string headerName, string value)
         {
-            this.Set(headerName, value);
+            Set(headerName, value);
         }
 
         public bool TryGetValue(string headerName, out string value)
@@ -45,7 +44,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(headerName));
             }
 
-            return this.headers.TryGetValue(headerName, out value);
+            return headers.TryGetValue(headerName, out value);
         }
 
         public void Remove(string headerName)
@@ -55,15 +54,14 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(headerName));
             }
 
-            this.headers.Remove(headerName);
+            headers.Remove(headerName);
         }
 
         public string this[string headerName]
         {
             get
             {
-                string value;
-                if (!this.TryGetValue(headerName, out value))
+                if (!TryGetValue(headerName, out string value))
                 {
                     return null;
                 }
@@ -72,7 +70,7 @@ namespace Microsoft.Azure.Cosmos
             }
             set
             {
-                this.Set(headerName, value);
+                Set(headerName, value);
             }
         }
 
@@ -85,10 +83,10 @@ namespace Microsoft.Azure.Cosmos
 
             if (value == null)
             {
-                this.headers.Remove(key);
+                headers.Remove(key);
             }
 
-            this.headers[key] = value;
+            headers[key] = value;
         }
 
         public string Get(string key)
@@ -103,18 +101,18 @@ namespace Microsoft.Azure.Cosmos
 
         public void Clear()
         {
-            this.headers.Clear();
+            headers.Clear();
         }
 
         public int Count()
         {
-            return this.headers.Count;
+            return headers.Count;
         }
 
         public INameValueCollection Clone()
         {
-            CosmosMessageHeadersInternal headersClone = new CosmosMessageHeadersInternal(this.headers.Count);
-            foreach (KeyValuePair<string, string> header in this.headers)
+            CosmosMessageHeadersInternal headersClone = new CosmosMessageHeadersInternal(headers.Count);
+            foreach (KeyValuePair<string, string> header in headers)
             {
                 headersClone.Add(header.Key, header.Value);
             }
@@ -126,7 +124,7 @@ namespace Microsoft.Azure.Cosmos
         {
             foreach (string key in collection.Keys())
             {
-                this.Add(key, collection[key]);
+                Add(key, collection[key]);
             }
         }
 
@@ -148,12 +146,12 @@ namespace Microsoft.Azure.Cosmos
 
         public string[] AllKeys()
         {
-            return this.headers.Keys.ToArray();
+            return headers.Keys.ToArray();
         }
 
         public IEnumerable<string> Keys()
         {
-            foreach (string key in this.headers.Keys)
+            foreach (string key in headers.Keys)
             {
                 yield return key;
             }
@@ -166,12 +164,12 @@ namespace Microsoft.Azure.Cosmos
 
         public IEnumerator<string> GetEnumerator()
         {
-            return this.headers.Select(x => x.Key).GetEnumerator();
+            return headers.Select(x => x.Key).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         public T GetHeaderValue<T>(string key)

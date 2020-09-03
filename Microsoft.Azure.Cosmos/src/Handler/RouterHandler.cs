@@ -41,11 +41,11 @@ namespace Microsoft.Azure.Cosmos.Handlers
             RequestHandler targetHandler = null;
             if (request.IsPartitionKeyRangeHandlerRequired)
             {
-                targetHandler = this.documentFeedHandler;
+                targetHandler = documentFeedHandler;
             }
             else
             {
-                targetHandler = this.pointOperationHandler;
+                targetHandler = pointOperationHandler;
             }
 
             using (request.DiagnosticsContext.CreateRequestHandlerScopeScope(targetHandler))

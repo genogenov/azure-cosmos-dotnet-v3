@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlParameterRefScalarExpression(SqlParameter sqlParameter)
         {
-            this.Parameter = sqlParameter ?? throw new ArgumentNullException(nameof(sqlParameter));
+            Parameter = sqlParameter ?? throw new ArgumentNullException(nameof(sqlParameter));
         }
 
         public SqlParameter Parameter { get; }

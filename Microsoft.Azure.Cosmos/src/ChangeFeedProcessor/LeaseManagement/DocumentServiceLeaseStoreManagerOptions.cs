@@ -14,7 +14,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         internal string GetPartitionLeasePrefix()
         {
-            return this.ContainerNamePrefix + PartitionLeasePrefixSeparator;
+            return ContainerNamePrefix + PartitionLeasePrefixSeparator;
         }
     }
 }

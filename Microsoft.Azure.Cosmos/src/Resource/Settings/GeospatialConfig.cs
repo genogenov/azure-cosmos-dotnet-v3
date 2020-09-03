@@ -3,10 +3,6 @@
 //------------------------------------------------------------
 namespace Microsoft.Azure.Cosmos
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using Microsoft.Azure.Documents;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -35,7 +31,7 @@ namespace Microsoft.Azure.Cosmos
         /// </remarks>
         public GeospatialConfig()
         {
-            this.GeospatialType = GeospatialType.Geography;
+            GeospatialType = GeospatialType.Geography;
         }
 
         /// <summary>
@@ -44,7 +40,7 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="geospatialType">Specifies GeospatialType of collection, which can be either Geography or Geometry</param>
         public GeospatialConfig(GeospatialType geospatialType)
         {
-            this.GeospatialType = geospatialType;
+            GeospatialType = geospatialType;
         }
 
         /// <summary>

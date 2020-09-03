@@ -37,13 +37,13 @@ namespace Microsoft.Azure.Cosmos
             this.resourceLink = resourceLink;
             this.clientContext = clientContext;
             this.resourceType = resourceType;
-            this.querySpec = queryDefinition?.ToSqlQuerySpec();
-            this.ContinuationToken = continuationToken;
-            this.requestOptions = options;
-            this.hasMoreResultsInternal = true;
+            querySpec = queryDefinition?.ToSqlQuerySpec();
+            ContinuationToken = continuationToken;
+            requestOptions = options;
+            hasMoreResultsInternal = true;
         }
 
-        public override bool HasMoreResults => this.hasMoreResultsInternal;
+        public override bool HasMoreResults => hasMoreResultsInternal;
 
         /// <summary>
         /// The query options for the result set
@@ -62,10 +62,10 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>A query response from cosmos service</returns>
         public override async Task<ResponseMessage> ReadNextAsync(CancellationToken cancellationToken = default)
         {
-            CosmosDiagnosticsContext diagnosticsContext = CosmosDiagnosticsContext.Create(this.requestOptions);
+            CosmosDiagnosticsContext diagnosticsContext = CosmosDiagnosticsContext.Create(requestOptions);
             using (diagnosticsContext.GetOverallScope())
             {
-                return await this.ReadNextInternalAsync(diagnosticsContext, cancellationToken);
+                return await ReadNextInternalAsync(diagnosticsContext, cancellationToken);
             }
         }
 
@@ -77,24 +77,24 @@ namespace Microsoft.Azure.Cosmos
 
             Stream stream = null;
             OperationType operation = OperationType.ReadFeed;
-            if (this.querySpec != null)
+            if (querySpec != null)
             {
-                stream = this.clientContext.SerializerCore.ToStreamSqlQuerySpec(this.querySpec, this.resourceType);
+                stream = clientContext.SerializerCore.ToStreamSqlQuerySpec(querySpec, resourceType);
                 operation = OperationType.Query;
             }
 
-            ResponseMessage responseMessage = await this.clientContext.ProcessResourceOperationStreamAsync(
-               resourceUri: this.resourceLink,
-               resourceType: this.resourceType,
+            ResponseMessage responseMessage = await clientContext.ProcessResourceOperationStreamAsync(
+               resourceUri: resourceLink,
+               resourceType: resourceType,
                operationType: operation,
-               requestOptions: this.requestOptions,
+               requestOptions: requestOptions,
                cosmosContainerCore: null,
-               partitionKey: this.requestOptions?.PartitionKey,
+               partitionKey: requestOptions?.PartitionKey,
                streamPayload: stream,
                requestEnricher: request =>
                {
-                   QueryRequestOptions.FillContinuationToken(request, this.ContinuationToken);
-                   if (this.querySpec != null)
+                   QueryRequestOptions.FillContinuationToken(request, ContinuationToken);
+                   if (querySpec != null)
                    {
                        request.Headers.Add(HttpConstants.HttpHeaders.ContentType, MediaTypes.QueryJson);
                        request.Headers.Add(HttpConstants.HttpHeaders.IsQuery, bool.TrueString);
@@ -103,14 +103,14 @@ namespace Microsoft.Azure.Cosmos
                diagnosticsContext: diagnostics,
                cancellationToken: cancellationToken);
 
-            this.ContinuationToken = responseMessage.Headers.ContinuationToken;
-            this.hasMoreResultsInternal = this.ContinuationToken != null && responseMessage.StatusCode != HttpStatusCode.NotModified;
+            ContinuationToken = responseMessage.Headers.ContinuationToken;
+            hasMoreResultsInternal = ContinuationToken != null && responseMessage.StatusCode != HttpStatusCode.NotModified;
 
             if (responseMessage.Content != null)
             {
-                await CosmosElementSerializer.RewriteStreamAsTextAsync(responseMessage, this.requestOptions);
+                await CosmosElementSerializer.RewriteStreamAsTextAsync(responseMessage, requestOptions);
             }
-            
+
             return responseMessage;
         }
 
@@ -137,11 +137,11 @@ namespace Microsoft.Azure.Cosmos
             this.feedIterator = feedIterator;
         }
 
-        public override bool HasMoreResults => this.feedIterator.HasMoreResults;
+        public override bool HasMoreResults => feedIterator.HasMoreResults;
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return this.feedIterator.GetCosmosElementContinuationToken();
+            return feedIterator.GetCosmosElementContinuationToken();
         }
 
         /// <summary>
@@ -153,13 +153,13 @@ namespace Microsoft.Azure.Cosmos
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            ResponseMessage response = await this.feedIterator.ReadNextAsync(cancellationToken);
-            return this.responseCreator(response);
+            ResponseMessage response = await feedIterator.ReadNextAsync(cancellationToken);
+            return responseCreator(response);
         }
 
         protected override void Dispose(bool disposing)
         {
-            this.feedIterator.Dispose();
+            feedIterator.Dispose();
             base.Dispose(disposing);
         }
     }

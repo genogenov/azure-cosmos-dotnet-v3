@@ -8,8 +8,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Json;
-    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
@@ -96,7 +94,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
                 foreach (CosmosElement document in sourceResponse.CosmosElements)
                 {
-                    if (this.distinctMap.Add(document, out UInt128 hash))
+                    if (distinctMap.Add(document, out UInt128 hash))
                     {
                         distinctResults.Add(document);
                     }
@@ -113,14 +111,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                if (this.IsDone)
+                if (IsDone)
                 {
                     return default;
                 }
 
                 DistinctContinuationToken distinctContinuationToken = new DistinctContinuationToken(
-                    sourceToken: this.Source.GetCosmosElementContinuationToken(),
-                    distinctMapToken: this.distinctMap.GetCosmosElementContinuationToken());
+                    sourceToken: Source.GetCosmosElementContinuationToken(),
+                    distinctMapToken: distinctMap.GetCosmosElementContinuationToken());
                 return DistinctContinuationToken.ToCosmosElement(distinctContinuationToken);
             }
 
@@ -131,8 +129,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Distinct
 
                 public DistinctContinuationToken(CosmosElement sourceToken, CosmosElement distinctMapToken)
                 {
-                    this.SourceToken = sourceToken;
-                    this.DistinctMapToken = distinctMapToken;
+                    SourceToken = sourceToken;
+                    DistinctMapToken = distinctMapToken;
                 }
 
                 public CosmosElement SourceToken { get; }

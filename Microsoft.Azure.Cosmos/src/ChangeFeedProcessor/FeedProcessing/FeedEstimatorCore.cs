@@ -20,24 +20,26 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         {
             this.dispatcher = dispatcher;
             this.remainingWorkEstimator = remainingWorkEstimator;
-            this.monitoringDelay = dispatcher.DispatchPeriod ?? FeedEstimatorCore.defaultMonitoringDelay;
+            monitoringDelay = dispatcher.DispatchPeriod ?? FeedEstimatorCore.defaultMonitoringDelay;
         }
 
         public override async Task RunAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                TimeSpan delay = this.monitoringDelay;
+                TimeSpan delay = monitoringDelay;
 
                 try
                 {
-                    long estimation = await this.remainingWorkEstimator.GetEstimatedRemainingWorkAsync(cancellationToken).ConfigureAwait(false);
-                    await this.dispatcher.DispatchEstimationAsync(estimation, cancellationToken);
+                    long estimation = await remainingWorkEstimator.GetEstimatedRemainingWorkAsync(cancellationToken).ConfigureAwait(false);
+                    await dispatcher.DispatchEstimationAsync(estimation, cancellationToken);
                 }
                 catch (TaskCanceledException canceledException)
                 {
                     if (cancellationToken.IsCancellationRequested)
+                    {
                         throw;
+                    }
 
                     Extensions.TraceException(new Exception("exception within estimator", canceledException));
 

@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="id">The Id of the resource in the Azure Cosmos service.</param>
         public DatabaseProperties(string id)
         {
-            this.Id = id;
+            Id = id;
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Microsoft.Azure.Cosmos
         [JsonProperty(PropertyName = Constants.Properties.Id)]
         public string Id
         {
-            get => this.id;
-            set => this.id = value ?? throw new ArgumentNullException(nameof(this.Id));
+            get => id;
+            set => id = value ?? throw new ArgumentNullException(nameof(Id));
         }
 
         /// <summary>

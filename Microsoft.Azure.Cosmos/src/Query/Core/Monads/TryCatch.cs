@@ -5,8 +5,6 @@
 namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 {
     using System;
-    using System.Runtime.CompilerServices;
-    using System.Threading;
     using System.Threading.Tasks;
 
 #if INTERNAL
@@ -25,36 +23,50 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             this.voidTryCatch = voidTryCatch;
         }
 
-        public Exception Exception => this.voidTryCatch.Exception;
+        public Exception Exception => voidTryCatch.Exception;
 
-        public bool Succeeded => this.voidTryCatch.Succeeded;
+        public bool Succeeded => voidTryCatch.Succeeded;
 
-        public bool Failed => this.voidTryCatch.Failed;
+        public bool Failed => voidTryCatch.Failed;
 
         public void Match(
             Action onSuccess,
-            Action<Exception> onError) => this.voidTryCatch.Match(
+            Action<Exception> onError)
+        {
+            voidTryCatch.Match(
                 onSuccess: (dummy) => { onSuccess(); },
                 onError: onError);
+        }
 
         public TryCatch Try(
-            Action onSuccess) => new TryCatch(this.voidTryCatch.Try(onSuccess: (dummy) => { onSuccess(); }));
+            Action onSuccess)
+        {
+            return new TryCatch(voidTryCatch.Try(onSuccess: (dummy) => { onSuccess(); }));
+        }
 
         public TryCatch<T> Try<T>(
-            Func<T> onSuccess) => this.voidTryCatch.Try<T>(
-                onSuccess: (dummy) => { return onSuccess(); });
+            Func<T> onSuccess)
+        {
+            return voidTryCatch.Try<T>(onSuccess: (dummy) => { return onSuccess(); });
+        }
 
         public Task<TryCatch<T>> TryAsync<T>(
-            Func<Task<T>> onSuccess) => this.voidTryCatch.TryAsync<T>(
-                onSuccess: (dummy) => { return onSuccess(); });
+            Func<Task<T>> onSuccess)
+        {
+            return voidTryCatch.TryAsync<T>(onSuccess: (dummy) => { return onSuccess(); });
+        }
 
         public TryCatch Catch(
-            Action<Exception> onError) => new TryCatch(this.voidTryCatch.Catch(onError));
+            Action<Exception> onError)
+        {
+            return new TryCatch(voidTryCatch.Catch(onError));
+        }
 
         public async Task<TryCatch> CatchAsync(
-            Func<Exception, Task> onError) => new TryCatch(await this.voidTryCatch.CatchAsync(onError));
-
-        public void ThrowIfFailed() => this.voidTryCatch.ThrowIfFailed();
+            Func<Exception, Task> onError)
+        {
+            return new TryCatch(await voidTryCatch.CatchAsync(onError));
+        }
 
         public override bool Equals(object obj)
         {
@@ -65,28 +77,31 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
             if (obj is TryCatch other)
             {
-                return this.Equals(other);
+                return Equals(other);
             }
 
             return false;
         }
 
-        public bool Equals(TryCatch other) => this.voidTryCatch.Equals(other.voidTryCatch);
+        public bool Equals(TryCatch other)
+        {
+            return voidTryCatch.Equals(other.voidTryCatch);
+        }
 
-        public override int GetHashCode() => this.voidTryCatch.GetHashCode();
+        public override int GetHashCode()
+        {
+            return voidTryCatch.GetHashCode();
+        }
 
-        public static TryCatch FromResult() => new TryCatch(TryCatch<Void>.FromResult(default));
+        public static TryCatch FromResult()
+        {
+            return new TryCatch(TryCatch<Void>.FromResult(default));
+        }
 
-        public static TryCatch FromException(Exception exception) => new TryCatch(TryCatch<Void>.FromException(exception));
-
-        public static Task UnsafeWaitAsync(
-            Task<TryCatch> tryCatchTask,
-            CancellationToken cancellationToken) => tryCatchTask.ContinueWith(
-                antecedent =>
-                {
-                    antecedent.Result.ThrowIfFailed();
-                },
-                cancellationToken);
+        public static TryCatch FromException(Exception exception)
+        {
+            return new TryCatch(TryCatch<Void>.FromException(exception));
+        }
 
         /// <summary>
         /// Represents a void return type.

@@ -42,11 +42,11 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosArray cosmosArray && this.Equals(cosmosArray);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosArray cosmosArray && Equals(cosmosArray);
 
         public bool Equals(CosmosArray cosmosArray)
         {
-            if (this.Count != cosmosArray.Count)
+            if (Count != cosmosArray.Count)
             {
                 return false;
             }
@@ -68,7 +68,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             uint hash = HashSeed;
 
             // Incorporate all the array items into the hash.
-            for (int index = 0; index < this.Count; index++)
+            for (int index = 0; index < Count; index++)
             {
                 CosmosElement arrayItem = this[index];
                 hash = MurmurHash3.Hash32(arrayItem.GetHashCode(), hash);
@@ -96,7 +96,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public abstract IEnumerator<CosmosElement> GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public static new CosmosArray CreateFromBuffer(ReadOnlyMemory<byte> buffer) => CosmosElement.CreateFromBuffer<CosmosArray>(buffer);
 

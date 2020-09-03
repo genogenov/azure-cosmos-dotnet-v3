@@ -20,42 +20,42 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
         public CosmosDiagnosticScope(
             string name)
         {
-            this.Id = name;
-            this.ElapsedTimeStopWatch = Stopwatch.StartNew();
+            Id = name;
+            ElapsedTimeStopWatch = Stopwatch.StartNew();
         }
 
         public string Id { get; }
 
         public bool TryGetElapsedTime(out TimeSpan elapsedTime)
         {
-            if (!this.isDisposed)
+            if (!isDisposed)
             {
                 return false;
             }
 
-            elapsedTime = this.ElapsedTimeStopWatch.Elapsed;
+            elapsedTime = ElapsedTimeStopWatch.Elapsed;
             return true;
         }
 
         internal TimeSpan GetElapsedTime()
         {
-            return this.ElapsedTimeStopWatch.Elapsed;
+            return ElapsedTimeStopWatch.Elapsed;
         }
 
         internal bool IsComplete()
         {
-            return !this.ElapsedTimeStopWatch.IsRunning;
+            return !ElapsedTimeStopWatch.IsRunning;
         }
 
         public void Dispose()
         {
-            if (this.isDisposed)
+            if (isDisposed)
             {
                 return;
             }
 
-            this.ElapsedTimeStopWatch.Stop();
-            this.isDisposed = true;
+            ElapsedTimeStopWatch.Stop();
+            isDisposed = true;
         }
 
         public override void Accept(CosmosDiagnosticsInternalVisitor cosmosDiagnosticsInternalVisitor)

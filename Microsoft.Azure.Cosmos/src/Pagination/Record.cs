@@ -11,10 +11,10 @@ namespace Microsoft.Azure.Cosmos.Pagination
     {
         private Record(long resourceIdentifier, long timestamp, Guid identifier, CosmosObject payload)
         {
-            this.ResourceIdentifier = resourceIdentifier < 0 ? throw new ArgumentOutOfRangeException(nameof(resourceIdentifier)) : resourceIdentifier;
-            this.Timestamp = timestamp < 0 ? throw new ArgumentOutOfRangeException(nameof(timestamp)) : timestamp;
-            this.Identifier = identifier;
-            this.Payload = payload ?? throw new ArgumentNullException(nameof(payload));
+            ResourceIdentifier = resourceIdentifier < 0 ? throw new ArgumentOutOfRangeException(nameof(resourceIdentifier)) : resourceIdentifier;
+            Timestamp = timestamp < 0 ? throw new ArgumentOutOfRangeException(nameof(timestamp)) : timestamp;
+            Identifier = identifier;
+            Payload = payload ?? throw new ArgumentNullException(nameof(payload));
         }
 
         public long ResourceIdentifier { get; }

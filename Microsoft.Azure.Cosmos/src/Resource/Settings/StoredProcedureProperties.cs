@@ -36,8 +36,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
             string id,
             string body)
         {
-            this.Id = id;
-            this.Body = body;
+            Id = id;
+            Body = body;
         }
 
         /// <summary>
@@ -48,8 +48,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         [JsonProperty(PropertyName = Constants.Properties.Body)]
         public string Body
         {
-            get => this.body;
-            set => this.body = value ?? throw new ArgumentNullException(nameof(this.Body));
+            get => body;
+            set => body = value ?? throw new ArgumentNullException(nameof(Body));
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace Microsoft.Azure.Cosmos.Scripts
         [JsonProperty(PropertyName = Constants.Properties.Id)]
         public string Id
         {
-            get => this.id;
-            set => this.id = value ?? throw new ArgumentNullException(nameof(this.Id));
+            get => id;
+            set => id = value ?? throw new ArgumentNullException(nameof(Id));
         }
 
         /// <summary>

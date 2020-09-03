@@ -19,16 +19,16 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         public ChangeFeedStartFromRequestOptionPopulator(RequestMessage requestMessage)
         {
             this.requestMessage = requestMessage ?? throw new ArgumentNullException(nameof(requestMessage));
-            this.feedRangeVisitor = new FeedRangeRequestMessagePopulatorVisitor(requestMessage);
+            feedRangeVisitor = new FeedRangeRequestMessagePopulatorVisitor(requestMessage);
         }
 
         public override void Visit(ChangeFeedStartFromNow startFromNow)
         {
-            this.requestMessage.Headers.IfNoneMatch = ChangeFeedStartFromRequestOptionPopulator.IfNoneMatchAllHeaderValue;
+            requestMessage.Headers.IfNoneMatch = ChangeFeedStartFromRequestOptionPopulator.IfNoneMatchAllHeaderValue;
 
             if (startFromNow.FeedRange != null)
             {
-                startFromNow.FeedRange.Accept(this.feedRangeVisitor);
+                startFromNow.FeedRange.Accept(feedRangeVisitor);
             }
         }
 
@@ -41,18 +41,18 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             // It's also an optimization, since the backend won't have to binary search for the value.
             if (startFromTime.StartTime != ChangeFeedStartFromRequestOptionPopulator.StartFromBeginningTime)
             {
-                this.requestMessage.Headers.Add(
+                requestMessage.Headers.Add(
                     HttpConstants.HttpHeaders.IfModifiedSince,
                     startFromTime.StartTime.ToString("r", CultureInfo.InvariantCulture));
             }
 
-            startFromTime.FeedRange.Accept(this.feedRangeVisitor);
+            startFromTime.FeedRange.Accept(feedRangeVisitor);
         }
 
         public override void Visit(ChangeFeedStartFromContinuation startFromContinuation)
         {
             // On REST level, change feed is using IfNoneMatch/ETag instead of continuation
-            this.requestMessage.Headers.IfNoneMatch = startFromContinuation.Continuation;
+            requestMessage.Headers.IfNoneMatch = startFromContinuation.Continuation;
         }
 
         public override void Visit(ChangeFeedStartFromBeginning startFromBeginning)
@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             // We don't need to set any headers to start from the beginning
 
             // Except for the feed range.
-            startFromBeginning.FeedRange.Accept(this.feedRangeVisitor);
+            startFromBeginning.FeedRange.Accept(feedRangeVisitor);
         }
 
         public override void Visit(ChangeFeedStartFromContinuationAndFeedRange startFromContinuationAndFeedRange)
@@ -68,10 +68,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             // On REST level, change feed is using IfNoneMatch/ETag instead of continuation
             if (startFromContinuationAndFeedRange.Etag != null)
             {
-                this.requestMessage.Headers.IfNoneMatch = startFromContinuationAndFeedRange.Etag;
+                requestMessage.Headers.IfNoneMatch = startFromContinuationAndFeedRange.Etag;
             }
 
-            startFromContinuationAndFeedRange.FeedRange.Accept(this.feedRangeVisitor);
+            startFromContinuationAndFeedRange.FeedRange.Accept(feedRangeVisitor);
         }
     }
 }

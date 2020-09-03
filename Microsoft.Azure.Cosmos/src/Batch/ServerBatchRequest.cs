@@ -48,7 +48,7 @@ namespace Microsoft.Azure.Cosmos
             this.serializerCore = serializerCore;
         }
 
-        public IReadOnlyList<ItemBatchOperation> Operations => this.operations;
+        public IReadOnlyList<ItemBatchOperation> Operations => operations;
 
         /// <summary>
         /// Returns the body Stream.
@@ -87,7 +87,7 @@ namespace Microsoft.Azure.Cosmos
                     break;
                 }
 
-                await operation.MaterializeResourceAsync(this.serializerCore, cancellationToken);
+                await operation.MaterializeResourceAsync(serializerCore, cancellationToken);
                 materializedCount++;
 
                 previousOperationIndex = operation.OperationIndex;
@@ -96,12 +96,12 @@ namespace Microsoft.Azure.Cosmos
                 estimatedMaxOperationLength = Math.Max(currentLength, estimatedMaxOperationLength);
 
                 approximateTotalLength += currentLength;
-                if (approximateTotalLength > this.maxBodyLength)
+                if (approximateTotalLength > maxBodyLength)
                 {
                     break;
                 }
 
-                if (materializedCount == this.maxOperationCount)
+                if (materializedCount == maxOperationCount)
                 {
                     break;
                 }
@@ -110,22 +110,22 @@ namespace Microsoft.Azure.Cosmos
             this.operations = new ArraySegment<ItemBatchOperation>(operations.Array, operations.Offset, materializedCount);
 
             const int operationSerializationOverheadOverEstimateInBytes = 200;
-            this.bodyStream = new MemoryStream(approximateTotalLength + (operationSerializationOverheadOverEstimateInBytes * materializedCount));
-            this.operationResizableWriteBuffer = new MemorySpanResizer<byte>(estimatedMaxOperationLength + operationSerializationOverheadOverEstimateInBytes);
+            bodyStream = new MemoryStream(approximateTotalLength + (operationSerializationOverheadOverEstimateInBytes * materializedCount));
+            operationResizableWriteBuffer = new MemorySpanResizer<byte>(estimatedMaxOperationLength + operationSerializationOverheadOverEstimateInBytes);
 
-            Result r = await this.bodyStream.WriteRecordIOAsync(default(Segment), this.WriteOperation);
+            Result r = await bodyStream.WriteRecordIOAsync(default(Segment), WriteOperation);
             Debug.Assert(r == Result.Success, "Failed to serialize batch request");
 
-            this.bodyStream.Position = 0;
+            bodyStream.Position = 0;
 
-            if (this.shouldDeleteLastWrittenRecord)
+            if (shouldDeleteLastWrittenRecord)
             {
-                this.bodyStream.SetLength(this.bodyStreamPositionBeforeWritingCurrentRecord);
-                this.operations = new ArraySegment<ItemBatchOperation>(operations.Array, operations.Offset, this.lastWrittenOperationIndex);
+                bodyStream.SetLength(bodyStreamPositionBeforeWritingCurrentRecord);
+                this.operations = new ArraySegment<ItemBatchOperation>(operations.Array, operations.Offset, lastWrittenOperationIndex);
             }
             else
             {
-                this.operations = new ArraySegment<ItemBatchOperation>(operations.Array, operations.Offset, this.lastWrittenOperationIndex + 1);
+                this.operations = new ArraySegment<ItemBatchOperation>(operations.Array, operations.Offset, lastWrittenOperationIndex + 1);
             }
 
             int overflowOperations = operations.Count - this.operations.Count;
@@ -134,30 +134,30 @@ namespace Microsoft.Azure.Cosmos
 
         private Result WriteOperation(long index, out ReadOnlyMemory<byte> buffer)
         {
-            if (this.bodyStream.Length > this.maxBodyLength)
+            if (bodyStream.Length > maxBodyLength)
             {
                 // If there is only one operation within the request, we will keep it even if it
                 // exceeds the maximum size allowed for the body.
                 if (index > 1)
                 {
-                    this.shouldDeleteLastWrittenRecord = true;
+                    shouldDeleteLastWrittenRecord = true;
                 }
 
                 buffer = default(ReadOnlyMemory<byte>);
                 return Result.Success;
             }
 
-            this.bodyStreamPositionBeforeWritingCurrentRecord = this.bodyStream.Length;
+            bodyStreamPositionBeforeWritingCurrentRecord = bodyStream.Length;
 
-            if (index >= this.operations.Count)
+            if (index >= operations.Count)
             {
                 buffer = default(ReadOnlyMemory<byte>);
                 return Result.Success;
             }
 
-            ItemBatchOperation operation = this.operations.Array[this.operations.Offset + (int)index];
+            ItemBatchOperation operation = operations.Array[operations.Offset + (int)index];
 
-            RowBuffer row = new RowBuffer(this.operationResizableWriteBuffer.Memory.Length, this.operationResizableWriteBuffer);
+            RowBuffer row = new RowBuffer(operationResizableWriteBuffer.Memory.Length, operationResizableWriteBuffer);
             row.InitLayout(HybridRowVersion.V1, BatchSchemaProvider.BatchOperationLayout, BatchSchemaProvider.BatchLayoutResolver);
             Result r = RowWriter.WriteBuffer(ref row, operation, ItemBatchOperation.WriteOperation);
             if (r != Result.Success)
@@ -166,8 +166,8 @@ namespace Microsoft.Azure.Cosmos
                 return r;
             }
 
-            this.lastWrittenOperationIndex = (int)index;
-            buffer = this.operationResizableWriteBuffer.Memory.Slice(0, row.Length);
+            lastWrittenOperationIndex = (int)index;
+            buffer = operationResizableWriteBuffer.Memory.Slice(0, row.Length);
             return Result.Success;
         }
     }

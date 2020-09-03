@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
     using System;
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.ItemProducers;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
@@ -38,7 +37,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         public void Aggregate(CosmosElement localMinMax)
         {
             // If the value became undefinded at some point then it should stay that way.
-            if (this.globalMinMax == Undefined)
+            if (globalMinMax == Undefined)
             {
                 return;
             }
@@ -46,7 +45,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             if (localMinMax == Undefined)
             {
                 // If we got an undefined in the pipeline then the whole thing becomes undefined.
-                this.globalMinMax = Undefined;
+                globalMinMax = Undefined;
                 return;
             }
 
@@ -89,26 +88,26 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 }
             }
 
-            if (!ItemComparer.IsMinOrMax(this.globalMinMax) && (!IsPrimitve(localMinMax) || !IsPrimitve(this.globalMinMax)))
+            if (!ItemComparer.IsMinOrMax(globalMinMax) && (!IsPrimitve(localMinMax) || !IsPrimitve(globalMinMax)))
             {
                 // This means we are comparing non primitives which is undefined
-                this.globalMinMax = Undefined;
+                globalMinMax = Undefined;
                 return;
             }
 
             // Finally do the comparision
-            if (this.isMinAggregation)
+            if (isMinAggregation)
             {
-                if (ItemComparer.Instance.Compare(localMinMax, this.globalMinMax) < 0)
+                if (ItemComparer.Instance.Compare(localMinMax, globalMinMax) < 0)
                 {
-                    this.globalMinMax = localMinMax;
+                    globalMinMax = localMinMax;
                 }
             }
             else
             {
-                if (ItemComparer.Instance.Compare(localMinMax, this.globalMinMax) > 0)
+                if (ItemComparer.Instance.Compare(localMinMax, globalMinMax) > 0)
                 {
-                    this.globalMinMax = localMinMax;
+                    globalMinMax = localMinMax;
                 }
             }
         }
@@ -116,14 +115,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         public CosmosElement GetResult()
         {
             CosmosElement result;
-            if ((this.globalMinMax == ItemComparer.MinValue) || (this.globalMinMax == ItemComparer.MaxValue))
+            if ((globalMinMax == ItemComparer.MinValue) || (globalMinMax == ItemComparer.MaxValue))
             {
                 // The filter did not match any documents.
                 result = Undefined;
             }
             else
             {
-                result = this.globalMinMax;
+                result = globalMinMax;
             }
 
             return result;
@@ -174,7 +173,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             }
             else
             {
-                globalMinMax = isMinAggregation ? (CosmosElement)ItemComparer.MaxValue : (CosmosElement)ItemComparer.MinValue;
+                globalMinMax = isMinAggregation ? ItemComparer.MaxValue : (CosmosElement)ItemComparer.MinValue;
             }
 
             return TryCatch<IAggregator>.FromResult(
@@ -194,21 +193,21 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         public CosmosElement GetCosmosElementContinuationToken()
         {
             MinMaxContinuationToken minMaxContinuationToken;
-            if (this.globalMinMax == ItemComparer.MinValue)
+            if (globalMinMax == ItemComparer.MinValue)
             {
                 minMaxContinuationToken = MinMaxContinuationToken.CreateMinValueContinuationToken();
             }
-            else if (this.globalMinMax == ItemComparer.MaxValue)
+            else if (globalMinMax == ItemComparer.MaxValue)
             {
                 minMaxContinuationToken = MinMaxContinuationToken.CreateMaxValueContinuationToken();
             }
-            else if (this.globalMinMax == Undefined)
+            else if (globalMinMax == Undefined)
             {
                 minMaxContinuationToken = MinMaxContinuationToken.CreateUndefinedValueContinuationToken();
             }
             else
             {
-                minMaxContinuationToken = MinMaxContinuationToken.CreateValueContinuationToken(this.globalMinMax);
+                minMaxContinuationToken = MinMaxContinuationToken.CreateValueContinuationToken(globalMinMax);
             }
 
             CosmosElement minMaxContinuationTokenAsCosmosElement = MinMaxContinuationToken.ToCosmosElement(minMaxContinuationToken);
@@ -298,8 +297,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                         throw new ArgumentOutOfRangeException($"Unknown {nameof(type)}: {type}.");
                 }
 
-                this.Type = type;
-                this.Value = value;
+                Type = type;
+                Value = value;
             }
 
             public MinMaxContinuationTokenType Type { get; }
@@ -332,10 +331,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                     throw new ArgumentNullException(nameof(minMaxContinuationToken));
                 }
 
-                Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>();
-                dictionary.Add(
-                    MinMaxContinuationToken.PropertyNames.Type,
-                    EnumToCosmosString.ConvertEnumToCosmosString(minMaxContinuationToken.Type));
+                Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>
+                {
+                    {
+                        MinMaxContinuationToken.PropertyNames.Type,
+                        EnumToCosmosString.ConvertEnumToCosmosString(minMaxContinuationToken.Type)
+                    }
+                };
                 if (minMaxContinuationToken.Value != null)
                 {
                     dictionary.Add(MinMaxContinuationToken.PropertyNames.Value, minMaxContinuationToken.Value);

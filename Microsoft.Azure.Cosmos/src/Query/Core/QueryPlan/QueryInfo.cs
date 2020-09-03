@@ -104,14 +104,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                return this.DistinctType != DistinctQueryType.None;
+                return DistinctType != DistinctQueryType.None;
             }
         }
         public bool HasTop
         {
             get
             {
-                return this.Top != null;
+                return Top != null;
             }
         }
 
@@ -119,14 +119,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                bool aggregatesListNonEmpty = (this.Aggregates != null) && (this.Aggregates.Count > 0);
+                bool aggregatesListNonEmpty = (Aggregates != null) && (Aggregates.Count > 0);
                 if (aggregatesListNonEmpty)
                 {
                     return true;
                 }
 
-                bool aggregateAliasMappingNonEmpty = (this.GroupByAliasToAggregateType != null)
-                    && this.GroupByAliasToAggregateType
+                bool aggregateAliasMappingNonEmpty = (GroupByAliasToAggregateType != null)
+                    && GroupByAliasToAggregateType
                         .Values
                         .Any(aggregateOperator => aggregateOperator.HasValue);
                 return aggregateAliasMappingNonEmpty;
@@ -137,7 +137,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                return this.GroupByExpressions != null && this.GroupByExpressions.Count > 0;
+                return GroupByExpressions != null && GroupByExpressions.Count > 0;
             }
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                return this.OrderBy != null && this.OrderBy.Count > 0;
+                return OrderBy != null && OrderBy.Count > 0;
             }
         }
 
@@ -153,7 +153,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                return this.Offset != null;
+                return Offset != null;
             }
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             get
             {
-                return this.Limit != null;
+                return Limit != null;
             }
         }
     }

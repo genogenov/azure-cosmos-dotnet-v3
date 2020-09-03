@@ -79,20 +79,20 @@ namespace Microsoft.Azure.Cosmos.Fluent
         public ContainerBuilder Attach()
         {
             ConflictResolutionPolicy resolutionPolicy = new ConflictResolutionPolicy();
-            if (this.conflictResolutionPath != null)
+            if (conflictResolutionPath != null)
             {
                 resolutionPolicy.Mode = ConflictResolutionMode.LastWriterWins;
-                resolutionPolicy.ResolutionPath = this.conflictResolutionPath;
+                resolutionPolicy.ResolutionPath = conflictResolutionPath;
             }
 
-            if (this.conflictResolutionProcedure != null)
+            if (conflictResolutionProcedure != null)
             {
                 resolutionPolicy.Mode = ConflictResolutionMode.Custom;
-                resolutionPolicy.ResolutionProcedure = this.conflictResolutionProcedure;
+                resolutionPolicy.ResolutionProcedure = conflictResolutionProcedure;
             }
 
-            this.attachCallback(resolutionPolicy);
-            return this.parent;
+            attachCallback(resolutionPolicy);
+            return parent;
         }
     }
 }

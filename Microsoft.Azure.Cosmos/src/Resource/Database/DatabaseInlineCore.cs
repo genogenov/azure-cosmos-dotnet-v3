@@ -4,7 +4,6 @@
 
 namespace Microsoft.Azure.Cosmos
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Fluent;
@@ -15,7 +14,7 @@ namespace Microsoft.Azure.Cosmos
         internal DatabaseInlineCore(
            CosmosClientContext clientContext,
            string databaseId)
-            : base (
+            : base(
                clientContext,
                databaseId)
         {
@@ -27,7 +26,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerAsync(diagnostics, containerProperties, throughput, requestOptions, cancellationToken));
@@ -39,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerAsync(diagnostics, id, partitionKeyPath, throughput, requestOptions, cancellationToken));
@@ -51,7 +50,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerIfNotExistsAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerIfNotExistsAsync(diagnostics, containerProperties, throughput, requestOptions, cancellationToken));
@@ -64,7 +63,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerIfNotExistsAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerIfNotExistsAsync(diagnostics, id, partitionKeyPath, throughput, requestOptions, cancellationToken));
@@ -76,7 +75,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerStreamAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerStreamAsync(diagnostics, containerProperties, throughput, requestOptions, cancellationToken));
@@ -86,7 +85,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateUserAsync),
                 requestOptions,
                 (diagnostics) => base.CreateUserAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -103,7 +102,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(DeleteAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteAsync(diagnostics, requestOptions, cancellationToken));
@@ -113,7 +112,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(DeleteStreamAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteStreamAsync(diagnostics, requestOptions, cancellationToken));
@@ -197,7 +196,7 @@ namespace Microsoft.Azure.Cosmos
         public override Task<DatabaseResponse> ReadAsync(RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadAsync),
                 requestOptions,
                 (diagnostics) => base.ReadAsync(diagnostics, requestOptions, cancellationToken));
@@ -207,7 +206,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadStreamAsync),
                 requestOptions,
                 (diagnostics) => base.ReadStreamAsync(diagnostics, requestOptions, cancellationToken));
@@ -215,7 +214,7 @@ namespace Microsoft.Azure.Cosmos
 
         public override Task<int?> ReadThroughputAsync(CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadThroughputAsync),
                 null,
                 (diagnostics) => base.ReadThroughputAsync(diagnostics, cancellationToken));
@@ -225,7 +224,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadThroughputAsync),
                 requestOptions,
                 (diagnostics) => base.ReadThroughputAsync(diagnostics, requestOptions, cancellationToken));
@@ -236,7 +235,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReplaceThroughputAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceThroughputAsync(diagnostics, throughput, requestOptions, cancellationToken));
@@ -247,7 +246,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReplaceThroughputAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceThroughputAsync(diagnostics, throughputProperties, requestOptions, cancellationToken));
@@ -259,7 +258,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerAsync(diagnostics, containerProperties, throughputProperties, requestOptions, cancellationToken));
@@ -271,7 +270,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerIfNotExistsAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerIfNotExistsAsync(diagnostics, containerProperties, throughputProperties, requestOptions, cancellationToken));
@@ -283,7 +282,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateContainerStreamAsync),
                 requestOptions,
                 (diagnostics) => base.CreateContainerStreamAsync(diagnostics, containerProperties, throughputProperties, requestOptions, cancellationToken));
@@ -294,7 +293,7 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(UpsertUserAsync),
                 requestOptions,
                 (diagnostics) => base.UpsertUserAsync(diagnostics, id, requestOptions, cancellationToken));

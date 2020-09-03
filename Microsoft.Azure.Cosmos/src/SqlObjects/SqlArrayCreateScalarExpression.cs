@@ -4,7 +4,6 @@
 namespace Microsoft.Azure.Cosmos.SqlObjects
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.Immutable;
     using Microsoft.Azure.Cosmos.SqlObjects.Visitors;
 
@@ -29,7 +28,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
                 }
             }
 
-            this.Items = items;
+            Items = items;
         }
 
         public ImmutableArray<SqlScalarExpression> Items { get; }

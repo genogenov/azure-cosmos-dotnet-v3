@@ -5,7 +5,6 @@
 namespace Microsoft.Azure.Cosmos.Scripts
 {
     using System.Net;
-    using Microsoft.Azure.Documents;
 
     /// <summary>
     /// The cosmos user defined function response
@@ -30,10 +29,10 @@ namespace Microsoft.Azure.Cosmos.Scripts
             UserDefinedFunctionProperties userDefinedFunctionProperties,
             CosmosDiagnostics diagnostics)
         {
-            this.StatusCode = httpStatusCode;
-            this.Headers = headers;
-            this.Resource = userDefinedFunctionProperties;
-            this.Diagnostics = diagnostics;
+            StatusCode = httpStatusCode;
+            Headers = headers;
+            Resource = userDefinedFunctionProperties;
+            Diagnostics = diagnostics;
         }
 
         /// <inheritdoc/>
@@ -49,13 +48,13 @@ namespace Microsoft.Azure.Cosmos.Scripts
         public override CosmosDiagnostics Diagnostics { get; }
 
         /// <inheritdoc/>
-        public override double RequestCharge => this.Headers?.RequestCharge ?? 0;
+        public override double RequestCharge => Headers?.RequestCharge ?? 0;
 
         /// <inheritdoc/>
-        public override string ActivityId => this.Headers?.ActivityId;
+        public override string ActivityId => Headers?.ActivityId;
 
         /// <inheritdoc/>
-        public override string ETag => this.Headers?.ETag;
+        public override string ETag => Headers?.ETag;
 
         /// <summary>
         /// Get <see cref="UserDefinedFunctionProperties"/> implicitly from <see cref="UserDefinedFunctionResponse"/>

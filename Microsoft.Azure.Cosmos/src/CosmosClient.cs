@@ -5,9 +5,7 @@
 namespace Microsoft.Azure.Cosmos
 {
     using System;
-    using System.IO;
     using System.Net;
-    using System.Net.Http;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -204,10 +202,10 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(authKeyOrResourceToken));
             }
 
-            this.Endpoint = new Uri(accountEndpoint);
-            this.AccountKey = authKeyOrResourceToken;
+            Endpoint = new Uri(accountEndpoint);
+            AccountKey = authKeyOrResourceToken;
 
-            this.ClientContext = ClientContextCore.Create(
+            ClientContext = ClientContextCore.Create(
                 this,
                 clientOptions);
         }
@@ -242,10 +240,10 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(documentClient));
             }
 
-            this.Endpoint = new Uri(accountEndpoint);
-            this.AccountKey = authKeyOrResourceToken;
+            Endpoint = new Uri(accountEndpoint);
+            AccountKey = authKeyOrResourceToken;
 
-            this.ClientContext = ClientContextCore.Create(
+            ClientContext = ClientContextCore.Create(
                  this,
                  documentClient,
                  cosmosClientOptions);
@@ -254,7 +252,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// The <see cref="Cosmos.CosmosClientOptions"/> used initialize CosmosClient.
         /// </summary>
-        public virtual CosmosClientOptions ClientOptions => this.ClientContext.ClientOptions;
+        public virtual CosmosClientOptions ClientOptions => ClientContext.ClientOptions;
 
         /// <summary>
         /// The response factory used to create CosmosClient response types.
@@ -269,7 +267,7 @@ namespace Microsoft.Azure.Cosmos
 #else
         internal
 #endif
-        virtual CosmosResponseFactory ResponseFactory => this.ClientContext.ResponseFactory;
+        virtual CosmosResponseFactory ResponseFactory => ClientContext.ResponseFactory;
 
         /// <summary>
         /// Gets the endpoint Uri for the Azure Cosmos DB service.
@@ -288,8 +286,8 @@ namespace Microsoft.Azure.Cosmos
         /// </value>
         internal string AccountKey { get; }
 
-        internal DocumentClient DocumentClient => this.ClientContext.DocumentClient;
-        internal RequestInvokerHandler RequestHandler => this.ClientContext.RequestHandler;
+        internal DocumentClient DocumentClient => ClientContext.DocumentClient;
+        internal RequestInvokerHandler RequestHandler => ClientContext.RequestHandler;
         internal CosmosClientContext ClientContext { get; }
 
         /// <summary>
@@ -300,7 +298,7 @@ namespace Microsoft.Azure.Cosmos
         /// </returns>
         public virtual Task<AccountProperties> ReadAccountAsync()
         {
-            return ((IDocumentClientInternal)this.DocumentClient).GetDatabaseAccountInternalAsync(this.Endpoint);
+            return ((IDocumentClientInternal)DocumentClient).GetDatabaseAccountInternalAsync(Endpoint);
         }
 
         /// <summary>
@@ -324,7 +322,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>Cosmos database proxy</returns>
         public virtual Database GetDatabase(string id)
         {
-            return new DatabaseInlineCore(this.ClientContext, id);
+            return new DatabaseInlineCore(ClientContext, id);
         }
 
         /// <summary>
@@ -351,7 +349,7 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(containerId));
             }
 
-            return this.GetDatabase(databaseId).GetContainer(containerId);
+            return GetDatabase(databaseId).GetContainer(containerId);
         }
 
         /// <summary>
@@ -383,21 +381,21 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateDatabaseAsync),
                 requestOptions,
                 (diagnostics) =>
                 {
-                DatabaseProperties databaseProperties = this.PrepareDatabaseProperties(id);
-                ThroughputProperties throughputProperties = ThroughputProperties.CreateManualThroughput(throughput);
+                    DatabaseProperties databaseProperties = PrepareDatabaseProperties(id);
+                    ThroughputProperties throughputProperties = ThroughputProperties.CreateManualThroughput(throughput);
 
-                return this.CreateDatabaseInternalAsync(
-                    databaseProperties: databaseProperties,
-                    throughputProperties: throughputProperties,
-                    requestOptions: requestOptions,
-                    diagnosticsContext: diagnostics,
-                    cancellationToken: cancellationToken);
-            });
+                    return CreateDatabaseInternalAsync(
+                        databaseProperties: databaseProperties,
+                        throughputProperties: throughputProperties,
+                        requestOptions: requestOptions,
+                        diagnosticsContext: diagnostics,
+                        cancellationToken: cancellationToken);
+                });
         }
 
         /// <summary>
@@ -429,13 +427,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateDatabaseAsync),
                 requestOptions,
                 (diagnostics) =>
                 {
-                    DatabaseProperties databaseProperties = this.PrepareDatabaseProperties(id);
-                    return this.CreateDatabaseInternalAsync(
+                    DatabaseProperties databaseProperties = PrepareDatabaseProperties(id);
+                    return CreateDatabaseInternalAsync(
                         diagnosticsContext: diagnostics,
                         databaseProperties: databaseProperties,
                         throughputProperties: throughputProperties,
@@ -487,14 +485,14 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateDatabaseIfNotExistsAsync),
                 requestOptions,
                 async (diagnostics) =>
             {
                 // Doing a Read before Create will give us better latency for existing databases
-                DatabaseProperties databaseProperties = this.PrepareDatabaseProperties(id);
-                DatabaseCore database = (DatabaseCore)this.GetDatabase(id);
+                DatabaseProperties databaseProperties = PrepareDatabaseProperties(id);
+                DatabaseCore database = (DatabaseCore)GetDatabase(id);
                 using (ResponseMessage readResponse = await database.ReadStreamAsync(
                     diagnosticsContext: diagnostics,
                     requestOptions: requestOptions,
@@ -502,11 +500,11 @@ namespace Microsoft.Azure.Cosmos
                 {
                     if (readResponse.StatusCode != HttpStatusCode.NotFound)
                     {
-                        return this.ClientContext.ResponseFactory.CreateDatabaseResponse(database, readResponse);
+                        return ClientContext.ResponseFactory.CreateDatabaseResponse(database, readResponse);
                     }
                 }
 
-                using (ResponseMessage createResponse = await this.CreateDatabaseStreamInternalAsync(
+                using (ResponseMessage createResponse = await CreateDatabaseStreamInternalAsync(
                     diagnostics,
                     databaseProperties,
                     throughputProperties,
@@ -515,7 +513,7 @@ namespace Microsoft.Azure.Cosmos
                 {
                     if (createResponse.StatusCode != HttpStatusCode.Conflict)
                     {
-                        return this.ClientContext.ResponseFactory.CreateDatabaseResponse(this.GetDatabase(databaseProperties.Id), createResponse);
+                        return ClientContext.ResponseFactory.CreateDatabaseResponse(GetDatabase(databaseProperties.Id), createResponse);
                     }
                 }
 
@@ -526,7 +524,7 @@ namespace Microsoft.Azure.Cosmos
                     requestOptions: requestOptions,
                     cancellationToken: cancellationToken);
 
-                return this.ClientContext.ResponseFactory.CreateDatabaseResponse(this.GetDatabase(databaseProperties.Id), readResponseAfterConflict);
+                return ClientContext.ResponseFactory.CreateDatabaseResponse(GetDatabase(databaseProperties.Id), readResponseAfterConflict);
             });
         }
 
@@ -570,7 +568,7 @@ namespace Microsoft.Azure.Cosmos
         {
             ThroughputProperties throughputProperties = ThroughputProperties.CreateManualThroughput(throughput);
 
-            return this.CreateDatabaseIfNotExistsAsync(
+            return CreateDatabaseIfNotExistsAsync(
                 id,
                 throughputProperties,
                 requestOptions,
@@ -618,7 +616,7 @@ namespace Microsoft.Azure.Cosmos
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorInlineCore<T>(
-               this.GetDatabaseQueryIteratorHelper<T>(
+               GetDatabaseQueryIteratorHelper<T>(
                    queryDefinition,
                    continuationToken,
                    requestOptions));
@@ -670,7 +668,7 @@ namespace Microsoft.Azure.Cosmos
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorInlineCore(
-                this.GetDatabaseQueryStreamIteratorHelper(
+                GetDatabaseQueryStreamIteratorHelper(
                     queryDefinition,
                     continuationToken,
                     requestOptions));
@@ -722,7 +720,7 @@ namespace Microsoft.Azure.Cosmos
             }
 
             return new FeedIteratorInlineCore<T>(
-                this.GetDatabaseQueryIteratorHelper<T>(
+                GetDatabaseQueryIteratorHelper<T>(
                     queryDefinition,
                     continuationToken,
                     requestOptions));
@@ -778,7 +776,7 @@ namespace Microsoft.Azure.Cosmos
             }
 
             return new FeedIteratorInlineCore(
-                this.GetDatabaseQueryStreamIterator(
+                GetDatabaseQueryStreamIterator(
                     queryDefinition,
                     continuationToken,
                     requestOptions));
@@ -813,13 +811,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(databaseProperties));
             }
 
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                  nameof(CreateDatabaseStreamAsync),
                  requestOptions,
                  (diagnostics) =>
                  {
-                     this.ClientContext.ValidateResource(databaseProperties.Id);
-                     return this.CreateDatabaseStreamInternalAsync(
+                     ClientContext.ValidateResource(databaseProperties.Id);
+                     return CreateDatabaseStreamInternalAsync(
                          diagnostics,
                          databaseProperties,
                          ThroughputProperties.CreateManualThroughput(throughput),
@@ -830,12 +828,12 @@ namespace Microsoft.Azure.Cosmos
 
         internal virtual async Task<ConsistencyLevel> GetAccountConsistencyLevelAsync()
         {
-            if (!this.accountConsistencyLevel.HasValue)
+            if (!accountConsistencyLevel.HasValue)
             {
-                this.accountConsistencyLevel = await this.DocumentClient.GetDefaultConsistencyLevelAsync();
+                accountConsistencyLevel = await DocumentClient.GetDefaultConsistencyLevelAsync();
             }
 
-            return this.accountConsistencyLevel.Value;
+            return accountConsistencyLevel.Value;
         }
 
         internal DatabaseProperties PrepareDatabaseProperties(string id)
@@ -850,7 +848,7 @@ namespace Microsoft.Azure.Cosmos
                 Id = id
             };
 
-            this.ClientContext.ValidateResource(databaseProperties.Id);
+            ClientContext.ValidateResource(databaseProperties.Id);
             return databaseProperties;
         }
 
@@ -882,13 +880,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(databaseProperties));
             }
 
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateDatabaseIfNotExistsAsync),
                 requestOptions,
                 (diagnostics) =>
                 {
-                    this.ClientContext.ValidateResource(databaseProperties.Id);
-                    return this.CreateDatabaseStreamInternalAsync(
+                    ClientContext.ValidateResource(databaseProperties.Id);
+                    return CreateDatabaseStreamInternalAsync(
                         diagnostics,
                         databaseProperties,
                         throughputProperties,
@@ -904,19 +902,19 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            ResponseMessage response = await this.ClientContext.ProcessResourceOperationStreamAsync(
-                resourceUri: this.DatabaseRootUri,
+            ResponseMessage response = await ClientContext.ProcessResourceOperationStreamAsync(
+                resourceUri: DatabaseRootUri,
                 resourceType: ResourceType.Database,
                 operationType: OperationType.Create,
                 requestOptions: requestOptions,
                 cosmosContainerCore: null,
                 partitionKey: null,
-                streamPayload: this.ClientContext.SerializerCore.ToStream<DatabaseProperties>(databaseProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream<DatabaseProperties>(databaseProperties),
                 requestEnricher: (httpRequestMessage) => httpRequestMessage.AddThroughputPropertiesHeader(throughputProperties),
                 diagnosticsContext: diagnosticsContext,
                 cancellationToken: cancellationToken);
 
-            return this.ClientContext.ResponseFactory.CreateDatabaseResponse(this.GetDatabase(databaseProperties.Id), response);
+            return ClientContext.ResponseFactory.CreateDatabaseResponse(GetDatabase(databaseProperties.Id), response);
         }
 
         private Task<ResponseMessage> CreateDatabaseStreamInternalAsync(
@@ -926,14 +924,14 @@ namespace Microsoft.Azure.Cosmos
             RequestOptions requestOptions,
             CancellationToken cancellationToken)
         {
-            return this.ClientContext.ProcessResourceOperationAsync(
-                resourceUri: this.DatabaseRootUri,
+            return ClientContext.ProcessResourceOperationAsync(
+                resourceUri: DatabaseRootUri,
                 resourceType: ResourceType.Database,
                 operationType: OperationType.Create,
                 requestOptions: requestOptions,
                 containerInternal: null,
                 partitionKey: null,
-                streamPayload: this.ClientContext.SerializerCore.ToStream<DatabaseProperties>(databaseProperties),
+                streamPayload: ClientContext.SerializerCore.ToStream<DatabaseProperties>(databaseProperties),
                 requestEnricher: (httpRequestMessage) => httpRequestMessage.AddThroughputPropertiesHeader(throughputProperties),
                 responseCreator: (response) => response,
                 diagnosticsContext: diagnosticsContext,
@@ -945,7 +943,7 @@ namespace Microsoft.Azure.Cosmos
            string continuationToken = null,
            QueryRequestOptions requestOptions = null)
         {
-            if (!(this.GetDatabaseQueryStreamIteratorHelper(
+            if (!(GetDatabaseQueryStreamIteratorHelper(
                 queryDefinition,
                 continuationToken,
                 requestOptions) is FeedIteratorInternal databaseStreamIterator))
@@ -955,7 +953,7 @@ namespace Microsoft.Azure.Cosmos
 
             return new FeedIteratorCore<T>(
                     databaseStreamIterator,
-                    (response) => this.ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
+                    (response) => ClientContext.ResponseFactory.CreateQueryFeedResponse<T>(
                         responseMessage: response,
                         resourceType: ResourceType.Database));
         }
@@ -966,8 +964,8 @@ namespace Microsoft.Azure.Cosmos
             QueryRequestOptions requestOptions = null)
         {
             return new FeedIteratorCore(
-               clientContext: this.ClientContext,
-               resourceLink: this.DatabaseRootUri,
+               clientContext: ClientContext,
+               resourceLink: DatabaseRootUri,
                resourceType: ResourceType.Database,
                queryDefinition: queryDefinition,
                continuationToken: continuationToken,
@@ -979,7 +977,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         /// <summary>
@@ -988,20 +986,20 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="disposing">True if disposing</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!this.isDisposed)
+            if (!isDisposed)
             {
                 if (disposing)
                 {
-                    this.ClientContext.Dispose();
+                    ClientContext.Dispose();
                 }
 
-                this.isDisposed = true;
+                isDisposed = true;
             }
         }
 
         private void ThrowIfDisposed()
         {
-            if (this.isDisposed)
+            if (isDisposed)
             {
                 throw new ObjectDisposedException($"Accessing {nameof(CosmosClient)} after it is disposed is invalid.");
             }

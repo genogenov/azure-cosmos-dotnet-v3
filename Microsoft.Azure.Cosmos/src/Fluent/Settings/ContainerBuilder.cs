@@ -33,9 +33,9 @@ namespace Microsoft.Azure.Cosmos.Fluent
             string partitionKeyPath = null)
             : base(name, partitionKeyPath)
         {
-            this.database = cosmosContainers;
+            database = cosmosContainers;
             this.clientContext = clientContext;
-            this.containerUri = UriFactory.CreateDocumentCollectionUri(this.database.Id, name);
+            containerUri = UriFactory.CreateDocumentCollectionUri(database.Id, name);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         {
             return new UniqueKeyDefinition(
                 this,
-                (uniqueKey) => this.AddUniqueKey(uniqueKey));
+                (uniqueKey) => AddUniqueKey(uniqueKey));
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         {
             return new ConflictResolutionDefinition(
                 this,
-                (conflictPolicy) => this.AddConflictResolution(conflictPolicy));
+                (conflictPolicy) => AddConflictResolution(conflictPolicy));
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace Microsoft.Azure.Cosmos.Fluent
             ThroughputProperties throughputProperties,
             CancellationToken cancellationToken = default)
         {
-            ContainerProperties containerProperties = this.Build();
+            ContainerProperties containerProperties = Build();
 
-            return await this.database.CreateContainerAsync(
+            return await database.CreateContainerAsync(
                 containerProperties: containerProperties,
                 throughputProperties: throughputProperties,
                 cancellationToken: cancellationToken);
@@ -90,9 +90,9 @@ namespace Microsoft.Azure.Cosmos.Fluent
             ThroughputProperties throughputProperties,
             CancellationToken cancellationToken = default)
         {
-            ContainerProperties containerProperties = this.Build();
+            ContainerProperties containerProperties = Build();
 
-            return await this.database.CreateContainerIfNotExistsAsync(
+            return await database.CreateContainerIfNotExistsAsync(
                 containerProperties: containerProperties,
                 throughputProperties: throughputProperties,
                 cancellationToken: cancellationToken);
@@ -109,9 +109,9 @@ namespace Microsoft.Azure.Cosmos.Fluent
             int? throughput = null,
             CancellationToken cancellationToken = default)
         {
-            ContainerProperties containerProperties = this.Build();
+            ContainerProperties containerProperties = Build();
 
-            return await this.database.CreateContainerAsync(
+            return await database.CreateContainerAsync(
                 containerProperties: containerProperties,
                 throughput: throughput,
                 requestOptions: null,
@@ -129,9 +129,9 @@ namespace Microsoft.Azure.Cosmos.Fluent
             int? throughput = null,
             CancellationToken cancellationToken = default)
         {
-            ContainerProperties containerProperties = this.Build();
+            ContainerProperties containerProperties = Build();
 
-            return await this.database.CreateContainerIfNotExistsAsync(
+            return await database.CreateContainerIfNotExistsAsync(
                 containerProperties: containerProperties,
                 throughput: throughput,
                 requestOptions: null,
@@ -146,14 +146,14 @@ namespace Microsoft.Azure.Cosmos.Fluent
         {
             ContainerProperties containerProperties = base.Build();
 
-            if (this.uniqueKeyPolicy != null)
+            if (uniqueKeyPolicy != null)
             {
-                containerProperties.UniqueKeyPolicy = this.uniqueKeyPolicy;
+                containerProperties.UniqueKeyPolicy = uniqueKeyPolicy;
             }
 
-            if (this.conflictResolutionPolicy != null)
+            if (conflictResolutionPolicy != null)
             {
-                containerProperties.ConflictResolutionPolicy = this.conflictResolutionPolicy;
+                containerProperties.ConflictResolutionPolicy = conflictResolutionPolicy;
             }
 
             return containerProperties;
@@ -161,12 +161,12 @@ namespace Microsoft.Azure.Cosmos.Fluent
 
         private void AddUniqueKey(UniqueKey uniqueKey)
         {
-            if (this.uniqueKeyPolicy == null)
+            if (uniqueKeyPolicy == null)
             {
-                this.uniqueKeyPolicy = new UniqueKeyPolicy();
+                uniqueKeyPolicy = new UniqueKeyPolicy();
             }
 
-            this.uniqueKeyPolicy.UniqueKeys.Add(uniqueKey);
+            uniqueKeyPolicy.UniqueKeys.Add(uniqueKey);
         }
 
         private void AddConflictResolution(ConflictResolutionPolicy conflictResolutionPolicy)
@@ -174,8 +174,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
             if (conflictResolutionPolicy.Mode == ConflictResolutionMode.Custom
                 && !string.IsNullOrEmpty(conflictResolutionPolicy.ResolutionProcedure))
             {
-                this.clientContext.ValidateResource(conflictResolutionPolicy.ResolutionProcedure);
-                conflictResolutionPolicy.ResolutionProcedure = UriFactory.CreateStoredProcedureUri(this.containerUri.ToString(), conflictResolutionPolicy.ResolutionProcedure).ToString();
+                clientContext.ValidateResource(conflictResolutionPolicy.ResolutionProcedure);
+                conflictResolutionPolicy.ResolutionProcedure = UriFactory.CreateStoredProcedureUri(containerUri.ToString(), conflictResolutionPolicy.ResolutionProcedure).ToString();
             }
 
             this.conflictResolutionPolicy = conflictResolutionPolicy;

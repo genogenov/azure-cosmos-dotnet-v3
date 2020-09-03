@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         private SqlBooleanLiteral(bool value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public bool Value { get; }

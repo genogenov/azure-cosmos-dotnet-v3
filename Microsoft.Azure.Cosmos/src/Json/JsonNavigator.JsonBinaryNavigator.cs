@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Cosmos.Json
     using System.Linq;
     using System.Runtime.InteropServices;
     using Microsoft.Azure.Cosmos.Core.Utf8;
-    using Microsoft.Azure.Cosmos.Json.Interop;
 
     /// <summary>
     /// Partial class that wraps the private JsonTextNavigator
@@ -62,7 +61,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 this.buffer = buffer;
                 this.jsonStringDictionary = jsonStringDictionary;
-                this.rootNode = new BinaryNavigatorNode(this.buffer, NodeTypes.GetNodeType(this.buffer.Span[0]));
+                rootNode = new BinaryNavigatorNode(this.buffer, NodeTypes.GetNodeType(this.buffer.Span[0]));
             }
 
             /// <inheritdoc />
@@ -77,7 +76,7 @@ namespace Microsoft.Azure.Cosmos.Json
             /// <inheritdoc />
             public override IJsonNavigatorNode GetRootNode()
             {
-                return this.rootNode;
+                return rootNode;
             }
 
             /// <inheritdoc />
@@ -116,7 +115,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
                 return JsonBinaryEncoding.TryGetBufferedStringValue(
                     Utf8Memory.UnsafeCreateNoValidation(buffer),
-                    this.jsonStringDictionary,
+                    jsonStringDictionary,
                     out value);
             }
 
@@ -128,7 +127,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     stringNode);
                 return JsonBinaryEncoding.GetStringValue(
                     Utf8Memory.UnsafeCreateNoValidation(buffer),
-                    this.jsonStringDictionary);
+                    jsonStringDictionary);
             }
 
             /// <inheritdoc />
@@ -206,7 +205,7 @@ namespace Microsoft.Azure.Cosmos.Json
             /// <inheritdoc />
             public override ReadOnlyMemory<byte> GetBinaryValue(IJsonNavigatorNode binaryNode)
             {
-                if (!this.TryGetBufferedBinaryValue(
+                if (!TryGetBufferedBinaryValue(
                     binaryNode,
                     out ReadOnlyMemory<byte> bufferedBinaryValue))
                 {
@@ -309,7 +308,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     JsonNodeType.Array,
                     arrayNode);
 
-                return this.GetArrayItemsInternal(buffer).Select((node) => (IJsonNavigatorNode)node);
+                return GetArrayItemsInternal(buffer).Select((node) => (IJsonNavigatorNode)node);
             }
 
             private IEnumerable<BinaryNavigatorNode> GetArrayItemsInternal(ReadOnlyMemory<byte> buffer)
@@ -320,7 +319,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 int arrayLength = JsonBinaryEncoding.GetValueLength(buffer.Span);
 
                 // Scope to just the array
-                buffer = buffer.Slice(0, (int)arrayLength);
+                buffer = buffer.Slice(0, arrayLength);
 
                 // Seek to the first array item
                 buffer = buffer.Slice(firstArrayItemOffset);
@@ -412,9 +411,9 @@ namespace Microsoft.Azure.Cosmos.Json
                     objectNode);
 
                 Utf8Span utf8StringPropertyName = Utf8Span.TranscodeUtf16(propertyName);
-                foreach (ObjectProperty objectPropertyNode in this.GetObjectProperties(objectNode))
+                foreach (ObjectProperty objectPropertyNode in GetObjectProperties(objectNode))
                 {
-                    if (this.TryGetBufferedStringValue(objectPropertyNode.NameNode, out Utf8Memory bufferedUtf8StringValue))
+                    if (TryGetBufferedStringValue(objectPropertyNode.NameNode, out Utf8Memory bufferedUtf8StringValue))
                     {
                         // First try and see if we can avoid materializing the UTF16 string.
                         if (utf8StringPropertyName.Equals(bufferedUtf8StringValue.Span))
@@ -425,7 +424,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     }
                     else
                     {
-                        if (this.GetStringValue(objectPropertyNode.NameNode) == propertyName)
+                        if (GetStringValue(objectPropertyNode.NameNode) == propertyName)
                         {
                             objectProperty = objectPropertyNode;
                             return true;
@@ -444,7 +443,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     JsonNodeType.Object,
                     objectNode);
 
-                return this.GetObjectPropertiesInternal(buffer)
+                return GetObjectPropertiesInternal(buffer)
                     .Select((objectPropertyInternal) => new ObjectProperty(
                         objectPropertyInternal.NameNode,
                         objectPropertyInternal.ValueNode));
@@ -490,14 +489,14 @@ namespace Microsoft.Azure.Cosmos.Json
                     throw new ArgumentException($"{nameof(jsonNode)} must be a {nameof(BinaryNavigatorNode)}");
                 }
 
-                return this.TryGetBufferedRawJsonInternal(binaryNavigatorNode, out bufferedRawJson);
+                return TryGetBufferedRawJsonInternal(binaryNavigatorNode, out bufferedRawJson);
             }
 
             private bool TryGetBufferedRawJsonInternal(
                 BinaryNavigatorNode binaryNavigatorNode,
                 out ReadOnlyMemory<byte> bufferedRawJson)
             {
-                if ((this.jsonStringDictionary != null) && JsonBinaryNavigator.IsStringOrNested(binaryNavigatorNode))
+                if ((jsonStringDictionary != null) && JsonBinaryNavigator.IsStringOrNested(binaryNavigatorNode))
                 {
                     // Force a rewrite for dictionary encoding.
                     bufferedRawJson = default;
@@ -523,7 +522,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 }
 
                 ReadOnlyMemory<byte> buffer = binaryNavigatorNode.Buffer;
-                return JsonReader.Create(JsonSerializationFormat.Binary, buffer, this.jsonStringDictionary);
+                return JsonReader.Create(JsonSerializationFormat.Binary, buffer, jsonStringDictionary);
             }
 
             private static bool IsStringOrNested(BinaryNavigatorNode binaryNavigatorNode)
@@ -565,7 +564,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 int arrayLength = JsonBinaryEncoding.GetValueLength(buffer.Span);
 
                 // Scope to just the array
-                buffer = buffer.Slice(0, (int)arrayLength);
+                buffer = buffer.Slice(0, arrayLength);
 
                 // Seek to the first array item
                 buffer = buffer.Slice(firstArrayItemOffset);
@@ -628,7 +627,7 @@ namespace Microsoft.Azure.Cosmos.Json
                     throw new ArgumentOutOfRangeException($"Expected {nameof(jsonNavigatorNode)} to be a {nameof(BinaryNavigatorNode)}.");
                 }
 
-                this.WriteToInternal(binaryNavigatorNode, jsonWriter, sameEncoding: this.SerializationFormat == jsonWriter.SerializationFormat);
+                WriteToInternal(binaryNavigatorNode, jsonWriter, sameEncoding: SerializationFormat == jsonWriter.SerializationFormat);
             }
 
             private void WriteToInternal(BinaryNavigatorNode binaryNavigatorNode, IJsonWriter jsonWriter, bool sameEncoding)
@@ -636,7 +635,7 @@ namespace Microsoft.Azure.Cosmos.Json
                 ReadOnlyMemory<byte> buffer = binaryNavigatorNode.Buffer;
                 JsonNodeType nodeType = binaryNavigatorNode.JsonNodeType;
 
-                if (sameEncoding && this.TryGetBufferedRawJsonInternal(binaryNavigatorNode, out ReadOnlyMemory<byte> bufferedRawJson))
+                if (sameEncoding && TryGetBufferedRawJsonInternal(binaryNavigatorNode, out ReadOnlyMemory<byte> bufferedRawJson))
                 {
                     // Token type doesn't make any difference other than whether it's a value or field name
                     JsonTokenType tokenType = nodeType == JsonNodeType.FieldName ? JsonTokenType.FieldName : JsonTokenType.String;
@@ -672,7 +671,7 @@ namespace Microsoft.Azure.Cosmos.Json
                         Utf8Memory utf8Buffer = Utf8Memory.UnsafeCreateNoValidation(buffer);
                         if (JsonBinaryEncoding.TryGetBufferedStringValue(
                             utf8Buffer,
-                            this.jsonStringDictionary,
+                            jsonStringDictionary,
                             out Utf8Memory bufferedStringValue))
                         {
                             if (fieldName)
@@ -688,7 +687,7 @@ namespace Microsoft.Azure.Cosmos.Json
                         {
                             string value = JsonBinaryEncoding.GetStringValue(
                                 utf8Buffer,
-                                this.jsonStringDictionary);
+                                jsonStringDictionary);
                             if (fieldName)
                             {
                                 jsonWriter.WriteFieldName(value);
@@ -704,9 +703,9 @@ namespace Microsoft.Azure.Cosmos.Json
                         {
                             jsonWriter.WriteArrayStart();
 
-                            foreach (BinaryNavigatorNode arrayItem in this.GetArrayItemsInternal(buffer))
+                            foreach (BinaryNavigatorNode arrayItem in GetArrayItemsInternal(buffer))
                             {
-                                this.WriteToInternal(arrayItem, jsonWriter, sameEncoding);
+                                WriteToInternal(arrayItem, jsonWriter, sameEncoding);
                             }
 
                             jsonWriter.WriteArrayEnd();
@@ -717,10 +716,10 @@ namespace Microsoft.Azure.Cosmos.Json
                         {
                             jsonWriter.WriteObjectStart();
 
-                            foreach (ObjectPropertyInternal objectProperty in this.GetObjectPropertiesInternal(buffer))
+                            foreach (ObjectPropertyInternal objectProperty in GetObjectPropertiesInternal(buffer))
                             {
-                                this.WriteToInternal(objectProperty.NameNode, jsonWriter, sameEncoding);
-                                this.WriteToInternal(objectProperty.ValueNode, jsonWriter, sameEncoding);
+                                WriteToInternal(objectProperty.NameNode, jsonWriter, sameEncoding);
+                                WriteToInternal(objectProperty.ValueNode, jsonWriter, sameEncoding);
                             }
 
                             jsonWriter.WriteObjectEnd();
@@ -801,8 +800,8 @@ namespace Microsoft.Azure.Cosmos.Json
                     ReadOnlyMemory<byte> buffer,
                     JsonNodeType jsonNodeType)
                 {
-                    this.Buffer = buffer;
-                    this.JsonNodeType = jsonNodeType;
+                    Buffer = buffer;
+                    JsonNodeType = jsonNodeType;
                 }
 
                 public ReadOnlyMemory<byte> Buffer { get; }
@@ -816,8 +815,8 @@ namespace Microsoft.Azure.Cosmos.Json
                     BinaryNavigatorNode nameNode,
                     BinaryNavigatorNode valueNode)
                 {
-                    this.NameNode = nameNode;
-                    this.ValueNode = valueNode;
+                    NameNode = nameNode;
+                    ValueNode = valueNode;
                 }
 
                 public BinaryNavigatorNode NameNode { get; }

@@ -116,7 +116,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         {
             get
             {
-                return this.component.IsDone;
+                return component.IsDone;
             }
         }
 
@@ -153,23 +153,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                     testSettings: initParams.TestSettings);
             }
 
-            Task<TryCatch<IDocumentQueryExecutionComponent>> tryCreateOrderByComponentAsync(CosmosElement continuationToken)
-            {
-                return CosmosOrderByItemQueryExecutionContext.TryCreateAsync(
+            Task<TryCatch<IDocumentQueryExecutionComponent>> tryCreateOrderByComponentAsync(CosmosElement continuationToken) => CosmosOrderByItemQueryExecutionContext.TryCreateAsync(
                     queryContext,
                     initParams,
                     continuationToken,
                     cancellationToken);
-            }
 
-            Task<TryCatch<IDocumentQueryExecutionComponent>> tryCreateParallelComponentAsync(CosmosElement continuationToken)
-            {
-                return CosmosParallelItemQueryExecutionContext.TryCreateAsync(
+            Task<TryCatch<IDocumentQueryExecutionComponent>> tryCreateParallelComponentAsync(CosmosElement continuationToken) => CosmosParallelItemQueryExecutionContext.TryCreateAsync(
                     queryContext,
                     initParams,
                     continuationToken,
                     cancellationToken);
-            }
 
             Func<CosmosElement, Task<TryCatch<IDocumentQueryExecutionComponent>>> tryCreatePipelineAsync;
             if (queryInfo.HasOrderBy)
@@ -331,7 +325,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// </summary>
         public override void Dispose()
         {
-            this.component.Dispose();
+            component.Dispose();
         }
 
         /// <summary>
@@ -341,7 +335,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         /// <returns>A task to await on that in turn returns a DoucmentFeedResponse of results.</returns>
         public async Task<DocumentFeedResponse<CosmosElement>> ExecuteNextFeedResponseAsync(CancellationToken token)
         {
-            QueryResponseCore feedResponse = await this.ExecuteNextAsync(token);
+            QueryResponseCore feedResponse = await ExecuteNextAsync(token);
             return new DocumentFeedResponse<CosmosElement>(
                 result: feedResponse.CosmosElements,
                 count: feedResponse.CosmosElements.Count,
@@ -362,10 +356,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
         {
             try
             {
-                QueryResponseCore queryResponse = await this.component.DrainAsync(this.actualPageSize, token);
+                QueryResponseCore queryResponse = await component.DrainAsync(actualPageSize, token);
                 if (!queryResponse.IsSuccess)
                 {
-                    this.component.Stop();
+                    component.Stop();
                     return queryResponse;
                 }
 
@@ -396,14 +390,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
             }
             catch (Exception)
             {
-                this.component.Stop();
+                component.Stop();
                 throw;
             }
         }
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return this.component.GetCosmosElementContinuationToken();
+            return component.GetCosmosElementContinuationToken();
         }
     }
 }

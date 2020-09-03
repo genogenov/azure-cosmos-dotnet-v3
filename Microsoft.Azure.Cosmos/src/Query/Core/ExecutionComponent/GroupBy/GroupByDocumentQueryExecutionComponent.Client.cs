@@ -63,7 +63,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
 
                 double requestCharge = 0.0;
                 long responseLengthBytes = 0;
-                while (!this.Source.IsDone)
+                while (!Source.IsDone)
                 {
                     // Stage 1: 
                     // Drain the groupings fully from all continuation and all partitions
@@ -76,12 +76,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                     requestCharge += sourceResponse.RequestCharge;
                     responseLengthBytes += sourceResponse.ResponseLengthBytes;
 
-                    this.AggregateGroupings(sourceResponse.CosmosElements);
+                    AggregateGroupings(sourceResponse.CosmosElements);
                 }
 
                 // Stage 2:
                 // Emit the results from the grouping table page by page
-                IReadOnlyList<CosmosElement> results = this.groupingTable.Drain(maxElements);
+                IReadOnlyList<CosmosElement> results = groupingTable.Drain(maxElements);
 
                 QueryResponseCore response = QueryResponseCore.CreateSuccess(
                    result: results,

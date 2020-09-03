@@ -44,10 +44,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             bool filterExpressionPrecision,
             bool indexPlanFullFidelity)
         {
-            this.FilterExpression = filterExpression ?? throw new ArgumentNullException(nameof(filterExpression));
-            this.IndexDocumentExpression = indexDocumentExpression ?? throw new ArgumentNullException(nameof(indexDocumentExpression));
-            this.FilterExpressionPrecision = filterExpressionPrecision;
-            this.IndexPlanFullFidelity = indexPlanFullFidelity;
+            FilterExpression = filterExpression ?? throw new ArgumentNullException(nameof(filterExpression));
+            IndexDocumentExpression = indexDocumentExpression ?? throw new ArgumentNullException(nameof(indexDocumentExpression));
+            FilterExpressionPrecision = filterExpressionPrecision;
+            IndexPlanFullFidelity = indexPlanFullFidelity;
         }
     }
 }

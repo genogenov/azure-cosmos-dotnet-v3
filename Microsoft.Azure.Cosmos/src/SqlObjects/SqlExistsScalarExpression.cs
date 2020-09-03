@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlExistsScalarExpression(SqlQuery subquery)
         {
-            this.Subquery = subquery ?? throw new ArgumentNullException(nameof(subquery));
+            Subquery = subquery ?? throw new ArgumentNullException(nameof(subquery));
         }
 
         public SqlQuery Subquery { get; }

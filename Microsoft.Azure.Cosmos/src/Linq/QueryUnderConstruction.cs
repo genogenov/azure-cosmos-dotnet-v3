@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             get
             {
-                return this.alias.Value;
+                return alias.Value;
             }
         }
 
@@ -72,25 +72,25 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public QueryUnderConstruction(Func<string, ParameterExpression> aliasCreatorFunc, QueryUnderConstruction inputQuery)
         {
-            this.fromParameters = new FromParameterBindings();
+            fromParameters = new FromParameterBindings();
             this.aliasCreatorFunc = aliasCreatorFunc;
             this.inputQuery = inputQuery;
-            this.alias = new Lazy<ParameterExpression>(() => aliasCreatorFunc(QueryUnderConstruction.DefaultSubqueryRoot));
+            alias = new Lazy<ParameterExpression>(() => aliasCreatorFunc(QueryUnderConstruction.DefaultSubqueryRoot));
         }
 
         public void Bind(ParameterExpression parameter, SqlCollection collection)
         {
-            this.AddBinding(new FromParameterBindings.Binding(parameter, collection, isInCollection: true));
+            AddBinding(new FromParameterBindings.Binding(parameter, collection, isInCollection: true));
         }
 
         public void AddBinding(Binding binding)
         {
-            this.fromParameters.Add(binding);
+            fromParameters.Add(binding);
         }
 
         public ParameterExpression GetInputParameterInContext(bool isInNewQuery)
         {
-            return isInNewQuery ? this.Alias : this.fromParameters.GetInputParameter();
+            return isInNewQuery ? Alias : fromParameters.GetInputParameter();
         }
 
         /// <summary>
@@ -100,14 +100,17 @@ namespace Microsoft.Azure.Cosmos.Linq
         private SqlFromClause CreateFrom(SqlCollectionExpression inputCollectionExpression)
         {
             bool first = true;
-            foreach (Binding paramDef in this.fromParameters.GetBindings())
+            foreach (Binding paramDef in fromParameters.GetBindings())
             {
                 // If input collection expression is provided, the first binding,
                 // which is the input paramter name, should be omitted.
                 if (first)
                 {
                     first = false;
-                    if (inputCollectionExpression != null) continue;
+                    if (inputCollectionExpression != null)
+                    {
+                        continue;
+                    }
                 }
 
                 ParameterExpression parameter = paramDef.Parameter;
@@ -142,12 +145,12 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         private SqlFromClause CreateSubqueryFromClause()
         {
-            SqlQuery subquery = this.inputQuery.GetSqlQuery();
+            SqlQuery subquery = inputQuery.GetSqlQuery();
             SqlSubqueryCollection collection = SqlSubqueryCollection.Create(subquery);
-            ParameterExpression inputParam = this.inputQuery.Alias;
+            ParameterExpression inputParam = inputQuery.Alias;
             SqlIdentifier identifier = SqlIdentifier.Create(inputParam.Name);
             SqlAliasedCollectionExpression colExp = SqlAliasedCollectionExpression.Create(collection, identifier);
-            SqlFromClause fromClause = this.CreateFrom(colExp);
+            SqlFromClause fromClause = CreateFrom(colExp);
             return fromClause;
         }
 
@@ -158,18 +161,18 @@ namespace Microsoft.Azure.Cosmos.Linq
         public SqlQuery GetSqlQuery()
         {
             SqlFromClause fromClause;
-            if (this.inputQuery != null)
+            if (inputQuery != null)
             {
 #if SUPPORT_SUBQUERIES
 
-                fromClause = this.CreateSubqueryFromClause();
+                fromClause = CreateSubqueryFromClause();
 #else
                 throw new DocumentQueryException("SQL subqueries currently not supported");
 #endif
             }
             else
             {
-                fromClause = this.CreateFrom(inputCollectionExpression: null);
+                fromClause = CreateFrom(inputCollectionExpression: null);
             }
 
             // Create a SqlSelectClause with the topSpec.
@@ -178,15 +181,15 @@ namespace Microsoft.Azure.Cosmos.Linq
             SqlSelectClause selectClause = this.selectClause;
             if (selectClause == null)
             {
-                string parameterName = this.fromParameters.GetInputParameter().Name;
+                string parameterName = fromParameters.GetInputParameter().Name;
                 SqlScalarExpression parameterExpression = SqlPropertyRefScalarExpression.Create(null, SqlIdentifier.Create(parameterName));
                 selectClause = this.selectClause = SqlSelectClause.Create(SqlSelectValueSpec.Create(parameterExpression));
             }
-            selectClause = SqlSelectClause.Create(selectClause.SelectSpec, selectClause.TopSpec ?? this.topSpec, selectClause.HasDistinct);
-            SqlOffsetLimitClause offsetLimitClause = (this.offsetSpec != null) ?
-                SqlOffsetLimitClause.Create(this.offsetSpec, this.limitSpec ?? SqlLimitSpec.Create(SqlNumberLiteral.Create(int.MaxValue))) :
+            selectClause = SqlSelectClause.Create(selectClause.SelectSpec, selectClause.TopSpec ?? topSpec, selectClause.HasDistinct);
+            SqlOffsetLimitClause offsetLimitClause = (offsetSpec != null) ?
+                SqlOffsetLimitClause.Create(offsetSpec, limitSpec ?? SqlLimitSpec.Create(SqlNumberLiteral.Create(int.MaxValue))) :
                 offsetLimitClause = default(SqlOffsetLimitClause);
-            SqlQuery result = SqlQuery.Create(selectClause, fromClause, this.whereClause, /*GroupBy*/ null, this.orderByClause, offsetLimitClause);
+            SqlQuery result = SqlQuery.Create(selectClause, fromClause, whereClause, /*GroupBy*/ null, orderByClause, offsetLimitClause);
             return result;
         }
 
@@ -197,8 +200,8 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>The new query node</returns>
         public QueryUnderConstruction PackageQuery(HashSet<ParameterExpression> inScope)
         {
-            QueryUnderConstruction result = new QueryUnderConstruction(this.aliasCreatorFunc);
-            result.fromParameters.SetInputParameter(typeof(object), this.Alias.Name, inScope);
+            QueryUnderConstruction result = new QueryUnderConstruction(aliasCreatorFunc);
+            result.fromParameters.SetInputParameter(typeof(object), Alias.Name, inScope);
             result.inputQuery = this;
             return result;
         }
@@ -239,7 +242,10 @@ namespace Microsoft.Azure.Cosmos.Linq
                     break;
                 }
 
-                if (flattenQuery != null) break;
+                if (flattenQuery != null)
+                {
+                    break;
+                }
 
                 if (((query.topSpec != null || query.offsetSpec != null || query.limitSpec != null) && seenAnyNonSelectOp) ||
                     (query.selectClause != null && query.selectClause.HasDistinct && seenSelect))
@@ -256,11 +262,14 @@ namespace Microsoft.Azure.Cosmos.Linq
                     (query.topSpec != null) ||
                     (query.offsetSpec != null) ||
                     query.fromParameters.GetBindings().Any(b => b.ParameterDefinition != null) ||
-                    ((query.selectClause != null) && (query.selectClause.HasDistinct || this.HasSelectAggregate()));
+                    ((query.selectClause != null) && (query.selectClause.HasDistinct || HasSelectAggregate()));
                 parentQuery = query;
             }
 
-            if (flattenQuery == null) flattenQuery = this.Flatten();
+            if (flattenQuery == null)
+            {
+                flattenQuery = Flatten();
+            }
 
             return flattenQuery;
         }
@@ -275,25 +284,25 @@ namespace Microsoft.Azure.Cosmos.Linq
             // is translated by substituting fi(x) for y in the outer query
             // producing
             // SELECT fo(fi(x)) FROM x WHERE gi(x) AND (go(fi(x))
-            if (this.inputQuery == null)
+            if (inputQuery == null)
             {
                 // we are flat already
-                if (this.selectClause == null)
+                if (selectClause == null)
                 {
                     // If selectClause doesn't exists, use SELECT v0 where v0 is the input parameter, instead of SELECT *.
-                    string parameterName = this.fromParameters.GetInputParameter().Name;
+                    string parameterName = fromParameters.GetInputParameter().Name;
                     SqlScalarExpression parameterExpression = SqlPropertyRefScalarExpression.Create(null, SqlIdentifier.Create(parameterName));
-                    this.selectClause = SqlSelectClause.Create(SqlSelectValueSpec.Create(parameterExpression));
+                    selectClause = SqlSelectClause.Create(SqlSelectValueSpec.Create(parameterExpression));
                 }
                 else
                 {
-                    this.selectClause = SqlSelectClause.Create(this.selectClause.SelectSpec, this.topSpec, this.selectClause.HasDistinct);
+                    selectClause = SqlSelectClause.Create(selectClause.SelectSpec, topSpec, selectClause.HasDistinct);
                 }
 
                 return this;
             }
 
-            QueryUnderConstruction flatInput = this.inputQuery.Flatten();
+            QueryUnderConstruction flatInput = inputQuery.Flatten();
             SqlSelectClause inputSelect = flatInput.selectClause;
             SqlWhereClause inputwhere = flatInput.whereClause;
 
@@ -302,12 +311,12 @@ namespace Microsoft.Azure.Cosmos.Linq
             // That is because if it has been binded before, it has global scope and should not be replaced.
             string paramName = null;
             HashSet<string> inputQueryParams = new HashSet<string>();
-            foreach (Binding binding in this.inputQuery.fromParameters.GetBindings())
+            foreach (Binding binding in inputQuery.fromParameters.GetBindings())
             {
                 inputQueryParams.Add(binding.Parameter.Name);
             }
 
-            foreach (Binding binding in this.fromParameters.GetBindings())
+            foreach (Binding binding in fromParameters.GetBindings())
             {
                 if (binding.ParameterDefinition == null || inputQueryParams.Contains(binding.Parameter.Name))
                 {
@@ -316,11 +325,11 @@ namespace Microsoft.Azure.Cosmos.Linq
             }
 
             SqlIdentifier replacement = SqlIdentifier.Create(paramName);
-            SqlSelectClause composedSelect = this.Substitute(inputSelect, inputSelect.TopSpec ?? this.topSpec, replacement, this.selectClause);
-            SqlWhereClause composedWhere = this.Substitute(inputSelect.SelectSpec, replacement, this.whereClause);
-            SqlOrderbyClause composedOrderBy = this.Substitute(inputSelect.SelectSpec, replacement, this.orderByClause);
+            SqlSelectClause composedSelect = Substitute(inputSelect, inputSelect.TopSpec ?? topSpec, replacement, selectClause);
+            SqlWhereClause composedWhere = Substitute(inputSelect.SelectSpec, replacement, whereClause);
+            SqlOrderbyClause composedOrderBy = Substitute(inputSelect.SelectSpec, replacement, orderByClause);
             SqlWhereClause and = QueryUnderConstruction.CombineWithConjunction(inputwhere, composedWhere);
-            FromParameterBindings fromParams = QueryUnderConstruction.CombineInputParameters(flatInput.fromParameters, this.fromParameters);
+            FromParameterBindings fromParams = QueryUnderConstruction.CombineInputParameters(flatInput.fromParameters, fromParameters);
             SqlOffsetSpec offsetSpec;
             SqlLimitSpec limitSpec;
             if (flatInput.offsetSpec != null)
@@ -333,16 +342,16 @@ namespace Microsoft.Azure.Cosmos.Linq
                 offsetSpec = this.offsetSpec;
                 limitSpec = this.limitSpec;
             }
-            QueryUnderConstruction result = new QueryUnderConstruction(this.aliasCreatorFunc)
+            QueryUnderConstruction result = new QueryUnderConstruction(aliasCreatorFunc)
             {
                 selectClause = composedSelect,
                 whereClause = and,
                 inputQuery = null,
                 fromParameters = flatInput.fromParameters,
-                orderByClause = composedOrderBy ?? this.inputQuery.orderByClause,
+                orderByClause = composedOrderBy ?? inputQuery.orderByClause,
                 offsetSpec = offsetSpec,
                 limitSpec = limitSpec,
-                alias = new Lazy<ParameterExpression>(() => this.Alias)
+                alias = new Lazy<ParameterExpression>(() => Alias)
             };
             return result;
         }
@@ -475,23 +484,23 @@ namespace Microsoft.Azure.Cosmos.Linq
             {
                 case LinqMethods.Select:
                     // New query is needed when adding a Select to an existing Select
-                    shouldPackage = this.selectClause != null;
+                    shouldPackage = selectClause != null;
                     break;
 
                 case LinqMethods.Min:
                 case LinqMethods.Max:
                 case LinqMethods.Sum:
                 case LinqMethods.Average:
-                    shouldPackage = (this.selectClause != null) ||
-                        (this.offsetSpec != null) ||
-                        (this.topSpec != null);
+                    shouldPackage = (selectClause != null) ||
+                        (offsetSpec != null) ||
+                        (topSpec != null);
                     break;
 
                 case LinqMethods.Count:
                     // When Count has 2 arguments, it calls into AddWhereClause so it should be considered as a Where in that case.
                     // Otherwise, treat it as other aggregate functions (using Sum here for simplicity).
-                    shouldPackage = (argumentCount == 2 && this.ShouldBeOnNewQuery(LinqMethods.Where, 2)) ||
-                        this.ShouldBeOnNewQuery(LinqMethods.Sum, 1);
+                    shouldPackage = (argumentCount == 2 && ShouldBeOnNewQuery(LinqMethods.Where, 2)) ||
+                        ShouldBeOnNewQuery(LinqMethods.Sum, 1);
                     break;
 
                 case LinqMethods.Where:
@@ -504,20 +513,20 @@ namespace Microsoft.Azure.Cosmos.Linq
                 case LinqMethods.ThenByDescending:
                 case LinqMethods.Distinct:
                     // New query is needed when there is already a Take or a non-distinct Select
-                    shouldPackage = (this.topSpec != null) ||
-                        (this.offsetSpec != null) ||
-                        (this.selectClause != null && !this.selectClause.HasDistinct);
+                    shouldPackage = (topSpec != null) ||
+                        (offsetSpec != null) ||
+                        (selectClause != null && !selectClause.HasDistinct);
                     break;
 
                 case LinqMethods.Skip:
-                    shouldPackage = (this.topSpec != null) ||
-                        (this.limitSpec != null);
+                    shouldPackage = (topSpec != null) ||
+                        (limitSpec != null);
                     break;
 
                 case LinqMethods.SelectMany:
-                    shouldPackage = (this.topSpec != null) ||
-                        (this.offsetSpec != null) ||
-                        (this.selectClause != null);
+                    shouldPackage = (topSpec != null) ||
+                        (offsetSpec != null) ||
+                        (selectClause != null);
                     break;
 
                 default:
@@ -536,13 +545,13 @@ namespace Microsoft.Azure.Cosmos.Linq
         {
             // If result SelectClause is not null, or both result selectClause and select has Distinct
             // then it is unexpected since the SelectClause will be overwritten.
-            if (!((this.selectClause != null && this.selectClause.HasDistinct && this.selectClause.HasDistinct) ||
-                this.selectClause == null))
+            if (!((selectClause != null && selectClause.HasDistinct && selectClause.HasDistinct) ||
+                selectClause == null))
             {
                 throw new DocumentQueryException("Internal error: attempting to overwrite SELECT clause");
             }
 
-            this.selectClause = select;
+            selectClause = select;
 
             return this;
         }
@@ -559,14 +568,17 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             // If result SelectClause is not null, or both result selectClause and select has Distinct
             // then it is unexpected since the SelectClause will be overwritten.
-            if (!((result.selectClause != null && result.selectClause.HasDistinct && this.selectClause.HasDistinct) ||
+            if (!((result.selectClause != null && result.selectClause.HasDistinct && selectClause.HasDistinct) ||
                 result.selectClause == null))
             {
                 throw new DocumentQueryException("Internal error: attempting to overwrite SELECT clause");
             }
 
             result.selectClause = select;
-            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings()) result.AddBinding(binding);
+            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings())
+            {
+                result.AddBinding(binding);
+            }
 
             return result;
         }
@@ -576,7 +588,10 @@ namespace Microsoft.Azure.Cosmos.Linq
             QueryUnderConstruction result = context.PackageCurrentQueryIfNeccessary();
 
             result.orderByClause = orderBy;
-            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings()) result.AddBinding(binding);
+            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings())
+            {
+                result.AddBinding(binding);
+            }
 
             return result;
         }
@@ -587,7 +602,10 @@ namespace Microsoft.Azure.Cosmos.Linq
             items.AddRange(thenBy.OrderbyItems);
             context.currentQuery.orderByClause = SqlOrderbyClause.Create(items.ToImmutableArray());
 
-            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings()) context.currentQuery.AddBinding(binding);
+            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings())
+            {
+                context.currentQuery.AddBinding(binding);
+            }
 
             return context.currentQuery;
         }
@@ -787,7 +805,10 @@ namespace Microsoft.Azure.Cosmos.Linq
 
             whereClause = QueryUnderConstruction.CombineWithConjunction(result.whereClause, whereClause);
             result.whereClause = whereClause;
-            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings()) result.AddBinding(binding);
+            foreach (Binding binding in context.CurrentSubqueryBinding.TakeBindings())
+            {
+                result.AddBinding(binding);
+            }
 
             return result;
         }
@@ -816,7 +837,7 @@ namespace Microsoft.Azure.Cosmos.Linq
 
         public bool HasOffsetSpec()
         {
-            return this.offsetSpec != null;
+            return offsetSpec != null;
         }
 
         /// <summary>
@@ -825,7 +846,7 @@ namespace Microsoft.Azure.Cosmos.Linq
         /// <returns>true if the selectClause has an aggregate function call</returns>
         private bool HasSelectAggregate()
         {
-            string functionCallName = ((this.selectClause?.SelectSpec as SqlSelectValueSpec)?.Expression as SqlFunctionCallScalarExpression)?.Name.Value;
+            string functionCallName = ((selectClause?.SelectSpec as SqlSelectValueSpec)?.Expression as SqlFunctionCallScalarExpression)?.Name.Value;
             return (functionCallName != null) &&
                 ((functionCallName == SqlFunctionCallScalarExpression.Names.Max) ||
                 (functionCallName == SqlFunctionCallScalarExpression.Names.Min) ||
@@ -841,21 +862,21 @@ namespace Microsoft.Azure.Cosmos.Linq
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
-            if (this.inputQuery != null)
+            if (inputQuery != null)
             {
-                builder.Append(this.inputQuery);
+                builder.Append(inputQuery);
             }
 
-            if (this.whereClause != null)
+            if (whereClause != null)
             {
                 builder.Append("->");
-                builder.Append(this.whereClause);
+                builder.Append(whereClause);
             }
 
-            if (this.selectClause != null)
+            if (selectClause != null)
             {
                 builder.Append("->");
-                builder.Append(this.selectClause);
+                builder.Append(selectClause);
             }
 
             return builder.ToString();

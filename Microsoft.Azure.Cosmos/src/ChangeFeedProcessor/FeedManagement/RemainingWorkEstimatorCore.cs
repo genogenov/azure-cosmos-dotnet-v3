@@ -17,7 +17,6 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
     using Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement;
     using Microsoft.Azure.Cosmos.ChangeFeed.Utils;
     using Microsoft.Azure.Cosmos.Core.Trace;
-    using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Documents;
     using Newtonsoft.Json.Linq;
 
@@ -57,22 +56,25 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public override async Task<long> GetEstimatedRemainingWorkAsync(CancellationToken cancellationToken)
         {
-            IReadOnlyList<RemainingLeaseTokenWork> leaseTokens = await this.GetEstimatedRemainingWorkPerLeaseTokenAsync(cancellationToken);
-            if (leaseTokens.Count == 0) return 1;
+            IReadOnlyList<RemainingLeaseTokenWork> leaseTokens = await GetEstimatedRemainingWorkPerLeaseTokenAsync(cancellationToken);
+            if (leaseTokens.Count == 0)
+            {
+                return 1;
+            }
 
             return leaseTokens.Sum(leaseToken => leaseToken.RemainingWork);
         }
 
         public override async Task<IReadOnlyList<RemainingLeaseTokenWork>> GetEstimatedRemainingWorkPerLeaseTokenAsync(CancellationToken cancellationToken)
         {
-            IReadOnlyList<DocumentServiceLease> leases = await this.leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
+            IReadOnlyList<DocumentServiceLease> leases = await leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
             if (leases == null || leases.Count == 0)
             {
                 return new List<RemainingLeaseTokenWork>().AsReadOnly();
             }
 
             IEnumerable<Task<List<RemainingLeaseTokenWork>>> tasks = Partitioner.Create(leases)
-                .GetPartitions(this.degreeOfParallelism)
+                .GetPartitions(degreeOfParallelism)
                 .Select(partition => Task.Run(async () =>
                 {
                     List<RemainingLeaseTokenWork> partialResults = new List<RemainingLeaseTokenWork>();
@@ -83,8 +85,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                             DocumentServiceLease item = partition.Current;
                             try
                             {
-                                if (string.IsNullOrEmpty(item?.CurrentLeaseToken)) continue;
-                                long result = await this.GetRemainingWorkAsync(item, cancellationToken);
+                                if (string.IsNullOrEmpty(item?.CurrentLeaseToken))
+                                {
+                                    continue;
+                                }
+
+                                long result = await GetRemainingWorkAsync(item, cancellationToken);
                                 partialResults.Add(new RemainingLeaseTokenWork(item.CurrentLeaseToken, result));
                             }
                             catch (CosmosException ex)
@@ -158,8 +164,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         private static long TryConvertToNumber(string number)
         {
-            long parsed = 0;
-            if (!long.TryParse(number, NumberStyles.Number, CultureInfo.InvariantCulture, out parsed))
+            if (!long.TryParse(number, NumberStyles.Number, CultureInfo.InvariantCulture, out long parsed))
             {
                 DefaultTrace.TraceWarning("Cannot parse number '{0}'.", number);
                 return 0;
@@ -184,7 +189,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             // Current lease schema maps Token to PKRangeId
             string partitionKeyRangeId = existingLease.CurrentLeaseToken;
-            using FeedIterator iterator = this.feedCreator(
+            using FeedIterator iterator = feedCreator(
                 partitionKeyRangeId,
                 existingLease.ContinuationToken,
                 string.IsNullOrEmpty(existingLease.ContinuationToken));

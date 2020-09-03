@@ -23,7 +23,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public EqualPartitionsBalancingStrategy(string hostName, int minPartitionCount, int maxPartitionCount, TimeSpan leaseExpirationInterval)
         {
-            if (hostName == null) throw new ArgumentNullException(nameof(hostName));
+            if (hostName == null)
+            {
+                throw new ArgumentNullException(nameof(hostName));
+            }
+
             this.hostName = hostName;
             this.minPartitionCount = minPartitionCount;
             this.maxPartitionCount = maxPartitionCount;
@@ -35,31 +39,35 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
             var workerToPartitionCount = new Dictionary<string, int>();
             var expiredLeases = new List<DocumentServiceLease>();
             var allPartitions = new Dictionary<string, DocumentServiceLease>();
-            this.CategorizeLeases(allLeases, allPartitions, expiredLeases, workerToPartitionCount);
+            CategorizeLeases(allLeases, allPartitions, expiredLeases, workerToPartitionCount);
 
             int partitionCount = allPartitions.Count;
             int workerCount = workerToPartitionCount.Count;
             if (partitionCount <= 0)
+            {
                 return Enumerable.Empty<DocumentServiceLease>();
+            }
 
-            int target = this.CalculateTargetPartitionCount(partitionCount, workerCount);
-            int myCount = workerToPartitionCount[this.hostName];
+            int target = CalculateTargetPartitionCount(partitionCount, workerCount);
+            int myCount = workerToPartitionCount[hostName];
             int partitionsNeededForMe = target - myCount;
 
             DefaultTrace.TraceInformation(
                 "Host '{0}' {1} partitions, {2} hosts, {3} available leases, target = {4}, min = {5}, max = {6}, mine = {7}, will try to take {8} lease(s) for myself'.",
-                this.hostName,
+                hostName,
                 partitionCount,
                 workerCount,
                 expiredLeases.Count,
                 target,
-                this.minPartitionCount,
-                this.maxPartitionCount,
+                minPartitionCount,
+                maxPartitionCount,
                 myCount,
                 Math.Max(partitionsNeededForMe, 0));
 
             if (partitionsNeededForMe <= 0)
+            {
                 return Enumerable.Empty<DocumentServiceLease>();
+            }
 
             if (expiredLeases.Count > 0)
             {
@@ -107,14 +115,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 target = (int)Math.Ceiling((double)partitionCount / workerCount);
             }
 
-            if (this.maxPartitionCount > 0 && target > this.maxPartitionCount)
+            if (maxPartitionCount > 0 && target > maxPartitionCount)
             {
-                target = this.maxPartitionCount;
+                target = maxPartitionCount;
             }
 
-            if (this.minPartitionCount > 0 && target < this.minPartitionCount)
+            if (minPartitionCount > 0 && target < minPartitionCount)
             {
-                target = this.minPartitionCount;
+                target = minPartitionCount;
             }
 
             return target;
@@ -131,16 +139,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 Debug.Assert(lease.CurrentLeaseToken != null, "TakeLeasesAsync: lease.PartitionId cannot be null.");
 
                 allPartitions.Add(lease.CurrentLeaseToken, lease);
-                if (string.IsNullOrWhiteSpace(lease.Owner) || this.IsExpired(lease))
+                if (string.IsNullOrWhiteSpace(lease.Owner) || IsExpired(lease))
                 {
                     DefaultTrace.TraceVerbose("Found unused or expired lease: {0}", lease);
                     expiredLeases.Add(lease);
                 }
                 else
                 {
-                    var count = 0;
                     string assignedTo = lease.Owner;
-                    if (workerToPartitionCount.TryGetValue(assignedTo, out count))
+                    if (workerToPartitionCount.TryGetValue(assignedTo, out int count))
                     {
                         workerToPartitionCount[assignedTo] = count + 1;
                     }
@@ -151,15 +158,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 }
             }
 
-            if (!workerToPartitionCount.ContainsKey(this.hostName))
+            if (!workerToPartitionCount.ContainsKey(hostName))
             {
-                workerToPartitionCount.Add(this.hostName, 0);
+                workerToPartitionCount.Add(hostName, 0);
             }
         }
 
         private bool IsExpired(DocumentServiceLease lease)
         {
-            return lease.Timestamp.ToUniversalTime() + this.leaseExpirationInterval < DateTime.UtcNow;
+            return lease.Timestamp.ToUniversalTime() + leaseExpirationInterval < DateTime.UtcNow;
         }
     }
 }

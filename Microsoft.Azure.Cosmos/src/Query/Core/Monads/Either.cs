@@ -15,7 +15,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         {
             this.left = left;
             this.right = right;
-            this.IsLeft = isLeft;
+            IsLeft = isLeft;
         }
 
         public bool IsLeft { get; }
@@ -24,32 +24,32 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         {
             get
             {
-                return !this.IsLeft;
+                return !IsLeft;
             }
         }
 
         public void Match(Action<TLeft> onLeft, Action<TRight> onRight)
         {
-            if (this.IsLeft)
+            if (IsLeft)
             {
-                onLeft(this.left);
+                onLeft(left);
             }
             else
             {
-                onRight(this.right);
+                onRight(right);
             }
         }
 
         public TResult Match<TResult>(Func<TLeft, TResult> onLeft, Func<TRight, TResult> onRight)
         {
             TResult result;
-            if (this.IsLeft)
+            if (IsLeft)
             {
-                result = onLeft(this.left);
+                result = onLeft(left);
             }
             else
             {
-                result = onRight(this.right);
+                result = onRight(right);
             }
 
             return result;
@@ -58,9 +58,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public TLeft FromLeft(TLeft defaultValue)
         {
             TLeft result;
-            if (this.IsLeft)
+            if (IsLeft)
             {
-                result = this.left;
+                result = left;
             }
             else
             {
@@ -73,9 +73,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public TRight FromRight(TRight defaultValue)
         {
             TRight result;
-            if (this.IsRight)
+            if (IsRight)
             {
-                result = this.right;
+                result = right;
             }
             else
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
             if (obj is Either<TLeft, TRight> other)
             {
-                return this.Equals(other);
+                return Equals(other);
             }
 
             return false;
@@ -102,21 +102,21 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
         public bool Equals(Either<TLeft, TRight> other)
         {
-            if (this.IsLeft != other.IsLeft)
+            if (IsLeft != other.IsLeft)
             {
                 return false;
             }
 
             bool memberEquals;
-            if (this.IsLeft)
+            if (IsLeft)
             {
-                TLeft left1 = this.left;
+                TLeft left1 = left;
                 TLeft left2 = other.left;
                 memberEquals = left1.Equals(left2);
             }
             else
             {
-                TRight right1 = this.right;
+                TRight right1 = right;
                 TRight right2 = other.right;
                 memberEquals = right1.Equals(right2);
             }
@@ -127,14 +127,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public override int GetHashCode()
         {
             int hashCode = 0;
-            hashCode ^= this.IsLeft.GetHashCode();
-            if (this.IsLeft)
+            hashCode ^= IsLeft.GetHashCode();
+            if (IsLeft)
             {
-                hashCode ^= this.left.GetHashCode();
+                hashCode ^= left.GetHashCode();
             }
             else
             {
-                hashCode ^= this.right.GetHashCode();
+                hashCode ^= right.GetHashCode();
             }
 
             return hashCode;

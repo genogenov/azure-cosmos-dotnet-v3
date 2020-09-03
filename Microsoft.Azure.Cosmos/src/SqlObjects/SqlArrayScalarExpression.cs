@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         private SqlArrayScalarExpression(SqlQuery sqlQuery)
         {
-            this.SqlQuery = sqlQuery ?? throw new ArgumentNullException(nameof(sqlQuery));
+            SqlQuery = sqlQuery ?? throw new ArgumentNullException(nameof(sqlQuery));
         }
 
         public static SqlArrayScalarExpression Create(SqlQuery sqlQuery) => new SqlArrayScalarExpression(sqlQuery);

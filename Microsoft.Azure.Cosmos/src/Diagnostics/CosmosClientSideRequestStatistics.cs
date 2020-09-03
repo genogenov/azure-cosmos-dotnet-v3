@@ -7,12 +7,9 @@ namespace Microsoft.Azure.Cosmos
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
     using System.Text;
     using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Documents;
-    using Newtonsoft.Json;
 
     internal sealed class CosmosClientSideRequestStatistics : CosmosDiagnosticsInternal, IClientSideRequestStatistics
     {
@@ -27,15 +24,15 @@ namespace Microsoft.Azure.Cosmos
 
         public CosmosClientSideRequestStatistics(CosmosDiagnosticsContext diagnosticsContext = null)
         {
-            this.RequestStartTimeUtc = DateTime.UtcNow;
-            this.RequestEndTimeUtc = null;
-            this.EndpointToAddressResolutionStatistics = new Dictionary<string, AddressResolutionStatistics>();
-            this.ContactedReplicas = new List<Uri>();
-            this.FailedReplicas = new HashSet<Uri>();
-            this.RegionsContacted = new HashSet<Uri>();
-            this.DiagnosticsContext = diagnosticsContext ?? CosmosDiagnosticsContextCore.Create(requestOptions: null);
-            this.DiagnosticsContext.AddDiagnosticsInternal(this);
-            this.clientSideRequestStatisticsCreateTime = Stopwatch.GetTimestamp();
+            RequestStartTimeUtc = DateTime.UtcNow;
+            RequestEndTimeUtc = null;
+            EndpointToAddressResolutionStatistics = new Dictionary<string, AddressResolutionStatistics>();
+            ContactedReplicas = new List<Uri>();
+            FailedReplicas = new HashSet<Uri>();
+            RegionsContacted = new HashSet<Uri>();
+            DiagnosticsContext = diagnosticsContext ?? CosmosDiagnosticsContextCore.Create(requestOptions: null);
+            DiagnosticsContext.AddDiagnosticsInternal(this);
+            clientSideRequestStatisticsCreateTime = Stopwatch.GetTimestamp();
         }
 
         private DateTime RequestStartTimeUtc { get; }
@@ -44,7 +41,7 @@ namespace Microsoft.Azure.Cosmos
 
         private Dictionary<string, AddressResolutionStatistics> EndpointToAddressResolutionStatistics { get; }
 
-        private Dictionary<int, DateTime> RecordRequestHashCodeToStartTime = new Dictionary<int, DateTime>();
+        private readonly Dictionary<int, DateTime> RecordRequestHashCodeToStartTime = new Dictionary<int, DateTime>();
 
         public List<Uri> ContactedReplicas { get; set; }
 
@@ -56,9 +53,9 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.RequestEndTimeUtc.HasValue)
+                if (RequestEndTimeUtc.HasValue)
                 {
-                    return this.RequestEndTimeUtc.Value - this.RequestStartTimeUtc;
+                    return RequestEndTimeUtc.Value - RequestStartTimeUtc;
                 }
 
                 return TimeSpan.MaxValue;
@@ -69,51 +66,51 @@ namespace Microsoft.Azure.Cosmos
 
         public CosmosDiagnosticsContext DiagnosticsContext { get; }
 
-        public TimeSpan EstimatedClientDelayFromRateLimiting => TimeSpan.FromSeconds(this.cumulativeEstimatedDelayDueToRateLimitingInStopwatchTicks / (double)Stopwatch.Frequency);
+        public TimeSpan EstimatedClientDelayFromRateLimiting => TimeSpan.FromSeconds(cumulativeEstimatedDelayDueToRateLimitingInStopwatchTicks / (double)Stopwatch.Frequency);
 
         public TimeSpan EstimatedClientDelayFromAllCauses
         {
             get
             {
-                if (!this.lastStartRequestTimestamp.HasValue || !this.firstStartRequestTimestamp.HasValue)
+                if (!lastStartRequestTimestamp.HasValue || !firstStartRequestTimestamp.HasValue)
                 {
                     return TimeSpan.Zero;
                 }
 
                 // Stopwatch ticks are not equivalent to DateTime ticks
-                long clientDelayInStopWatchTicks = this.lastStartRequestTimestamp.Value - this.firstStartRequestTimestamp.Value;
+                long clientDelayInStopWatchTicks = lastStartRequestTimestamp.Value - firstStartRequestTimestamp.Value;
                 return TimeSpan.FromSeconds(clientDelayInStopWatchTicks / (double)Stopwatch.Frequency);
             }
         }
 
         public void RecordRequest(DocumentServiceRequest request)
         {
-            lock (this.lockObject)
+            lock (lockObject)
             {
                 long timestamp = Stopwatch.GetTimestamp();
-                if (this.received429ResponseSinceLastStartRequest)
+                if (received429ResponseSinceLastStartRequest)
                 {
-                    long lastTimestamp = this.lastStartRequestTimestamp ?? this.clientSideRequestStatisticsCreateTime;
-                    this.cumulativeEstimatedDelayDueToRateLimitingInStopwatchTicks += timestamp - lastTimestamp;
+                    long lastTimestamp = lastStartRequestTimestamp ?? clientSideRequestStatisticsCreateTime;
+                    cumulativeEstimatedDelayDueToRateLimitingInStopwatchTicks += timestamp - lastTimestamp;
                 }
 
-                if (!this.firstStartRequestTimestamp.HasValue)
+                if (!firstStartRequestTimestamp.HasValue)
                 {
-                    this.firstStartRequestTimestamp = timestamp;
+                    firstStartRequestTimestamp = timestamp;
                 }
 
-                this.lastStartRequestTimestamp = timestamp;
-                this.received429ResponseSinceLastStartRequest = false;
+                lastStartRequestTimestamp = timestamp;
+                received429ResponseSinceLastStartRequest = false;
             }
 
-            this.RecordRequestHashCodeToStartTime[request.GetHashCode()] = DateTime.UtcNow;
+            RecordRequestHashCodeToStartTime[request.GetHashCode()] = DateTime.UtcNow;
         }
 
         public void RecordResponse(DocumentServiceRequest request, StoreResult storeResult)
         {
             // One DocumentServiceRequest can map to multiple store results
             DateTime? startDateTime = null;
-            if (this.RecordRequestHashCodeToStartTime.TryGetValue(request.GetHashCode(), out DateTime startRequestTime))
+            if (RecordRequestHashCodeToStartTime.TryGetValue(request.GetHashCode(), out DateTime startRequestTime))
             {
                 startDateTime = startRequestTime;
             }
@@ -134,27 +131,27 @@ namespace Microsoft.Azure.Cosmos
 
             if (storeResult?.IsClientCpuOverloaded ?? false)
             {
-                this.IsCpuOverloaded = true;
+                IsCpuOverloaded = true;
             }
 
-            lock (this.lockObject)
+            lock (lockObject)
             {
-                if (!this.RequestEndTimeUtc.HasValue || responseTime > this.RequestEndTimeUtc)
+                if (!RequestEndTimeUtc.HasValue || responseTime > RequestEndTimeUtc)
                 {
-                    this.RequestEndTimeUtc = responseTime;
+                    RequestEndTimeUtc = responseTime;
                 }
 
                 if (locationEndpoint != null)
                 {
-                    this.RegionsContacted.Add(locationEndpoint);
+                    RegionsContacted.Add(locationEndpoint);
                 }
 
-                this.DiagnosticsContext.AddDiagnosticsInternal(responseStatistics);
+                DiagnosticsContext.AddDiagnosticsInternal(responseStatistics);
 
-                if (!this.received429ResponseSinceLastStartRequest &&
+                if (!received429ResponseSinceLastStartRequest &&
                     storeResult.StatusCode == StatusCodes.TooManyRequests)
                 {
-                    this.received429ResponseSinceLastStartRequest = true;
+                    received429ResponseSinceLastStartRequest = true;
                 }
             }
         }
@@ -167,10 +164,10 @@ namespace Microsoft.Azure.Cosmos
                 endTime: DateTime.MaxValue,
                 targetEndpoint: targetEndpoint == null ? "<NULL>" : targetEndpoint.ToString());
 
-            lock (this.lockObject)
+            lock (lockObject)
             {
-                this.EndpointToAddressResolutionStatistics.Add(identifier, resolutionStats);
-                this.DiagnosticsContext.AddDiagnosticsInternal(resolutionStats);
+                EndpointToAddressResolutionStatistics.Add(identifier, resolutionStats);
+                DiagnosticsContext.AddDiagnosticsInternal(resolutionStats);
             }
 
             return identifier;
@@ -184,19 +181,19 @@ namespace Microsoft.Azure.Cosmos
             }
 
             DateTime responseTime = DateTime.UtcNow;
-            lock (this.lockObject)
+            lock (lockObject)
             {
-                if (!this.EndpointToAddressResolutionStatistics.ContainsKey(identifier))
+                if (!EndpointToAddressResolutionStatistics.ContainsKey(identifier))
                 {
                     throw new ArgumentException("Identifier {0} does not exist. Please call start before calling end.", identifier);
                 }
 
-                if (!this.RequestEndTimeUtc.HasValue || responseTime > this.RequestEndTimeUtc)
+                if (!RequestEndTimeUtc.HasValue || responseTime > RequestEndTimeUtc)
                 {
-                    this.RequestEndTimeUtc = responseTime;
+                    RequestEndTimeUtc = responseTime;
                 }
 
-                this.EndpointToAddressResolutionStatistics[identifier].EndTime = responseTime;
+                EndpointToAddressResolutionStatistics[identifier].EndTime = responseTime;
             }
         }
 

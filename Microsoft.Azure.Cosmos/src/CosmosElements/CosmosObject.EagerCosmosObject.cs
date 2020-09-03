@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             {
                 get
                 {
-                    if (!this.TryGetValue(key, out CosmosElement value))
+                    if (!TryGetValue(key, out CosmosElement value))
                     {
                         throw new KeyNotFoundException($"Failed to find key: {key}");
                     }
@@ -41,19 +41,19 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 }
             }
 
-            public override IEnumerable<string> Keys => this.properties.Select(kvp => kvp.Key);
+            public override IEnumerable<string> Keys => properties.Select(kvp => kvp.Key);
 
-            public override IEnumerable<CosmosElement> Values => this.properties.Select(kvp => kvp.Value);
+            public override IEnumerable<CosmosElement> Values => properties.Select(kvp => kvp.Value);
 
-            public override int Count => this.properties.Count;
+            public override int Count => properties.Count;
 
-            public override bool ContainsKey(string key) => this.TryGetValue(key, out _);
+            public override bool ContainsKey(string key) => TryGetValue(key, out _);
 
-            public override IEnumerator<KeyValuePair<string, CosmosElement>> GetEnumerator() => this.properties.GetEnumerator();
+            public override IEnumerator<KeyValuePair<string, CosmosElement>> GetEnumerator() => properties.GetEnumerator();
 
             public override bool TryGetValue(string key, out CosmosElement value)
             {
-                foreach (KeyValuePair<string, CosmosElement> property in this.properties)
+                foreach (KeyValuePair<string, CosmosElement> property in properties)
                 {
                     if (property.Key == key)
                     {
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             {
                 jsonWriter.WriteObjectStart();
 
-                foreach (KeyValuePair<string, CosmosElement> kvp in this.properties)
+                foreach (KeyValuePair<string, CosmosElement> kvp in properties)
                 {
                     jsonWriter.WriteFieldName(kvp.Key);
                     kvp.Value.WriteTo(jsonWriter);

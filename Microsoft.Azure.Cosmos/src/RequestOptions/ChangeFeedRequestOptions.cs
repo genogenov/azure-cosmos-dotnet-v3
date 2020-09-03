@@ -30,15 +30,15 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>This is just a hint to the server which can return less items per page.</remarks>
         public int? PageSizeHint
         {
-            get => this.pageSizeHint;
+            get => pageSizeHint;
             set
             {
                 if (value.HasValue && (value.Value <= 0))
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(this.PageSizeHint)} must be a positive value.");
+                    throw new ArgumentOutOfRangeException($"{nameof(PageSizeHint)} must be a positive value.");
                 }
 
-                this.pageSizeHint = value;
+                pageSizeHint = value;
             }
         }
 
@@ -52,11 +52,11 @@ namespace Microsoft.Azure.Cosmos
 
             base.PopulateRequestOptions(request);
 
-            if (this.PageSizeHint.HasValue)
+            if (PageSizeHint.HasValue)
             {
                 request.Headers.Add(
                     HttpConstants.HttpHeaders.PageSize,
-                    this.PageSizeHint.Value.ToString(CultureInfo.InvariantCulture));
+                    PageSizeHint.Value.ToString(CultureInfo.InvariantCulture));
             }
 
             request.Headers.Add(
@@ -71,8 +71,8 @@ namespace Microsoft.Azure.Cosmos
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public new string IfMatchEtag
         {
-            get => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(this.IfMatchEtag)} property.");
-            set => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(this.IfMatchEtag)} property.");
+            get => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(IfMatchEtag)} property.");
+            set => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(IfMatchEtag)} property.");
         }
 
         /// <summary>
@@ -82,15 +82,15 @@ namespace Microsoft.Azure.Cosmos
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public new string IfNoneMatchEtag
         {
-            get => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(this.IfNoneMatchEtag)} property.");
-            set => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(this.IfNoneMatchEtag)} property.");
+            get => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(IfNoneMatchEtag)} property.");
+            set => throw new NotSupportedException($"{nameof(ChangeFeedRequestOptions)} does not use the {nameof(IfNoneMatchEtag)} property.");
         }
 
         internal ChangeFeedRequestOptions Clone()
         {
             return new ChangeFeedRequestOptions()
             {
-                PageSizeHint = this.pageSizeHint,
+                PageSizeHint = pageSizeHint,
             };
         }
     }

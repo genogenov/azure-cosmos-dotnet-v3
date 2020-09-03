@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("coordinates");
             }
 
-            this.Positions = new ReadOnlyCollection<Position>(coordinates);
+            Positions = new ReadOnlyCollection<Position>(coordinates);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as LinearRing);
+            return Equals(obj as LinearRing);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return this.Positions.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
+                return Positions.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
             }
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return this.Positions.SequenceEqual(other.Positions);
+            return Positions.SequenceEqual(other.Positions);
         }
     }
 }

@@ -157,28 +157,28 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                     return sourcePage;
                 }
 
-                List<CosmosElement> takedDocuments = sourcePage.CosmosElements.Take(this.takeCount).ToList();
-                this.takeCount -= takedDocuments.Count;
+                List<CosmosElement> takedDocuments = sourcePage.CosmosElements.Take(takeCount).ToList();
+                takeCount -= takedDocuments.Count;
 
                 string updatedContinuationToken;
-                if (!this.IsDone && (sourcePage.DisallowContinuationTokenMessage == null))
+                if (!IsDone && (sourcePage.DisallowContinuationTokenMessage == null))
                 {
-                    switch (this.takeEnum)
+                    switch (takeEnum)
                     {
                         case TakeEnum.Limit:
                             updatedContinuationToken = new LimitContinuationToken(
-                                limit: this.takeCount,
+                                limit: takeCount,
                                 sourceToken: sourcePage.ContinuationToken).ToString();
                             break;
 
                         case TakeEnum.Top:
                             updatedContinuationToken = new TopContinuationToken(
-                                top: this.takeCount,
+                                top: takeCount,
                                 sourceToken: sourcePage.ContinuationToken).ToString();
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException($"Unknown {nameof(TakeEnum)}: {this.takeEnum}.");
+                            throw new ArgumentOutOfRangeException($"Unknown {nameof(TakeEnum)}: {takeEnum}.");
                     }
                 }
                 else
@@ -227,8 +227,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                         throw new ArgumentException($"{nameof(limit)} must be a non negative number.");
                     }
 
-                    this.Limit = limit;
-                    this.SourceToken = sourceToken;
+                    Limit = limit;
+                    SourceToken = sourceToken;
                 }
 
                 /// <summary>
@@ -296,8 +296,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                 /// <param name="sourceToken">The continuation token for the source component of the query.</param>
                 public TopContinuationToken(int top, string sourceToken)
                 {
-                    this.Top = top;
-                    this.SourceToken = sourceToken;
+                    Top = top;
+                    SourceToken = sourceToken;
                 }
 
                 /// <summary>

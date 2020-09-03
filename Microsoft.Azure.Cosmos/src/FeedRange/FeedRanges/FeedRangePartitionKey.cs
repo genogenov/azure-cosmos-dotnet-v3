@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Cosmos
 
         public FeedRangePartitionKey(PartitionKey partitionKey)
         {
-            this.PartitionKey = partitionKey;
+            PartitionKey = partitionKey;
         }
 
         public override Task<List<Documents.Routing.Range<string>>> GetEffectiveRangesAsync(
@@ -28,7 +28,7 @@ namespace Microsoft.Azure.Cosmos
                 new List<Documents.Routing.Range<string>>
                 {
                     Documents.Routing.Range<string>.GetPointRange(
-                        this.PartitionKey.InternalKey.GetEffectivePartitionKeyString(partitionKeyDefinition))
+                        PartitionKey.InternalKey.GetEffectivePartitionKeyString(partitionKeyDefinition))
                 });
 
         public override async Task<IEnumerable<string>> GetPartitionKeyRangesAsync(
@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Cosmos
             Documents.PartitionKeyDefinition partitionKeyDefinition,
             CancellationToken cancellationToken)
         {
-            string effectivePartitionKeyString = this.PartitionKey.InternalKey.GetEffectivePartitionKeyString(partitionKeyDefinition);
+            string effectivePartitionKeyString = PartitionKey.InternalKey.GetEffectivePartitionKeyString(partitionKeyDefinition);
             Documents.PartitionKeyRange range = await routingMapProvider.TryGetRangeByEffectivePartitionKeyAsync(containerRid, effectivePartitionKeyString);
             return new List<string>() { range.Id };
         }
@@ -48,6 +48,6 @@ namespace Microsoft.Azure.Cosmos
             IFeedRangeAsyncVisitor<TResult> visitor,
             CancellationToken cancellationToken = default) => visitor.VisitAsync(this, cancellationToken);
 
-        public override string ToString() => this.PartitionKey.InternalKey.ToJsonString();
+        public override string ToString() => PartitionKey.InternalKey.ToJsonString();
     }
 }

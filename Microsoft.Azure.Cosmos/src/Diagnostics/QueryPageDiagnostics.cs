@@ -14,11 +14,11 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
             string indexUtilizationText,
             CosmosDiagnosticsContext diagnosticsContext)
         {
-            this.ClientCorrelationId = clientQueryCorrelationId;
-            this.PartitionKeyRangeId = partitionKeyRangeId ?? throw new ArgumentNullException(nameof(partitionKeyRangeId));
-            this.QueryMetricText = queryMetricText ?? string.Empty;
-            this.IndexUtilizationText = indexUtilizationText ?? string.Empty;
-            this.DiagnosticsContext = diagnosticsContext;
+            ClientCorrelationId = clientQueryCorrelationId;
+            PartitionKeyRangeId = partitionKeyRangeId ?? throw new ArgumentNullException(nameof(partitionKeyRangeId));
+            QueryMetricText = queryMetricText ?? string.Empty;
+            IndexUtilizationText = indexUtilizationText ?? string.Empty;
+            DiagnosticsContext = diagnosticsContext;
         }
 
         /// <summary>

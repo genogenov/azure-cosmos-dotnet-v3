@@ -5,7 +5,6 @@
 namespace Microsoft.Azure.Cosmos.Linq
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
@@ -48,14 +47,14 @@ namespace Microsoft.Azure.Cosmos.Linq
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
         {
             return new CosmosLinqQuery<TElement>(
-                this.container,
-                this.responseFactory,
-                this.queryClient,
-                this.continuationToken,
-                this.cosmosQueryRequestOptions,
+                container,
+                responseFactory,
+                queryClient,
+                continuationToken,
+                cosmosQueryRequestOptions,
                 expression,
-                this.allowSynchronousQueryExecution,
-                this.serializationOptions);
+                allowSynchronousQueryExecution,
+                serializationOptions);
         }
 
         public IQueryable CreateQuery(Expression expression)
@@ -64,14 +63,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type documentQueryType = typeof(CosmosLinqQuery<bool>).GetGenericTypeDefinition().MakeGenericType(expressionType);
             return (IQueryable)Activator.CreateInstance(
                 documentQueryType,
-                this.container,
-                this.responseFactory,
-                this.queryClient,
-                this.continuationToken,
-                this.cosmosQueryRequestOptions,
+                container,
+                responseFactory,
+                queryClient,
+                continuationToken,
+                cosmosQueryRequestOptions,
                 expression,
-                this.allowSynchronousQueryExecution,
-                this.serializationOptions);
+                allowSynchronousQueryExecution,
+                serializationOptions);
         }
 
         public TResult Execute<TResult>(Expression expression)
@@ -79,15 +78,15 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type cosmosQueryType = typeof(CosmosLinqQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(TResult));
             CosmosLinqQuery<TResult> cosmosLINQQuery = (CosmosLinqQuery<TResult>)Activator.CreateInstance(
                 cosmosQueryType,
-                this.container,
-                this.responseFactory,
-                this.queryClient,
-                this.continuationToken,
-                this.cosmosQueryRequestOptions,
+                container,
+                responseFactory,
+                queryClient,
+                continuationToken,
+                cosmosQueryRequestOptions,
                 expression,
-                this.allowSynchronousQueryExecution,
-                this.serializationOptions);
-            this.onExecuteScalarQueryCallback?.Invoke(cosmosLINQQuery);
+                allowSynchronousQueryExecution,
+                serializationOptions);
+            onExecuteScalarQueryCallback?.Invoke(cosmosLINQQuery);
             return cosmosLINQQuery.ToList().FirstOrDefault();
         }
 
@@ -97,14 +96,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type cosmosQueryType = typeof(CosmosLinqQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(object));
             CosmosLinqQuery<object> cosmosLINQQuery = (CosmosLinqQuery<object>)Activator.CreateInstance(
                 cosmosQueryType,
-                this.container,
-                this.responseFactory,
-                this.queryClient,
-                this.continuationToken,
-                this.cosmosQueryRequestOptions,
-                this.allowSynchronousQueryExecution,
-                this.serializationOptions);
-            this.onExecuteScalarQueryCallback?.Invoke(cosmosLINQQuery);
+                container,
+                responseFactory,
+                queryClient,
+                continuationToken,
+                cosmosQueryRequestOptions,
+                allowSynchronousQueryExecution,
+                serializationOptions);
+            onExecuteScalarQueryCallback?.Invoke(cosmosLINQQuery);
             return cosmosLINQQuery.ToList().FirstOrDefault();
         }
 
@@ -115,14 +114,14 @@ namespace Microsoft.Azure.Cosmos.Linq
             Type cosmosQueryType = typeof(CosmosLinqQuery<bool>).GetGenericTypeDefinition().MakeGenericType(typeof(TResult));
             CosmosLinqQuery<TResult> cosmosLINQQuery = (CosmosLinqQuery<TResult>)Activator.CreateInstance(
                 cosmosQueryType,
-                this.container,
-                this.responseFactory,
-                this.queryClient,
-                this.continuationToken,
-                this.cosmosQueryRequestOptions,
+                container,
+                responseFactory,
+                queryClient,
+                continuationToken,
+                cosmosQueryRequestOptions,
                 expression,
-                this.allowSynchronousQueryExecution,
-                this.serializationOptions);
+                allowSynchronousQueryExecution,
+                serializationOptions);
             return TaskHelper.RunInlineIfNeededAsync(() => cosmosLINQQuery.AggregateResultAsync());
         }
     }

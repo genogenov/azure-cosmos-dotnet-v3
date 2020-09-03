@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as UnspecifiedCrs);
+            return Equals(obj as UnspecifiedCrs);
         }
 
         /// <summary>

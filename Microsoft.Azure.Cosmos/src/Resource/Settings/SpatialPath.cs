@@ -48,11 +48,11 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.spatialTypesInternal == null)
+                if (spatialTypesInternal == null)
                 {
-                    this.spatialTypesInternal = new Collection<SpatialType>();
+                    spatialTypesInternal = new Collection<SpatialType>();
                 }
-                return this.spatialTypesInternal;
+                return spatialTypesInternal;
             }
             internal set
             {
@@ -61,7 +61,7 @@ namespace Microsoft.Azure.Cosmos
                     throw new ArgumentNullException();
                 }
 
-                this.spatialTypesInternal = value;
+                spatialTypesInternal = value;
             }
         }
 

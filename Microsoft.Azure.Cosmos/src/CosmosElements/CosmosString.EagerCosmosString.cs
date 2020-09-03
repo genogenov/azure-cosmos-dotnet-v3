@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         {
             public EagerCosmosString(string value)
             {
-                this.Value = value;
+                Value = value;
             }
 
             public override string Value { get; }
@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 return false;
             }
 
-            public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteStringValue(this.Value);
+            public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteStringValue(Value);
         }
     }
 #if INTERNAL

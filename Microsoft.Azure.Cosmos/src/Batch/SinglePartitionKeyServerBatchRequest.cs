@@ -23,7 +23,7 @@ namespace Microsoft.Azure.Cosmos
                   maxOperationCount: int.MaxValue,
                   serializerCore: serializerCore)
         {
-            this.PartitionKey = partitionKey;
+            PartitionKey = partitionKey;
         }
 
         /// <summary>

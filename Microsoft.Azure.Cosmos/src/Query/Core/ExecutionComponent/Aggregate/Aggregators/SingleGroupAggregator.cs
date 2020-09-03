@@ -7,8 +7,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Json;
-    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
@@ -97,22 +95,22 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
             public override void AddValues(CosmosElement values)
             {
-                this.aggregateValue.AddValue(values);
+                aggregateValue.AddValue(values);
             }
 
             public override CosmosElement GetResult()
             {
-                return this.aggregateValue.Result;
+                return aggregateValue.Result;
             }
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                return this.aggregateValue.GetCosmosElementContinuationToken();
+                return aggregateValue.GetCosmosElementContinuationToken();
             }
 
             public override string ToString()
             {
-                return this.aggregateValue.ToString();
+                return aggregateValue.ToString();
             }
         }
 
@@ -137,9 +135,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             public override CosmosElement GetResult()
             {
                 List<KeyValuePair<string, CosmosElement>> aliasToElement = new List<KeyValuePair<string, CosmosElement>>();
-                foreach (string alias in this.orderedAliases)
+                foreach (string alias in orderedAliases)
                 {
-                    AggregateValue aggregateValue = this.aliasToValue[alias];
+                    AggregateValue aggregateValue = aliasToValue[alias];
                     if (aggregateValue.Result != null)
                     {
                         KeyValuePair<string, CosmosElement> kvp = new KeyValuePair<string, CosmosElement>(alias, aggregateValue.Result);
@@ -153,7 +151,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             public override CosmosElement GetCosmosElementContinuationToken()
             {
                 Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>();
-                foreach (KeyValuePair<string, AggregateValue> kvp in this.aliasToValue)
+                foreach (KeyValuePair<string, AggregateValue> kvp in aliasToValue)
                 {
                     dictionary.Add(kvp.Key, kvp.Value.GetCosmosElementContinuationToken());
                 }
@@ -231,7 +229,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                     throw new ArgumentException("values is not an object.");
                 }
 
-                foreach (KeyValuePair<string, AggregateValue> aliasAndValue in this.aliasToValue)
+                foreach (KeyValuePair<string, AggregateValue> aliasAndValue in aliasToValue)
                 {
                     string alias = aliasAndValue.Key;
                     AggregateValue aggregateValue = aliasAndValue.Value;
@@ -246,7 +244,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
             public override string ToString()
             {
-                return Newtonsoft.Json.JsonConvert.SerializeObject(this.aliasToValue);
+                return Newtonsoft.Json.JsonConvert.SerializeObject(aliasToValue);
             }
         }
 
@@ -265,7 +263,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
             public override string ToString()
             {
-                return this.Result.ToString();
+                return Result.ToString();
             }
 
             public static TryCatch<AggregateValue> TryCreate(AggregateOperator? aggregateOperator, CosmosElement continuationToken)
@@ -287,7 +285,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             {
                 private readonly IAggregator aggregator;
 
-                public override CosmosElement Result => this.aggregator.GetResult();
+                public override CosmosElement Result => aggregator.GetResult();
 
                 private AggregateAggregateValue(IAggregator aggregator)
                 {
@@ -297,12 +295,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 public override void AddValue(CosmosElement aggregateValue)
                 {
                     AggregateItem aggregateItem = new AggregateItem(aggregateValue);
-                    this.aggregator.Aggregate(aggregateItem.Item);
+                    aggregator.Aggregate(aggregateItem.Item);
                 }
 
                 public override CosmosElement GetCosmosElementContinuationToken()
                 {
-                    return this.aggregator.GetCosmosElementContinuationToken();
+                    return aggregator.GetCosmosElementContinuationToken();
                 }
 
                 public static TryCatch<AggregateValue> TryCreate(
@@ -347,7 +345,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
                 private ScalarAggregateValue(CosmosElement initialValue, bool initialized)
                 {
-                    this.value = initialValue;
+                    value = initialValue;
                     this.initialized = initialized;
                 }
 
@@ -355,23 +353,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 {
                     get
                     {
-                        if (!this.initialized)
+                        if (!initialized)
                         {
                             throw new InvalidOperationException($"{nameof(ScalarAggregateValue)} is not yet initialized.");
                         }
 
-                        return this.value;
+                        return value;
                     }
                 }
 
                 public override CosmosElement GetCosmosElementContinuationToken()
                 {
-                    Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>();
-                    dictionary.Add(nameof(this.initialized), CosmosBoolean.Create(this.initialized));
-
-                    if (this.value != null)
+                    Dictionary<string, CosmosElement> dictionary = new Dictionary<string, CosmosElement>
                     {
-                        dictionary.Add(nameof(this.value), this.value);
+                        { nameof(initialized), CosmosBoolean.Create(initialized) }
+                    };
+
+                    if (value != null)
+                    {
+                        dictionary.Add(nameof(value), value);
                     }
 
                     return CosmosObject.Create(dictionary);
@@ -415,10 +415,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
                 public override void AddValue(CosmosElement aggregateValue)
                 {
-                    if (!this.initialized)
+                    if (!initialized)
                     {
-                        this.value = aggregateValue;
-                        this.initialized = true;
+                        value = aggregateValue;
+                        initialized = true;
                     }
                 }
             }

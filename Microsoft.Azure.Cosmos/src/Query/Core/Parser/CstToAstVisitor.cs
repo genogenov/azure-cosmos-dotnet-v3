@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.Immutable;
     using System.Diagnostics.Contracts;
     using Antlr4.Runtime.Misc;
     using Antlr4.Runtime.Tree;
@@ -60,19 +59,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            return this.Visit(context.sql_query());
+            return Visit(context.sql_query());
         }
 
         public override SqlObject VisitSql_query([NotNull] sqlParser.Sql_queryContext context)
         {
             Contract.Requires(context != null);
 
-            SqlSelectClause sqlSelectClause = (SqlSelectClause)this.Visit(context.select_clause());
+            SqlSelectClause sqlSelectClause = (SqlSelectClause)Visit(context.select_clause());
 
             SqlFromClause sqlFromClause;
             if (context.from_clause() != null)
             {
-                sqlFromClause = (SqlFromClause)this.Visit(context.from_clause());
+                sqlFromClause = (SqlFromClause)Visit(context.from_clause());
             }
             else
             {
@@ -82,7 +81,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlWhereClause sqlWhereClause;
             if (context.where_clause() != null)
             {
-                sqlWhereClause = (SqlWhereClause)this.Visit(context.where_clause());
+                sqlWhereClause = (SqlWhereClause)Visit(context.where_clause());
             }
             else
             {
@@ -92,7 +91,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlOrderbyClause sqlOrderByClause;
             if (context.order_by_clause() != null)
             {
-                sqlOrderByClause = (SqlOrderbyClause)this.Visit(context.order_by_clause());
+                sqlOrderByClause = (SqlOrderbyClause)Visit(context.order_by_clause());
             }
             else
             {
@@ -102,7 +101,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlGroupByClause sqlGroupByClause;
             if (context.group_by_clause() != default)
             {
-                sqlGroupByClause = (SqlGroupByClause)this.Visit(context.group_by_clause());
+                sqlGroupByClause = (SqlGroupByClause)Visit(context.group_by_clause());
             }
             else
             {
@@ -112,7 +111,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlOffsetLimitClause sqlOffsetLimitClause;
             if (context.offset_limit_clause() != default)
             {
-                sqlOffsetLimitClause = (SqlOffsetLimitClause)this.Visit(context.offset_limit_clause());
+                sqlOffsetLimitClause = (SqlOffsetLimitClause)Visit(context.offset_limit_clause());
             }
             else
             {
@@ -131,11 +130,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         #region SELECT
         public override SqlObject VisitSelect_clause([NotNull] sqlParser.Select_clauseContext context)
         {
-            SqlSelectSpec sqlSelectSpec = (SqlSelectSpec)this.Visit(context.selection());
+            SqlSelectSpec sqlSelectSpec = (SqlSelectSpec)Visit(context.selection());
             SqlTopSpec sqlTopSpec;
             if (context.top_spec() != default)
             {
-                sqlTopSpec = (SqlTopSpec)this.Visit(context.top_spec());
+                sqlTopSpec = (SqlTopSpec)Visit(context.top_spec());
             }
             else
             {
@@ -158,7 +157,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlScalarExpression scalarExpression = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression scalarExpression = (SqlScalarExpression)Visit(context.scalar_expression());
             SqlSelectValueSpec sqlSelectValueSpec = SqlSelectValueSpec.Create(scalarExpression);
             return sqlSelectValueSpec;
         }
@@ -170,18 +169,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             List<SqlSelectItem> sqlSelectItems = new List<SqlSelectItem>();
             foreach (sqlParser.Select_itemContext selectItemContext in context.select_item())
             {
-                SqlSelectItem selectItem = (SqlSelectItem)this.Visit(selectItemContext);
+                SqlSelectItem selectItem = (SqlSelectItem)Visit(selectItemContext);
                 sqlSelectItems.Add(selectItem);
             }
 
-            return SqlSelectListSpec.Create(sqlSelectItems.ToImmutableArray());
+            return SqlSelectListSpec.Create(sqlSelectItems);
         }
 
         public override SqlObject VisitSelect_item([NotNull] sqlParser.Select_itemContext context)
         {
             Contract.Requires(context != null);
 
-            SqlScalarExpression sqlScalarExpression = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression sqlScalarExpression = (SqlScalarExpression)Visit(context.scalar_expression());
             SqlIdentifier alias;
             if (context.IDENTIFIER() != null)
             {
@@ -222,7 +221,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlCollectionExpression collectionExpression = (SqlCollectionExpression)this.Visit(context.collection_expression());
+            SqlCollectionExpression collectionExpression = (SqlCollectionExpression)Visit(context.collection_expression());
 
             return SqlFromClause.Create(collectionExpression);
         }
@@ -231,7 +230,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlCollection sqlCollection = (SqlCollection)this.Visit(context.collection());
+            SqlCollection sqlCollection = (SqlCollection)Visit(context.collection());
             SqlIdentifier alias;
             if (context.IDENTIFIER() != null)
             {
@@ -249,7 +248,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlCollection sqlCollection = (SqlCollection)this.Visit(context.collection());
+            SqlCollection sqlCollection = (SqlCollection)Visit(context.collection());
             SqlIdentifier identifier = SqlIdentifier.Create(context.IDENTIFIER().GetText());
 
             return SqlArrayIteratorCollectionExpression.Create(identifier, sqlCollection);
@@ -259,8 +258,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlCollectionExpression left = (SqlCollectionExpression)this.Visit(context.collection_expression(0));
-            SqlCollectionExpression right = (SqlCollectionExpression)this.Visit(context.collection_expression(1));
+            SqlCollectionExpression left = (SqlCollectionExpression)Visit(context.collection_expression(0));
+            SqlCollectionExpression right = (SqlCollectionExpression)Visit(context.collection_expression(1));
 
             return SqlJoinCollectionExpression.Create(left, right);
         }
@@ -273,7 +272,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlPathExpression pathExpression;
             if (context.path_expression() != null)
             {
-                pathExpression = (SqlPathExpression)this.Visit(context.path_expression());
+                pathExpression = (SqlPathExpression)Visit(context.path_expression());
             }
             else
             {
@@ -287,7 +286,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlQuery subQuery = (SqlQuery)this.Visit(context.sql_query());
+            SqlQuery subQuery = (SqlQuery)Visit(context.sql_query());
 
             return SqlSubqueryCollection.Create(subQuery);
         }
@@ -301,7 +300,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlPathExpression pathExpression = (SqlPathExpression)this.Visit(context.path_expression());
+            SqlPathExpression pathExpression = (SqlPathExpression)Visit(context.path_expression());
             SqlIdentifier identifier = SqlIdentifier.Create(context.IDENTIFIER().GetText());
 
             return SqlIdentifierPathExpression.Create(parentPath: pathExpression, value: identifier);
@@ -311,7 +310,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlPathExpression pathExpression = (SqlPathExpression)this.Visit(context.path_expression());
+            SqlPathExpression pathExpression = (SqlPathExpression)Visit(context.path_expression());
             SqlNumberLiteral number = SqlNumberLiteral.Create(CstToAstVisitor.GetNumber64ValueFromNode(context.NUMERIC_LITERAL()));
 
             return SqlNumberPathExpression.Create(pathExpression, number);
@@ -321,7 +320,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         {
             Contract.Requires(context != null);
 
-            SqlPathExpression pathExpression = (SqlPathExpression)this.Visit(context.path_expression());
+            SqlPathExpression pathExpression = (SqlPathExpression)Visit(context.path_expression());
             SqlStringLiteral stringIndex = SqlStringLiteral.Create(CstToAstVisitor.GetStringValueFromNode(context.STRING_LITERAL()));
 
             return SqlStringPathExpression.Create(pathExpression, stringIndex);
@@ -331,7 +330,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
         public override SqlObject VisitWhere_clause([NotNull] sqlParser.Where_clauseContext context)
         {
             Contract.Requires(context != null);
-            SqlScalarExpression sqlScalarExpression = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression sqlScalarExpression = (SqlScalarExpression)Visit(context.scalar_expression());
             return SqlWhereClause.Create(sqlScalarExpression);
         }
         #endregion
@@ -343,10 +342,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             List<SqlScalarExpression> groupByColumns = new List<SqlScalarExpression>();
             foreach (sqlParser.Scalar_expressionContext scalarExpressionContext in context.scalar_expression_list().scalar_expression())
             {
-                groupByColumns.Add((SqlScalarExpression)this.Visit(scalarExpressionContext));
+                groupByColumns.Add((SqlScalarExpression)Visit(scalarExpressionContext));
             }
 
-            return SqlGroupByClause.Create(groupByColumns.ToImmutableArray());
+            return SqlGroupByClause.Create(groupByColumns);
         }
         #endregion
         #region ORDER BY
@@ -357,18 +356,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             List<SqlOrderByItem> orderByItems = new List<SqlOrderByItem>();
             foreach (sqlParser.Order_by_itemContext orderByItemContext in context.order_by_items().order_by_item())
             {
-                SqlOrderByItem orderByItem = (SqlOrderByItem)this.VisitOrder_by_item(orderByItemContext);
+                SqlOrderByItem orderByItem = (SqlOrderByItem)VisitOrder_by_item(orderByItemContext);
                 orderByItems.Add(orderByItem);
             }
 
-            return SqlOrderbyClause.Create(orderByItems.ToImmutableArray());
+            return SqlOrderbyClause.Create(orderByItems);
         }
 
         public override SqlObject VisitOrder_by_item([NotNull] sqlParser.Order_by_itemContext context)
         {
             Contract.Requires(context != null);
 
-            SqlScalarExpression expression = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression expression = (SqlScalarExpression)Visit(context.scalar_expression());
             bool isDescending = false;
             if (context.sort_order() != null)
             {
@@ -397,8 +396,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context.offset_count() != null);
             Contract.Requires(context.limit_count() != null);
 
-            SqlOffsetSpec sqlOffsetSpec = (SqlOffsetSpec)this.Visit(context.offset_count());
-            SqlLimitSpec sqlLimitSpec = (SqlLimitSpec)this.Visit(context.limit_count());
+            SqlOffsetSpec sqlOffsetSpec = (SqlOffsetSpec)Visit(context.offset_count());
+            SqlLimitSpec sqlLimitSpec = (SqlLimitSpec)Visit(context.limit_count());
 
             return SqlOffsetLimitClause.Create(sqlOffsetSpec, sqlLimitSpec);
         }
@@ -468,18 +467,18 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             {
                 foreach (sqlParser.Scalar_expressionContext scalarExpressionContext in context.scalar_expression_list().scalar_expression())
                 {
-                    arrayItems.Add((SqlScalarExpression)this.Visit(scalarExpressionContext));
+                    arrayItems.Add((SqlScalarExpression)Visit(scalarExpressionContext));
                 }
             }
 
-            return SqlArrayCreateScalarExpression.Create(arrayItems.ToImmutableArray());
+            return SqlArrayCreateScalarExpression.Create(arrayItems);
         }
 
         public override SqlObject VisitArrayScalarExpression([NotNull] sqlParser.ArrayScalarExpressionContext context)
         {
             Contract.Requires(context != null);
 
-            SqlQuery sqlQuery = (SqlQuery)this.Visit(context.sql_query());
+            SqlQuery sqlQuery = (SqlQuery)Visit(context.sql_query());
             return SqlArrayScalarExpression.Create(sqlQuery);
         }
 
@@ -488,10 +487,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // scalar_expression K_NOT? K_BETWEEN scalar_expression K_AND scalar_expression
 
-            SqlScalarExpression needle = (SqlScalarExpression)this.Visit(context.binary_scalar_expression(0));
+            SqlScalarExpression needle = (SqlScalarExpression)Visit(context.binary_scalar_expression(0));
             bool not = context.K_NOT() != null;
-            SqlScalarExpression start = (SqlScalarExpression)this.Visit(context.binary_scalar_expression(1));
-            SqlScalarExpression end = (SqlScalarExpression)this.Visit(context.binary_scalar_expression(2));
+            SqlScalarExpression start = (SqlScalarExpression)Visit(context.binary_scalar_expression(1));
+            SqlScalarExpression end = (SqlScalarExpression)Visit(context.binary_scalar_expression(2));
 
             return SqlBetweenScalarExpression.Create(needle, start, end, not);
         }
@@ -503,14 +502,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlObject sqlObject;
             if (context.unary_scalar_expression() != null)
             {
-                sqlObject = (SqlScalarExpression)this.Visit(context.unary_scalar_expression());
+                sqlObject = (SqlScalarExpression)Visit(context.unary_scalar_expression());
             }
             else
             {
                 // scalar_expression binary_operator scalar_expression
                 Contract.Requires(context.ChildCount == 3);
 
-                SqlScalarExpression left = (SqlScalarExpression)this.Visit(context.binary_scalar_expression(0));
+                SqlScalarExpression left = (SqlScalarExpression)Visit(context.binary_scalar_expression(0));
                 if (!CstToAstVisitor.binaryOperatorKindLookup.TryGetValue(
                     context.children[1].GetText(),
                     out SqlBinaryScalarOperatorKind operatorKind))
@@ -518,7 +517,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                     throw new ArgumentOutOfRangeException($"Unknown binary operator: {context.children[1].GetText()}.");
                 }
 
-                SqlScalarExpression right = (SqlScalarExpression)this.Visit(context.binary_scalar_expression(1));
+                SqlScalarExpression right = (SqlScalarExpression)Visit(context.binary_scalar_expression(1));
 
                 sqlObject = SqlBinaryScalarExpression.Create(operatorKind, left, right);
             }
@@ -531,8 +530,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // scalar_expression '??' scalar_expression
 
-            SqlScalarExpression left = (SqlScalarExpression)this.Visit(context.scalar_expression(0));
-            SqlScalarExpression right = (SqlScalarExpression)this.Visit(context.scalar_expression(1));
+            SqlScalarExpression left = (SqlScalarExpression)Visit(context.scalar_expression(0));
+            SqlScalarExpression right = (SqlScalarExpression)Visit(context.scalar_expression(1));
 
             return SqlCoalesceScalarExpression.Create(left, right);
         }
@@ -543,9 +542,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             // scalar_expression '?' scalar_expression ':' scalar_expression
             Contract.Requires(context.ChildCount == 5);
 
-            SqlScalarExpression condition = (SqlScalarExpression)this.Visit(context.scalar_expression(0));
-            SqlScalarExpression consequent = (SqlScalarExpression)this.Visit(context.scalar_expression(1));
-            SqlScalarExpression alternative = (SqlScalarExpression)this.Visit(context.scalar_expression(2));
+            SqlScalarExpression condition = (SqlScalarExpression)Visit(context.scalar_expression(0));
+            SqlScalarExpression consequent = (SqlScalarExpression)Visit(context.scalar_expression(1));
+            SqlScalarExpression alternative = (SqlScalarExpression)Visit(context.scalar_expression(2));
             return SqlConditionalScalarExpression.Create(condition, consequent, alternative);
         }
 
@@ -555,7 +554,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             // K_EXISTS '(' sql_query ')'
             Contract.Requires(context.ChildCount == 4);
 
-            SqlQuery subquery = (SqlQuery)this.Visit(context.children[2]);
+            SqlQuery subquery = (SqlQuery)Visit(context.children[2]);
             return SqlExistsScalarExpression.Create(subquery);
         }
 
@@ -571,11 +570,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             {
                 foreach (sqlParser.Scalar_expressionContext scalarExpressionContext in context.scalar_expression_list().scalar_expression())
                 {
-                    arguments.Add((SqlScalarExpression)this.Visit(scalarExpressionContext));
+                    arguments.Add((SqlScalarExpression)Visit(scalarExpressionContext));
                 }
             }
 
-            return SqlFunctionCallScalarExpression.Create(identifier, udf, arguments.ToImmutableArray());
+            return SqlFunctionCallScalarExpression.Create(identifier, udf, arguments);
         }
 
         public override SqlObject VisitIn_scalar_expression([NotNull] sqlParser.In_scalar_expressionContext context)
@@ -583,22 +582,22 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // scalar_expression K_NOT? K_IN '(' scalar_expression_list ')'
 
-            SqlScalarExpression needle = (SqlScalarExpression)this.Visit(context.binary_scalar_expression());
+            SqlScalarExpression needle = (SqlScalarExpression)Visit(context.binary_scalar_expression());
             bool not = context.K_NOT() != null;
             List<SqlScalarExpression> searchList = new List<SqlScalarExpression>();
             foreach (sqlParser.Scalar_expressionContext scalarExpressionContext in context.scalar_expression_list().scalar_expression())
             {
-                searchList.Add((SqlScalarExpression)this.Visit(scalarExpressionContext));
+                searchList.Add((SqlScalarExpression)Visit(scalarExpressionContext));
             }
 
-            return SqlInScalarExpression.Create(needle, not, searchList.ToImmutableArray());
+            return SqlInScalarExpression.Create(needle, not, searchList);
         }
 
         public override SqlObject VisitLiteralScalarExpression([NotNull] sqlParser.LiteralScalarExpressionContext context)
         {
             Contract.Requires(context != null);
 
-            SqlLiteral sqlLiteral = (SqlLiteral)this.Visit(context.literal());
+            SqlLiteral sqlLiteral = (SqlLiteral)Visit(context.literal());
             return SqlLiteralScalarExpression.Create(sqlLiteral);
         }
 
@@ -647,8 +646,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // primary_expression '[' scalar_expression ']'
 
-            SqlScalarExpression memberExpression = (SqlScalarExpression)this.Visit(context.primary_expression());
-            SqlScalarExpression indexExpression = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression memberExpression = (SqlScalarExpression)Visit(context.primary_expression());
+            SqlScalarExpression indexExpression = (SqlScalarExpression)Visit(context.scalar_expression());
 
             return SqlMemberIndexerScalarExpression.Create(memberExpression, indexExpression);
         }
@@ -664,12 +663,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                 sqlParser.Object_propertyContext[] propertyContexts = context.object_property_list().object_property();
                 foreach (sqlParser.Object_propertyContext objectPropertyContext in propertyContexts)
                 {
-                    SqlObjectProperty property = (SqlObjectProperty)this.Visit(objectPropertyContext);
+                    SqlObjectProperty property = (SqlObjectProperty)Visit(objectPropertyContext);
                     properties.Add(property);
                 }
             }
 
-            return SqlObjectCreateScalarExpression.Create(properties.ToImmutableArray());
+            return SqlObjectCreateScalarExpression.Create(properties);
         }
 
         public override SqlObject VisitObject_property([NotNull] sqlParser.Object_propertyContext context)
@@ -679,7 +678,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context.scalar_expression() != null);
 
             string name = CstToAstVisitor.GetStringValueFromNode(context.STRING_LITERAL());
-            SqlScalarExpression value = (SqlScalarExpression)this.Visit(context.scalar_expression());
+            SqlScalarExpression value = (SqlScalarExpression)Visit(context.scalar_expression());
 
             SqlObjectProperty property = SqlObjectProperty.Create(
                 SqlPropertyName.Create(name),
@@ -710,7 +709,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // primary_expression '.' IDENTIFIER
 
-            SqlScalarExpression memberExpression = (SqlScalarExpression)this.Visit(context.primary_expression());
+            SqlScalarExpression memberExpression = (SqlScalarExpression)Visit(context.primary_expression());
             SqlIdentifier indentifier = SqlIdentifier.Create(context.IDENTIFIER().GetText());
 
             return SqlPropertyRefScalarExpression.Create(memberExpression, indentifier);
@@ -721,7 +720,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             // '(' sql_query ')'
 
-            SqlQuery subquery = (SqlQuery)this.Visit(context.sql_query());
+            SqlQuery subquery = (SqlQuery)Visit(context.sql_query());
             return SqlSubqueryScalarExpression.Create(subquery);
         }
 
@@ -730,7 +729,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context != null);
             if (context.primary_expression() != null)
             {
-                return this.Visit(context.primary_expression());
+                return Visit(context.primary_expression());
             }
 
             string unaryOperatorText = context.unary_operator().GetText();
@@ -741,7 +740,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
                 throw new ArgumentOutOfRangeException($"Unknown unary operator: {unaryOperatorText}.");
             }
 
-            SqlScalarExpression expression = (SqlScalarExpression)this.Visit(context.unary_scalar_expression());
+            SqlScalarExpression expression = (SqlScalarExpression)Visit(context.unary_scalar_expression());
 
             return SqlUnaryScalarExpression.Create(unaryOperator, expression);
         }
@@ -753,7 +752,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             Contract.Requires(context.ChildCount == 3); // open parens and close parens
 
             IParseTree parseTree = context.children[1];
-            return this.Visit(parseTree);
+            return Visit(parseTree);
         }
 
         public override SqlObject VisitLogical_scalar_expression([NotNull] sqlParser.Logical_scalar_expressionContext context)
@@ -763,11 +762,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Parser
             SqlObject sqlObject;
             if (context.binary_scalar_expression() != null)
             {
-                sqlObject = this.Visit(context.binary_scalar_expression());
+                sqlObject = Visit(context.binary_scalar_expression());
             }
             else if (context.in_scalar_expression() != null)
             {
-                sqlObject = this.Visit(context.in_scalar_expression());
+                sqlObject = Visit(context.in_scalar_expression());
             }
             else
             {

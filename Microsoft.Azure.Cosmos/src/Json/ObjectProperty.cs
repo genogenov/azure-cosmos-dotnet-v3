@@ -3,8 +3,6 @@
 //------------------------------------------------------------
 namespace Microsoft.Azure.Cosmos.Json
 {
-    using System;
-
     /// <summary>
     /// Struct to hold the property name and property value for an object property.
     /// </summary>
@@ -24,8 +22,8 @@ namespace Microsoft.Azure.Cosmos.Json
             IJsonNavigatorNode nameNode,
             IJsonNavigatorNode valueNode)
         {
-            this.NameNode = nameNode;
-            this.ValueNode = valueNode;
+            NameNode = nameNode;
+            ValueNode = valueNode;
         }
 
         /// <summary>

@@ -28,12 +28,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <param name="retryCount">The number of times we retried for this fetch execution range.</param>
         public FetchExecutionRange(string partitionKeyRangeId, string activityId, DateTime startTime, DateTime endTime, long numberOfDocuments, long retryCount)
         {
-            this.PartitionId = partitionKeyRangeId;
-            this.ActivityId = activityId;
-            this.StartTime = startTime;
-            this.EndTime = endTime;
-            this.NumberOfDocuments = numberOfDocuments;
-            this.RetryCount = retryCount;
+            PartitionId = partitionKeyRangeId;
+            ActivityId = activityId;
+            StartTime = startTime;
+            EndTime = endTime;
+            NumberOfDocuments = numberOfDocuments;
+            RetryCount = retryCount;
         }
 
         /// <summary>

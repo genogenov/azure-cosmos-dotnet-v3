@@ -38,19 +38,19 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosString cosmosString && this.Equals(cosmosString);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosString cosmosString && Equals(cosmosString);
 
-        public bool Equals(CosmosString cosmosString) => this.Value == cosmosString.Value;
+        public bool Equals(CosmosString cosmosString) => Value == cosmosString.Value;
 
         public override int GetHashCode()
         {
             uint hash = HashSeed;
-            hash = MurmurHash3.Hash32(this.Value, hash);
+            hash = MurmurHash3.Hash32(Value, hash);
 
             return (int)hash;
         }
 
-        public int CompareTo(CosmosString cosmosString) => string.CompareOrdinal(this.Value, cosmosString.Value);
+        public int CompareTo(CosmosString cosmosString) => string.CompareOrdinal(Value, cosmosString.Value);
 
         public static CosmosString Create(
             IJsonNavigator jsonNavigator,

@@ -20,38 +20,38 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
     {
         public void WriteQueryMetrics(QueryMetrics queryMetrics)
         {
-            this.WriteBeforeQueryMetrics();
+            WriteBeforeQueryMetrics();
 
             // Top Level Properties
-            this.WriteRetrievedDocumentCount(queryMetrics.BackendMetrics.RetrievedDocumentCount);
-            this.WriteRetrievedDocumentSize(queryMetrics.BackendMetrics.RetrievedDocumentSize);
-            this.WriteOutputDocumentCount(queryMetrics.BackendMetrics.OutputDocumentCount);
-            this.WriteOutputDocumentSize(queryMetrics.BackendMetrics.OutputDocumentSize);
-            this.WriteIndexHitRatio(queryMetrics.BackendMetrics.IndexHitRatio);
+            WriteRetrievedDocumentCount(queryMetrics.BackendMetrics.RetrievedDocumentCount);
+            WriteRetrievedDocumentSize(queryMetrics.BackendMetrics.RetrievedDocumentSize);
+            WriteOutputDocumentCount(queryMetrics.BackendMetrics.OutputDocumentCount);
+            WriteOutputDocumentSize(queryMetrics.BackendMetrics.OutputDocumentSize);
+            WriteIndexHitRatio(queryMetrics.BackendMetrics.IndexHitRatio);
 
-            this.WriteTotalQueryExecutionTime(queryMetrics.BackendMetrics.TotalTime);
+            WriteTotalQueryExecutionTime(queryMetrics.BackendMetrics.TotalTime);
 
             // QueryPreparationTimes
-            this.WriteQueryPreparationTimes(queryMetrics.BackendMetrics.QueryPreparationTimes);
+            WriteQueryPreparationTimes(queryMetrics.BackendMetrics.QueryPreparationTimes);
 
-            this.WriteIndexLookupTime(queryMetrics.BackendMetrics.IndexLookupTime);
-            this.WriteDocumentLoadTime(queryMetrics.BackendMetrics.DocumentLoadTime);
-            this.WriteVMExecutionTime(queryMetrics.BackendMetrics.VMExecutionTime);
+            WriteIndexLookupTime(queryMetrics.BackendMetrics.IndexLookupTime);
+            WriteDocumentLoadTime(queryMetrics.BackendMetrics.DocumentLoadTime);
+            WriteVMExecutionTime(queryMetrics.BackendMetrics.VMExecutionTime);
 
             // RuntimesExecutionTimes
-            this.WriteRuntimesExecutionTimes(queryMetrics.BackendMetrics.RuntimeExecutionTimes);
+            WriteRuntimesExecutionTimes(queryMetrics.BackendMetrics.RuntimeExecutionTimes);
 
-            this.WriteDocumentWriteTime(queryMetrics.BackendMetrics.DocumentWriteTime);
+            WriteDocumentWriteTime(queryMetrics.BackendMetrics.DocumentWriteTime);
 
             // ClientSideMetrics
-            this.WriteClientSideMetrics(queryMetrics.ClientSideMetrics);
+            WriteClientSideMetrics(queryMetrics.ClientSideMetrics);
 
             // IndexUtilizationInfo
-            this.WriteBeforeIndexUtilizationInfo();
+            WriteBeforeIndexUtilizationInfo();
 
-            this.WriteIndexUtilizationInfo(queryMetrics.IndexUtilizationInfo);
+            WriteIndexUtilizationInfo(queryMetrics.IndexUtilizationInfo);
 
-            this.WriteAfterQueryMetrics();
+            WriteAfterQueryMetrics();
         }
 
         protected abstract void WriteBeforeQueryMetrics();
@@ -71,14 +71,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         #region QueryPreparationTimes
         private void WriteQueryPreparationTimes(QueryPreparationTimes queryPreparationTimes)
         {
-            this.WriteBeforeQueryPreparationTimes();
+            WriteBeforeQueryPreparationTimes();
 
-            this.WriteQueryCompilationTime(queryPreparationTimes.QueryCompilationTime);
-            this.WriteLogicalPlanBuildTime(queryPreparationTimes.LogicalPlanBuildTime);
-            this.WritePhysicalPlanBuildTime(queryPreparationTimes.PhysicalPlanBuildTime);
-            this.WriteQueryOptimizationTime(queryPreparationTimes.QueryOptimizationTime);
+            WriteQueryCompilationTime(queryPreparationTimes.QueryCompilationTime);
+            WriteLogicalPlanBuildTime(queryPreparationTimes.LogicalPlanBuildTime);
+            WritePhysicalPlanBuildTime(queryPreparationTimes.PhysicalPlanBuildTime);
+            WriteQueryOptimizationTime(queryPreparationTimes.QueryOptimizationTime);
 
-            this.WriteAfterQueryPreparationTimes();
+            WriteAfterQueryPreparationTimes();
         }
 
         protected abstract void WriteBeforeQueryPreparationTimes();
@@ -103,13 +103,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         #region RuntimeExecutionTimes
         private void WriteRuntimesExecutionTimes(RuntimeExecutionTimes runtimeExecutionTimes)
         {
-            this.WriteBeforeRuntimeExecutionTimes();
+            WriteBeforeRuntimeExecutionTimes();
 
-            this.WriteQueryEngineExecutionTime(runtimeExecutionTimes.QueryEngineExecutionTime);
-            this.WriteSystemFunctionExecutionTime(runtimeExecutionTimes.SystemFunctionExecutionTime);
-            this.WriteUserDefinedFunctionExecutionTime(runtimeExecutionTimes.UserDefinedFunctionExecutionTime);
+            WriteQueryEngineExecutionTime(runtimeExecutionTimes.QueryEngineExecutionTime);
+            WriteSystemFunctionExecutionTime(runtimeExecutionTimes.SystemFunctionExecutionTime);
+            WriteUserDefinedFunctionExecutionTime(runtimeExecutionTimes.UserDefinedFunctionExecutionTime);
 
-            this.WriteAfterRuntimeExecutionTimes();
+            WriteAfterRuntimeExecutionTimes();
         }
 
         protected abstract void WriteBeforeRuntimeExecutionTimes();
@@ -128,13 +128,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         #region ClientSideMetrics
         private void WriteClientSideMetrics(ClientSideMetrics clientSideMetrics)
         {
-            this.WriteBeforeClientSideMetrics();
+            WriteBeforeClientSideMetrics();
 
-            this.WriteRetries(clientSideMetrics.Retries);
-            this.WriteRequestCharge(clientSideMetrics.RequestCharge);
-            this.WritePartitionExecutionTimeline(clientSideMetrics);
+            WriteRetries(clientSideMetrics.Retries);
+            WriteRequestCharge(clientSideMetrics.RequestCharge);
+            WritePartitionExecutionTimeline(clientSideMetrics);
 
-            this.WriteAfterClientSideMetrics();
+            WriteAfterClientSideMetrics();
         }
 
         protected abstract void WriteBeforeClientSideMetrics();
@@ -145,30 +145,30 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         private void WritePartitionExecutionTimeline(ClientSideMetrics clientSideMetrics)
         {
-            this.WriteBeforePartitionExecutionTimeline();
+            WriteBeforePartitionExecutionTimeline();
 
             foreach (FetchExecutionRange fetchExecutionRange in clientSideMetrics.FetchExecutionRanges.OrderBy(fetchExecutionRange => fetchExecutionRange.StartTime))
             {
-                this.WriteFetchExecutionRange(fetchExecutionRange);
+                WriteFetchExecutionRange(fetchExecutionRange);
             }
 
-            this.WriteAfterPartitionExecutionTimeline();
+            WriteAfterPartitionExecutionTimeline();
         }
 
         protected abstract void WriteBeforePartitionExecutionTimeline();
 
         private void WriteFetchExecutionRange(FetchExecutionRange fetchExecutionRange)
         {
-            this.WriteBeforeFetchExecutionRange();
+            WriteBeforeFetchExecutionRange();
 
-            this.WriteFetchPartitionKeyRangeId(fetchExecutionRange.PartitionId);
-            this.WriteActivityId(fetchExecutionRange.ActivityId);
-            this.WriteStartTime(fetchExecutionRange.StartTime);
-            this.WriteEndTime(fetchExecutionRange.EndTime);
-            this.WriteFetchDocumentCount(fetchExecutionRange.NumberOfDocuments);
-            this.WriteFetchRetryCount(fetchExecutionRange.RetryCount);
+            WriteFetchPartitionKeyRangeId(fetchExecutionRange.PartitionId);
+            WriteActivityId(fetchExecutionRange.ActivityId);
+            WriteStartTime(fetchExecutionRange.StartTime);
+            WriteEndTime(fetchExecutionRange.EndTime);
+            WriteFetchDocumentCount(fetchExecutionRange.NumberOfDocuments);
+            WriteFetchRetryCount(fetchExecutionRange.RetryCount);
 
-            this.WriteAfterFetchExecutionRange();
+            WriteAfterFetchExecutionRange();
         }
 
         protected abstract void WriteBeforeFetchExecutionRange();
@@ -193,16 +193,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
 
         private void WritePartitionSchedulingTimeSpan(string partitionId, SchedulingTimeSpan schedulingTimeSpan)
         {
-            this.WriteBeforePartitionSchedulingTimeSpan();
+            WriteBeforePartitionSchedulingTimeSpan();
 
-            this.WritePartitionSchedulingTimeSpanId(partitionId);
-            this.WriteResponseTime(schedulingTimeSpan.ResponseTime);
-            this.WriteRunTime(schedulingTimeSpan.RunTime);
-            this.WriteWaitTime(schedulingTimeSpan.WaitTime);
-            this.WriteTurnaroundTime(schedulingTimeSpan.TurnaroundTime);
-            this.WriteNumberOfPreemptions(schedulingTimeSpan.NumPreemptions);
+            WritePartitionSchedulingTimeSpanId(partitionId);
+            WriteResponseTime(schedulingTimeSpan.ResponseTime);
+            WriteRunTime(schedulingTimeSpan.RunTime);
+            WriteWaitTime(schedulingTimeSpan.WaitTime);
+            WriteTurnaroundTime(schedulingTimeSpan.TurnaroundTime);
+            WriteNumberOfPreemptions(schedulingTimeSpan.NumPreemptions);
 
-            this.WriteAfterPartitionSchedulingTimeSpan();
+            WriteAfterPartitionSchedulingTimeSpan();
         }
 
         protected abstract void WriteBeforePartitionSchedulingTimeSpan();

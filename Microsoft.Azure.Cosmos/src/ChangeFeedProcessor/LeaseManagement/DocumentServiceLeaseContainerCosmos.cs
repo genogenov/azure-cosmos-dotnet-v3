@@ -25,15 +25,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override async Task<IReadOnlyList<DocumentServiceLease>> GetAllLeasesAsync()
         {
-            return await this.ListDocumentsAsync(this.options.GetPartitionLeasePrefix()).ConfigureAwait(false);
+            return await ListDocumentsAsync(options.GetPartitionLeasePrefix()).ConfigureAwait(false);
         }
 
         public override async Task<IEnumerable<DocumentServiceLease>> GetOwnedLeasesAsync()
         {
             List<DocumentServiceLease> ownedLeases = new List<DocumentServiceLease>();
-            foreach (DocumentServiceLease lease in await this.GetAllLeasesAsync().ConfigureAwait(false))
+            foreach (DocumentServiceLease lease in await GetAllLeasesAsync().ConfigureAwait(false))
             {
-                if (string.Compare(lease.Owner, this.options.HostName, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Compare(lease.Owner, options.HostName, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     ownedLeases.Add(lease);
                 }
@@ -45,9 +45,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         private async Task<IReadOnlyList<DocumentServiceLeaseCore>> ListDocumentsAsync(string prefix)
         {
             if (string.IsNullOrEmpty(prefix))
+            {
                 throw new ArgumentException("Prefix must be non-empty string", nameof(prefix));
+            }
 
-            FeedIterator iterator = this.container.GetItemQueryStreamIterator(
+            FeedIterator iterator = container.GetItemQueryStreamIterator(
                 "SELECT * FROM c WHERE STARTSWITH(c.id, '" + prefix + "')",
                 continuationToken: null,
                 requestOptions: queryRequestOptions);
@@ -61,7 +63,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                     leases.AddRange(CosmosFeedResponseSerializer.FromFeedResponseStream<DocumentServiceLeaseCore>(
                         CosmosContainerExtensions.DefaultJsonSerializer,
                         responseMessage.Content));
-                }   
+                }
             }
 
             return leases;

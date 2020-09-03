@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(path));
             }
 
-            this.spatialSpec.Path = path;
+            spatialSpec.Path = path;
             return this;
         }
 
@@ -60,11 +60,11 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(spatialTypes));
             }
 
-            this.spatialSpec.Path = path;
+            spatialSpec.Path = path;
 
             foreach (SpatialType spatialType in spatialTypes)
             {
-                this.spatialSpec.SpatialTypes.Add(spatialType);
+                spatialSpec.SpatialTypes.Add(spatialType);
             }
 
             return this;
@@ -76,8 +76,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of the parent.</returns>
         public T Attach()
         {
-            this.attachCallback(this.spatialSpec);
-            return this.parent;
+            attachCallback(spatialSpec);
+            return parent;
         }
     }
 }

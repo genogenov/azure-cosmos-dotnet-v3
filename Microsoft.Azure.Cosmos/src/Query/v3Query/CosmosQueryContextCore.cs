@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Cosmos.Query
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Query.Core;
-    using Microsoft.Azure.Cosmos.Query.Core.Metrics;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
     using Microsoft.Azure.Cosmos.Query.Core.QueryPlan;
     using Microsoft.Azure.Documents;
@@ -48,16 +47,16 @@ namespace Microsoft.Azure.Cosmos.Query
 
         internal override IDisposable CreateDiagnosticScope(string name)
         {
-            return this.diagnosticsContext.CreateScope(name);
+            return diagnosticsContext.CreateScope(name);
         }
 
         internal CosmosDiagnosticsContext GetAndResetDiagnostics()
         {
             // Safely swap the current diagnostics for the new diagnostics.
-            lock (this.diagnosticLock)
+            lock (diagnosticLock)
             {
-                CosmosDiagnosticsContext current = this.diagnosticsContext;
-                this.diagnosticsContext = CosmosDiagnosticsContext.Create(this.queryRequestOptions);
+                CosmosDiagnosticsContext current = diagnosticsContext;
+                diagnosticsContext = CosmosDiagnosticsContext.Create(queryRequestOptions);
                 return current;
             }
         }
@@ -71,23 +70,23 @@ namespace Microsoft.Azure.Cosmos.Query
             CancellationToken cancellationToken)
         {
             QueryRequestOptions requestOptions = null;
-            if (this.queryRequestOptions != null)
+            if (queryRequestOptions != null)
             {
-                requestOptions = this.queryRequestOptions.Clone();
-            }    
+                requestOptions = queryRequestOptions.Clone();
+            }
 
-            return this.QueryClient.ExecuteItemQueryAsync(
-                resourceUri: this.ResourceLink,
-                resourceType: this.ResourceTypeEnum,
-                operationType: this.OperationTypeEnum,
-                clientQueryCorrelationId: this.CorrelatedActivityId,
+            return QueryClient.ExecuteItemQueryAsync(
+                resourceUri: ResourceLink,
+                resourceType: ResourceTypeEnum,
+                operationType: OperationTypeEnum,
+                clientQueryCorrelationId: CorrelatedActivityId,
                 requestOptions: requestOptions,
                 sqlQuerySpec: querySpecForInit,
                 continuationToken: continuationToken,
                 partitionKeyRange: partitionKeyRange,
                 isContinuationExpected: isContinuationExpected,
                 pageSize: pageSize,
-                queryPageDiagnostics: this.AddQueryPageDiagnostic,
+                queryPageDiagnostics: AddQueryPageDiagnostic,
                 cancellationToken: cancellationToken);
         }
 
@@ -100,23 +99,23 @@ namespace Microsoft.Azure.Cosmos.Query
             string supportedQueryFeatures,
             CancellationToken cancellationToken)
         {
-            return this.QueryClient.ExecuteQueryPlanRequestAsync(
+            return QueryClient.ExecuteQueryPlanRequestAsync(
                 resourceUri,
                 resourceType,
                 operationType,
                 sqlQuerySpec,
                 partitionKey,
                 supportedQueryFeatures,
-                this.diagnosticsContext,
+                diagnosticsContext,
                 cancellationToken);
         }
 
         private void AddQueryPageDiagnostic(QueryPageDiagnostics queryPageDiagnostics)
         {
             // Prevent a swap while adding context
-            lock (this.diagnosticLock)
+            lock (diagnosticLock)
             {
-                this.diagnosticsContext.AddDiagnosticsInternal(queryPageDiagnostics);
+                diagnosticsContext.AddDiagnosticsInternal(queryPageDiagnostics);
             }
         }
     }

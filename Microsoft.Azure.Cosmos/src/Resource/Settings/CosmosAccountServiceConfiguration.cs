@@ -25,19 +25,19 @@ namespace Microsoft.Azure.Cosmos
             this.accountPropertiesTaskFunc = accountPropertiesTaskFunc;
         }
 
-        public IDictionary<string, object> QueryEngineConfiguration => this.AccountProperties.QueryEngineConfiguration;
+        public IDictionary<string, object> QueryEngineConfiguration => AccountProperties.QueryEngineConfiguration;
 
         public string DatabaseAccountId => throw new NotImplementedException();
 
         public Uri DatabaseAccountApiEndpoint => throw new NotImplementedException();
 
-        public ReplicationPolicy UserReplicationPolicy => this.AccountProperties.ReplicationPolicy;
+        public ReplicationPolicy UserReplicationPolicy => AccountProperties.ReplicationPolicy;
 
-        public ReplicationPolicy SystemReplicationPolicy => this.AccountProperties.SystemReplicationPolicy;
+        public ReplicationPolicy SystemReplicationPolicy => AccountProperties.SystemReplicationPolicy;
 
-        public Documents.ConsistencyLevel DefaultConsistencyLevel => (Documents.ConsistencyLevel)this.AccountProperties.Consistency.DefaultConsistencyLevel;
+        public Documents.ConsistencyLevel DefaultConsistencyLevel => (Documents.ConsistencyLevel)AccountProperties.Consistency.DefaultConsistencyLevel;
 
-        public ReadPolicy ReadPolicy => this.AccountProperties.ReadPolicy;
+        public ReadPolicy ReadPolicy => AccountProperties.ReadPolicy;
 
         public string PrimaryMasterKey => throw new NotImplementedException();
 
@@ -55,9 +55,9 @@ namespace Microsoft.Azure.Cosmos
 
         public async Task InitializeAsync()
         {
-            if (this.AccountProperties == null)
+            if (AccountProperties == null)
             {
-                this.AccountProperties = await this.accountPropertiesTaskFunc();
+                AccountProperties = await accountPropertiesTaskFunc();
             }
         }
     }

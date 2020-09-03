@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public RequestMessage()
         {
-            this.DiagnosticsContext = new CosmosDiagnosticsContextCore();
+            DiagnosticsContext = new CosmosDiagnosticsContextCore();
         }
 
         /// <summary>
@@ -41,10 +41,10 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="requestUri">The requested URI</param>
         public RequestMessage(HttpMethod method, Uri requestUri)
         {
-            this.Method = method;
-            this.RequestUriString = requestUri?.OriginalString;
-            this.InternalRequestUri = requestUri;
-            this.DiagnosticsContext = new CosmosDiagnosticsContextCore();
+            Method = method;
+            RequestUriString = requestUri?.OriginalString;
+            InternalRequestUri = requestUri;
+            DiagnosticsContext = new CosmosDiagnosticsContextCore();
         }
 
         /// <summary>
@@ -58,9 +58,9 @@ namespace Microsoft.Azure.Cosmos
             string requestUriString,
             CosmosDiagnosticsContext diagnosticsContext)
         {
-            this.Method = method;
-            this.RequestUriString = requestUriString;
-            this.DiagnosticsContext = diagnosticsContext ?? throw new ArgumentNullException(nameof(diagnosticsContext));
+            Method = method;
+            RequestUriString = requestUriString;
+            DiagnosticsContext = diagnosticsContext ?? throw new ArgumentNullException(nameof(diagnosticsContext));
         }
 
         /// <summary>
@@ -75,30 +75,30 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.InternalRequestUri == null)
+                if (InternalRequestUri == null)
                 {
-                    this.InternalRequestUri = new Uri(this.RequestUriString, UriKind.Relative);
+                    InternalRequestUri = new Uri(RequestUriString, UriKind.Relative);
                 }
 
-                return this.InternalRequestUri;
+                return InternalRequestUri;
             }
         }
 
         /// <summary>
         /// Gets the current <see cref="RequestMessage"/> HTTP headers.
         /// </summary>
-        public virtual Headers Headers => this.headers.Value;
+        public virtual Headers Headers => headers.Value;
 
         /// <summary>
         /// Gets or sets the current <see cref="RequestMessage"/> payload.
         /// </summary>
         public virtual Stream Content
         {
-            get => this.content;
+            get => content;
             set
             {
-                this.CheckDisposed();
-                this.content = value;
+                CheckDisposed();
+                content = value;
             }
         }
 
@@ -126,21 +126,21 @@ namespace Microsoft.Azure.Cosmos
 
         internal Action<DocumentServiceRequest> OnBeforeSendRequestActions { get; set; }
 
-        internal bool IsPropertiesInitialized => this.properties.IsValueCreated;
+        internal bool IsPropertiesInitialized => properties.IsValueCreated;
 
         /// <summary>
         /// The partition key range handler is only needed for read feed on partitioned resources 
         /// where the partition key range needs to be computed. 
         /// </summary>
-        internal bool IsPartitionKeyRangeHandlerRequired => this.OperationType == OperationType.ReadFeed &&
-            this.ResourceType.IsPartitioned() && this.PartitionKeyRangeId == null &&
-            this.Headers.PartitionKey == null;
+        internal bool IsPartitionKeyRangeHandlerRequired => OperationType == OperationType.ReadFeed &&
+            ResourceType.IsPartitioned() && PartitionKeyRangeId == null &&
+            Headers.PartitionKey == null;
 
         /// <summary>
         /// Request properties Per request context available to handlers. 
         /// These will not be automatically included into the wire.
         /// </summary>
-        public virtual Dictionary<string, object> Properties => this.properties.Value;
+        public virtual Dictionary<string, object> Properties => properties.Value;
 
         private readonly Lazy<Dictionary<string, object>> properties = new Lazy<Dictionary<string, object>>(RequestMessage.CreateDictionary);
 
@@ -155,7 +155,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -167,12 +167,12 @@ namespace Microsoft.Azure.Cosmos
         {
             // The reason for this type to implement IDisposable is that it contains instances of types that implement
             // IDisposable (content). 
-            if (disposing && !this.disposed)
+            if (disposing && !disposed)
             {
-                this.disposed = true;
-                if (this.Content != null)
+                disposed = true;
+                if (Content != null)
                 {
-                    this.Content.Dispose();
+                    Content.Dispose();
                 }
             }
         }
@@ -181,7 +181,7 @@ namespace Microsoft.Azure.Cosmos
         {
             if (throughputValue.HasValue)
             {
-                this.Headers.OfferThroughput = throughputValue.Value.ToString(CultureInfo.InvariantCulture);
+                Headers.OfferThroughput = throughputValue.Value.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -200,17 +200,17 @@ namespace Microsoft.Azure.Cosmos
 
             if (throughputProperties.Throughput.HasValue)
             {
-                this.AddThroughputHeader(throughputProperties.Throughput);
+                AddThroughputHeader(throughputProperties.Throughput);
             }
             else if (throughputProperties?.Content?.OfferAutoscaleSettings != null)
             {
-                this.Headers.Add(HttpConstants.HttpHeaders.OfferAutopilotSettings, throughputProperties.Content.OfferAutoscaleSettings.GetJsonString());
+                Headers.Add(HttpConstants.HttpHeaders.OfferAutopilotSettings, throughputProperties.Content.OfferAutoscaleSettings.GetJsonString());
             }
         }
 
         internal async Task AssertPartitioningDetailsAsync(CosmosClient client, CancellationToken cancellationToken)
         {
-            if (this.IsMasterOperation())
+            if (IsMasterOperation())
             {
                 return;
             }
@@ -220,10 +220,10 @@ namespace Microsoft.Azure.Cosmos
             {
                 CollectionCache collectionCache = await client.DocumentClient.GetCollectionCacheAsync();
                 ContainerProperties collectionFromCache =
-                    await collectionCache.ResolveCollectionAsync(this.ToDocumentServiceRequest(), cancellationToken);
+                    await collectionCache.ResolveCollectionAsync(ToDocumentServiceRequest(), cancellationToken);
                 if (collectionFromCache.PartitionKey?.Paths?.Count > 0)
                 {
-                    Debug.Assert(this.AssertPartitioningPropertiesAndHeaders());
+                    Debug.Assert(AssertPartitioningPropertiesAndHeaders());
                 }
             }
             catch (DocumentClientException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -237,45 +237,45 @@ namespace Microsoft.Azure.Cosmos
 
         internal DocumentServiceRequest ToDocumentServiceRequest()
         {
-            if (this.DocumentServiceRequest == null)
+            if (DocumentServiceRequest == null)
             {
                 DocumentServiceRequest serviceRequest;
-                if (this.OperationType == OperationType.ReadFeed && this.ResourceType == ResourceType.Database)
+                if (OperationType == OperationType.ReadFeed && ResourceType == ResourceType.Database)
                 {
                     serviceRequest = new DocumentServiceRequest(
-                        operationType: this.OperationType,
+                        operationType: OperationType,
                         resourceIdOrFullName: null,
-                        resourceType: this.ResourceType,
-                        body: this.Content,
-                        headers: this.Headers.CosmosMessageHeaders,
+                        resourceType: ResourceType,
+                        body: Content,
+                        headers: Headers.CosmosMessageHeaders,
                         isNameBased: false,
                         authorizationTokenType: AuthorizationTokenType.PrimaryMasterKey);
                 }
                 else
                 {
-                    serviceRequest = new DocumentServiceRequest(this.OperationType, this.ResourceType, this.RequestUriString, this.Content, AuthorizationTokenType.PrimaryMasterKey, this.Headers.CosmosMessageHeaders);
+                    serviceRequest = new DocumentServiceRequest(OperationType, ResourceType, RequestUriString, Content, AuthorizationTokenType.PrimaryMasterKey, Headers.CosmosMessageHeaders);
                 }
 
-                if (this.UseGatewayMode.HasValue)
+                if (UseGatewayMode.HasValue)
                 {
-                    serviceRequest.UseGatewayMode = this.UseGatewayMode.Value;
+                    serviceRequest.UseGatewayMode = UseGatewayMode.Value;
                 }
 
-                serviceRequest.RequestContext.ClientRequestStatistics = new CosmosClientSideRequestStatistics(this.DiagnosticsContext);
+                serviceRequest.RequestContext.ClientRequestStatistics = new CosmosClientSideRequestStatistics(DiagnosticsContext);
                 serviceRequest.UseStatusCodeForFailures = true;
                 serviceRequest.UseStatusCodeFor429 = true;
-                serviceRequest.Properties = this.Properties;
-                this.DocumentServiceRequest = serviceRequest;
+                serviceRequest.Properties = Properties;
+                DocumentServiceRequest = serviceRequest;
             }
 
             // Routing to a particular PartitionKeyRangeId
-            if (this.PartitionKeyRangeId != null)
+            if (PartitionKeyRangeId != null)
             {
-                this.DocumentServiceRequest.RouteTo(this.PartitionKeyRangeId);
+                DocumentServiceRequest.RouteTo(PartitionKeyRangeId);
             }
 
-            this.OnBeforeRequestHandler(this.DocumentServiceRequest);
-            return this.DocumentServiceRequest;
+            OnBeforeRequestHandler(DocumentServiceRequest);
+            return DocumentServiceRequest;
         }
 
         private static Dictionary<string, object> CreateDictionary()
@@ -290,33 +290,33 @@ namespace Microsoft.Azure.Cosmos
 
         private void OnBeforeRequestHandler(DocumentServiceRequest serviceRequest)
         {
-            if (this.OnBeforeSendRequestActions != null)
+            if (OnBeforeSendRequestActions != null)
             {
-                this.OnBeforeSendRequestActions(serviceRequest);
+                OnBeforeSendRequestActions(serviceRequest);
             }
         }
 
         private bool AssertPartitioningPropertiesAndHeaders()
         {
             // Either PK/key-range-id is assumed
-            bool pkExists = !string.IsNullOrEmpty(this.Headers.PartitionKey);
-            bool epkExists = this.Properties.ContainsKey(WFConstants.BackendHeaders.EffectivePartitionKeyString);
+            bool pkExists = !string.IsNullOrEmpty(Headers.PartitionKey);
+            bool epkExists = Properties.ContainsKey(WFConstants.BackendHeaders.EffectivePartitionKeyString);
             if (pkExists && epkExists)
             {
                 throw new ArgumentNullException(RMResources.PartitionKeyAndEffectivePartitionKeyBothSpecified);
             }
 
-            bool isPointOperation = this.OperationType != OperationType.ReadFeed;
-            if (!pkExists && !epkExists && this.OperationType.IsPointOperation())
+            bool isPointOperation = OperationType != OperationType.ReadFeed;
+            if (!pkExists && !epkExists && OperationType.IsPointOperation())
             {
                 throw new ArgumentNullException(RMResources.MissingPartitionKeyValue);
             }
 
-            bool partitionKeyRangeIdExists = !string.IsNullOrEmpty(this.Headers.PartitionKeyRangeId);
+            bool partitionKeyRangeIdExists = !string.IsNullOrEmpty(Headers.PartitionKeyRangeId);
             if (partitionKeyRangeIdExists)
             {
                 // Assert operation type is not write
-                if (this.OperationType != OperationType.Query && this.OperationType != OperationType.ReadFeed && this.OperationType != OperationType.Batch)
+                if (OperationType != OperationType.Query && OperationType != OperationType.ReadFeed && OperationType != OperationType.Batch)
                 {
                     throw new ArgumentOutOfRangeException(RMResources.UnexpectedPartitionKeyRangeId);
                 }
@@ -332,14 +332,14 @@ namespace Microsoft.Azure.Cosmos
 
         private bool IsMasterOperation()
         {
-            return this.ResourceType != ResourceType.Document;
+            return ResourceType != ResourceType.Document;
         }
 
         private void CheckDisposed()
         {
-            if (this.disposed)
+            if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().ToString());
+                throw new ObjectDisposedException(GetType().ToString());
             }
         }
     }

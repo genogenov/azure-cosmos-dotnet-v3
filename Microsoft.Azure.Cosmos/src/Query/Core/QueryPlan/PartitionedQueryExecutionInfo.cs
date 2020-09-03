@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
     {
         public PartitionedQueryExecutionInfo()
         {
-            this.Version = Constants.PartitionedQueryExecutionInfo.CurrentVersion;
+            Version = Constants.PartitionedQueryExecutionInfo.CurrentVersion;
         }
 
         [JsonProperty(Constants.Properties.PartitionedQueryExecutionInfoVersion)]

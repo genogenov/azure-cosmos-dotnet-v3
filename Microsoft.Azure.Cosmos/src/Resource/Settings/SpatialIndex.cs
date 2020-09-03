@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos
         public SpatialIndex(DataType dataType)
             : this()
         {
-            this.DataType = dataType;
+            DataType = dataType;
         }
 
         /// <summary>

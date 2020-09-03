@@ -13,9 +13,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryClient
             string effectivePartitionKeyString,
             PartitionKeyDefinition partitionKeyDefinition)
         {
-            this.ResourceId = resourceId;
-            this.EffectivePartitionKeyString = effectivePartitionKeyString;
-            this.PartitionKeyDefinition = partitionKeyDefinition;
+            ResourceId = resourceId;
+            EffectivePartitionKeyString = effectivePartitionKeyString;
+            PartitionKeyDefinition = partitionKeyDefinition;
         }
 
         public string ResourceId { get; }

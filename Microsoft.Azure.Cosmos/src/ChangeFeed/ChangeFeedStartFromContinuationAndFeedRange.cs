@@ -13,8 +13,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
     {
         public ChangeFeedStartFromContinuationAndFeedRange(string etag, FeedRangeInternal feedRange)
         {
-            this.Etag = etag;
-            this.FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
+            Etag = etag;
+            FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
         }
 
         public string Etag { get; }

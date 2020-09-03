@@ -20,14 +20,14 @@ namespace Microsoft.Azure.Cosmos
 
         private OfferContentProperties(int manualThroughput)
         {
-            this.OfferThroughput = manualThroughput;
-            this.OfferAutoscaleSettings = null;
+            OfferThroughput = manualThroughput;
+            OfferAutoscaleSettings = null;
         }
 
         private OfferContentProperties(OfferAutoscaleProperties autoscaleProperties)
         {
-            this.OfferThroughput = null;
-            this.OfferAutoscaleSettings = autoscaleProperties ?? throw new ArgumentNullException(nameof(autoscaleProperties));
+            OfferThroughput = null;
+            OfferAutoscaleSettings = autoscaleProperties ?? throw new ArgumentNullException(nameof(autoscaleProperties));
         }
 
         /// <summary>

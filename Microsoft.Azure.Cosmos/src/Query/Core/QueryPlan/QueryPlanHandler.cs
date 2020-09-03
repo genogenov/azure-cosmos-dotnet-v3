@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
                 throw new ArgumentNullException($"{nameof(partitionKeyDefinition)}");
             }
 
-            TryCatch<PartitionedQueryExecutionInfo> tryGetQueryInfo = await this.TryGetQueryInfoAsync(
+            TryCatch<PartitionedQueryExecutionInfo> tryGetQueryInfo = await TryGetQueryInfoAsync(
                 sqlQuerySpec,
                 partitionKeyDefinition,
                 hasLogicalPartitionKey,
@@ -84,7 +84,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            TryCatch<PartitionedQueryExecutionInfo> tryGetQueryInfo = await this.TryGetQueryInfoAsync(
+            TryCatch<PartitionedQueryExecutionInfo> tryGetQueryInfo = await TryGetQueryInfoAsync(
                 sqlQuerySpec,
                 partitionKeyDefinition,
                 hasLogicalPartitionKey,
@@ -108,7 +108,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryPlan
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            TryCatch<PartitionedQueryExecutionInfo> tryGetPartitoinedQueryExecutionInfo = await this.queryClient.TryGetPartitionedQueryExecutionInfoAsync(
+            TryCatch<PartitionedQueryExecutionInfo> tryGetPartitoinedQueryExecutionInfo = await queryClient.TryGetPartitionedQueryExecutionInfoAsync(
                 sqlQuerySpec: sqlQuerySpec,
                 partitionKeyDefinition: partitionKeyDefinition,
                 requireFormattableOrderByQuery: true,

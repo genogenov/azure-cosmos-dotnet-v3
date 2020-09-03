@@ -35,21 +35,21 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
 
         public ComparableTaskScheduler(IEnumerable<IComparableTask> tasks, int maximumConcurrencyLevel)
         {
-            this.taskQueue = new AsyncCollection<IComparableTask>(new PriorityQueue<IComparableTask>(tasks, true));
-            this.delayedTasks = new ConcurrentDictionary<IComparableTask, Task>();
-            this.MaximumConcurrencyLevel = maximumConcurrencyLevel;
-            this.tokenSource = new CancellationTokenSource();
-            this.canRunTaskSemaphoreSlim = new SemaphoreSlim(maximumConcurrencyLevel);
-            this.schedulerTask = this.ScheduleAsync();
+            taskQueue = new AsyncCollection<IComparableTask>(new PriorityQueue<IComparableTask>(tasks, true));
+            delayedTasks = new ConcurrentDictionary<IComparableTask, Task>();
+            MaximumConcurrencyLevel = maximumConcurrencyLevel;
+            tokenSource = new CancellationTokenSource();
+            canRunTaskSemaphoreSlim = new SemaphoreSlim(maximumConcurrencyLevel);
+            schedulerTask = ScheduleAsync();
         }
 
         public int MaximumConcurrencyLevel { get; private set; }
 
-        public int CurrentRunningTaskCount => this.MaximumConcurrencyLevel - Math.Max(0, this.canRunTaskSemaphoreSlim.CurrentCount);
+        public int CurrentRunningTaskCount => MaximumConcurrencyLevel - Math.Max(0, canRunTaskSemaphoreSlim.CurrentCount);
 
-        public bool IsStopped => this.isStopped;
+        public bool IsStopped => isStopped;
 
-        private CancellationToken CancellationToken => this.tokenSource.Token;
+        private CancellationToken CancellationToken => tokenSource.Token;
 
         public void IncreaseMaximumConcurrencyLevel(int delta)
         {
@@ -58,23 +58,23 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
                 throw new ArgumentOutOfRangeException("delta must be a positive number.");
             }
 
-            this.canRunTaskSemaphoreSlim.Release(delta);
-            this.MaximumConcurrencyLevel += delta;
+            canRunTaskSemaphoreSlim.Release(delta);
+            MaximumConcurrencyLevel += delta;
         }
 
         public void Dispose()
         {
-            this.Stop();
+            Stop();
 
-            this.canRunTaskSemaphoreSlim.Dispose();
-            this.tokenSource.Dispose();
+            canRunTaskSemaphoreSlim.Dispose();
+            tokenSource.Dispose();
         }
 
         public void Stop()
         {
-            this.isStopped = true;
-            this.tokenSource.Cancel();
-            this.delayedTasks.Clear();
+            isStopped = true;
+            tokenSource.Cancel();
+            delayedTasks.Clear();
         }
 
         public bool TryQueueTask(IComparableTask comparableTask, TimeSpan delay = default)
@@ -84,14 +84,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
                 throw new ArgumentNullException("task");
             }
 
-            if (this.isStopped)
+            if (isStopped)
             {
                 return false;
             }
 
-            Task newTask = new Task<Task>(() => this.QueueDelayedTaskAsync(comparableTask, delay), this.CancellationToken);
+            Task newTask = new Task<Task>(() => QueueDelayedTaskAsync(comparableTask, delay), CancellationToken);
 
-            if (this.delayedTasks.TryAdd(comparableTask, newTask))
+            if (delayedTasks.TryAdd(comparableTask, newTask))
             {
                 newTask.Start();
                 return true;
@@ -102,35 +102,35 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
 
         private async Task QueueDelayedTaskAsync(IComparableTask comparableTask, TimeSpan delay)
         {
-            if (this.delayedTasks.TryRemove(comparableTask, out Task task) && !task.IsCanceled)
+            if (delayedTasks.TryRemove(comparableTask, out Task task) && !task.IsCanceled)
             {
                 if (delay > default(TimeSpan))
                 {
-                    await Task.Delay(delay, this.CancellationToken);
+                    await Task.Delay(delay, CancellationToken);
                 }
 
-                if (this.taskQueue.TryPeek(out IComparableTask firstComparableTask) && (comparableTask.CompareTo(firstComparableTask) <= 0))
+                if (taskQueue.TryPeek(out IComparableTask firstComparableTask) && (comparableTask.CompareTo(firstComparableTask) <= 0))
                 {
-                    await this.ExecuteComparableTaskAsync(comparableTask);
+                    await ExecuteComparableTaskAsync(comparableTask);
                 }
                 else
                 {
-                    await this.taskQueue.AddAsync(comparableTask, this.CancellationToken);
+                    await taskQueue.AddAsync(comparableTask, CancellationToken);
                 }
             }
         }
 
         private async Task ScheduleAsync()
         {
-            while (!this.isStopped)
+            while (!isStopped)
             {
-                await this.ExecuteComparableTaskAsync(await this.taskQueue.TakeAsync(this.CancellationToken));
+                await ExecuteComparableTaskAsync(await taskQueue.TakeAsync(CancellationToken));
             }
         }
 
         private async Task ExecuteComparableTaskAsync(IComparableTask comparableTask)
         {
-            await this.canRunTaskSemaphoreSlim.WaitAsync(this.CancellationToken);
+            await canRunTaskSemaphoreSlim.WaitAsync(CancellationToken);
 
 #pragma warning disable 4014
             // Schedule execution on current .NET task scheduler.
@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
             Task.Factory
                 .StartNewOnCurrentTaskSchedulerAsync(
                     function: () => comparableTask
-                    .StartAsync(this.CancellationToken)
+                    .StartAsync(CancellationToken)
                     .ContinueWith((antecendent) =>
                     {
                         // Observing the exception.
@@ -150,14 +150,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
                         // Semaphore.Release can also throw an exception.
                         try
                         {
-                            this.canRunTaskSemaphoreSlim.Release();
+                            canRunTaskSemaphoreSlim.Release();
                         }
                         catch (Exception releaseException)
                         {
                             Extensions.TraceException(releaseException);
                         }
                     }, TaskScheduler.Current),
-                    cancellationToken: this.CancellationToken)
+                    cancellationToken: CancellationToken)
                 .ContinueWith((antecendent) =>
                 {
                     // StartNew can have a task cancelled exception

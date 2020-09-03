@@ -7,8 +7,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
     using System.Globalization;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.CosmosElements.Numbers;
-    using Microsoft.Azure.Cosmos.Json;
-    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
@@ -31,7 +29,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 throw new ArgumentOutOfRangeException(nameof(initialCount));
             }
 
-            this.globalCount = initialCount;
+            globalCount = initialCount;
         }
 
         /// <summary>
@@ -45,7 +43,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 throw new ArgumentException($"{nameof(localCount)} must be a number.");
             }
 
-            this.globalCount += Number64.ToLong(cosmosNumber.Value);
+            globalCount += Number64.ToLong(cosmosNumber.Value);
         }
 
         /// <summary>
@@ -54,12 +52,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         /// <returns>The global count.</returns>
         public CosmosElement GetResult()
         {
-            return CosmosNumber64.Create(this.globalCount);
+            return CosmosNumber64.Create(globalCount);
         }
 
         public string GetContinuationToken()
         {
-            return this.globalCount.ToString(CultureInfo.InvariantCulture);
+            return globalCount.ToString(CultureInfo.InvariantCulture);
         }
 
         public static TryCatch<IAggregator> TryCreate(CosmosElement continuationToken)
@@ -86,7 +84,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
         public CosmosElement GetCosmosElementContinuationToken()
         {
-            return CosmosNumber64.Create(this.globalCount);
+            return CosmosNumber64.Create(globalCount);
         }
     }
 }

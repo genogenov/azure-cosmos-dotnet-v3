@@ -26,8 +26,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         {
             try
             {
-                await this.inner.AddOrUpdateLeaseAsync(lease);
-                await this.monitor.InspectAsync(new HealthMonitoringRecord(HealthSeverity.Informational, MonitoredOperation.AcquireLease, lease, null));
+                await inner.AddOrUpdateLeaseAsync(lease);
+                await monitor.InspectAsync(new HealthMonitoringRecord(HealthSeverity.Informational, MonitoredOperation.AcquireLease, lease, null));
             }
             catch (DocumentClientException)
             {
@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             }
             catch (Exception exception)
             {
-                await this.monitor.InspectAsync(new HealthMonitoringRecord(HealthSeverity.Error, MonitoredOperation.AcquireLease, lease, exception));
+                await monitor.InspectAsync(new HealthMonitoringRecord(HealthSeverity.Error, MonitoredOperation.AcquireLease, lease, exception));
 
                 throw;
             }
@@ -43,12 +43,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         public override Task InitializeAsync()
         {
-            return this.inner.InitializeAsync();
+            return inner.InitializeAsync();
         }
 
         public override Task ShutdownAsync()
         {
-            return this.inner.ShutdownAsync();
+            return inner.ShutdownAsync();
         }
     }
 }

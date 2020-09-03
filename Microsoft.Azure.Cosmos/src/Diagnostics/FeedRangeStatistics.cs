@@ -10,7 +10,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
     {
         public FeedRangeStatistics(FeedRange feedRange)
         {
-            this.FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
+            FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
         }
 
         public FeedRange FeedRange { get; }

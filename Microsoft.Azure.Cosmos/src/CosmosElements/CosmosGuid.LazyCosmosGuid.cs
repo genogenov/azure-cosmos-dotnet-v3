@@ -29,10 +29,10 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                     throw new ArgumentOutOfRangeException($"{nameof(jsonNavigatorNode)} must be a {JsonNodeType.Guid} node. Got {type} instead.");
                 }
 
-                this.lazyGuid = new Lazy<Guid>(() => jsonNavigator.GetGuidValue(jsonNavigatorNode));
+                lazyGuid = new Lazy<Guid>(() => jsonNavigator.GetGuidValue(jsonNavigatorNode));
             }
 
-            public override Guid Value => this.lazyGuid.Value;
+            public override Guid Value => lazyGuid.Value;
         }
     }
 #if INTERNAL

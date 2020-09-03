@@ -34,18 +34,18 @@ namespace Microsoft.Azure.Cosmos
         public void OnBeforeSendRequest(DocumentServiceRequest request)
         {
             this.request = request;
-            this.retryPolicy.OnBeforeSendRequest(request);
+            retryPolicy.OnBeforeSendRequest(request);
         }
 
         public async Task<ShouldRetryResult> ShouldRetryAsync(
             Exception exception,
             CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetry = await this.retryPolicy.ShouldRetryAsync(exception, cancellationToken);
+            ShouldRetryResult shouldRetry = await retryPolicy.ShouldRetryAsync(exception, cancellationToken);
 
             DocumentClientException clientException = exception as DocumentClientException;
 
-            return this.ShouldRetryInternal(
+            return ShouldRetryInternal(
                 clientException?.StatusCode,
                 clientException?.GetSubStatus(),
                 shouldRetry);
@@ -64,24 +64,24 @@ namespace Microsoft.Azure.Cosmos
             SubStatusCodes? subStatusCode,
             ShouldRetryResult shouldRetryResult)
         {
-            if (this.request == null)
+            if (request == null)
             {
                 // someone didn't call OnBeforeSendRequest - nothing we can do
                 return shouldRetryResult;
             }
 
-            if (!shouldRetryResult.ShouldRetry && !this.hasTriggered && statusCode.HasValue && subStatusCode.HasValue)
+            if (!shouldRetryResult.ShouldRetry && !hasTriggered && statusCode.HasValue && subStatusCode.HasValue)
             {
-                if (this.request.IsNameBased &&
+                if (request.IsNameBased &&
                     statusCode.Value == HttpStatusCode.NotFound &&
                     subStatusCode.Value == SubStatusCodes.ReadSessionNotAvailable)
                 {
                     // Clear the session token, because the collection name might be reused.
                     DefaultTrace.TraceWarning("Clear the the token for named base request {0}", request.ResourceAddress);
 
-                    this.sessionContainer.ClearTokenByCollectionFullname(request.ResourceAddress);
+                    sessionContainer.ClearTokenByCollectionFullname(request.ResourceAddress);
 
-                    this.hasTriggered = true;
+                    hasTriggered = true;
                 }
             }
 

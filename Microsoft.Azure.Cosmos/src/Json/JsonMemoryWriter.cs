@@ -12,29 +12,29 @@ namespace Microsoft.Azure.Cosmos.Json
 
         protected JsonMemoryWriter(int initialCapacity = 256)
         {
-            this.buffer = new byte[initialCapacity];
+            buffer = new byte[initialCapacity];
         }
 
         public int Position { get; set; }
 
-        public Span<byte> Cursor => this.buffer.AsSpan().Slice(this.Position);
+        public Span<byte> Cursor => buffer.AsSpan().Slice(Position);
 
-        public ReadOnlyMemory<byte> BufferAsMemory => this.buffer.AsMemory();
+        public ReadOnlyMemory<byte> BufferAsMemory => buffer.AsMemory();
 
-        public Span<byte> BufferAsSpan => this.buffer.AsSpan();
+        public Span<byte> BufferAsSpan => buffer.AsSpan();
 
         public void Write(ReadOnlySpan<byte> value)
         {
-            this.EnsureRemainingBufferSpace(value.Length);
-            value.CopyTo(this.Cursor);
-            this.Position += value.Length;
+            EnsureRemainingBufferSpace(value.Length);
+            value.CopyTo(Cursor);
+            Position += value.Length;
         }
 
         public void EnsureRemainingBufferSpace(int size)
         {
-            if (this.Position + size >= this.buffer.Length)
+            if (Position + size >= buffer.Length)
             {
-                this.Resize(this.Position + size);
+                Resize(Position + size);
             }
         }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Azure.Cosmos.Json
 
             long newLength = minNewSize * 2;
             newLength = Math.Min(newLength, int.MaxValue);
-            Array.Resize(ref this.buffer, (int)newLength);
+            Array.Resize(ref buffer, (int)newLength);
         }
     }
 }

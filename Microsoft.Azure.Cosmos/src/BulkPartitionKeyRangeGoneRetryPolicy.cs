@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Cosmos
         {
             DocumentClientException clientException = exception as DocumentClientException;
 
-            ShouldRetryResult shouldRetryResult = this.ShouldRetryInternal(
+            ShouldRetryResult shouldRetryResult = ShouldRetryInternal(
                 clientException?.StatusCode,
                 clientException?.GetSubStatus(),
                 clientException?.ResourceAddress);
@@ -44,19 +44,19 @@ namespace Microsoft.Azure.Cosmos
                 return Task.FromResult(shouldRetryResult);
             }
 
-            if (this.nextRetryPolicy == null)
+            if (nextRetryPolicy == null)
             {
                 return Task.FromResult(ShouldRetryResult.NoRetry());
             }
 
-            return this.nextRetryPolicy.ShouldRetryAsync(exception, cancellationToken);
+            return nextRetryPolicy.ShouldRetryAsync(exception, cancellationToken);
         }
 
         public Task<ShouldRetryResult> ShouldRetryAsync(
             ResponseMessage cosmosResponseMessage,
             CancellationToken cancellationToken)
         {
-            ShouldRetryResult shouldRetryResult = this.ShouldRetryInternal(cosmosResponseMessage?.StatusCode,
+            ShouldRetryResult shouldRetryResult = ShouldRetryInternal(cosmosResponseMessage?.StatusCode,
                 cosmosResponseMessage?.Headers.SubStatusCode,
                 cosmosResponseMessage?.GetResourceAddress());
             if (shouldRetryResult != null)
@@ -64,17 +64,17 @@ namespace Microsoft.Azure.Cosmos
                 return Task.FromResult(shouldRetryResult);
             }
 
-            if (this.nextRetryPolicy == null)
+            if (nextRetryPolicy == null)
             {
                 return Task.FromResult(ShouldRetryResult.NoRetry());
             }
 
-            return this.nextRetryPolicy.ShouldRetryAsync(cosmosResponseMessage, cancellationToken);
+            return nextRetryPolicy.ShouldRetryAsync(cosmosResponseMessage, cancellationToken);
         }
 
         public void OnBeforeSendRequest(DocumentServiceRequest request)
         {
-            this.nextRetryPolicy.OnBeforeSendRequest(request);
+            nextRetryPolicy.OnBeforeSendRequest(request);
         }
 
         private ShouldRetryResult ShouldRetryInternal(
@@ -84,9 +84,9 @@ namespace Microsoft.Azure.Cosmos
         {
             if (statusCode == HttpStatusCode.Gone
                 && (subStatusCode == SubStatusCodes.PartitionKeyRangeGone || subStatusCode == SubStatusCodes.NameCacheIsStale)
-                && this.retriesAttempted < MaxRetries)
+                && retriesAttempted < MaxRetries)
             {
-                this.retriesAttempted++;
+                retriesAttempted++;
                 return ShouldRetryResult.RetryAfter(TimeSpan.Zero);
             }
 

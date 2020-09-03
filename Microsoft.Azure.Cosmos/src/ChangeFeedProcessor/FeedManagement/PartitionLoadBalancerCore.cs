@@ -26,9 +26,20 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
             LoadBalancingStrategy partitionLoadBalancingStrategy,
             TimeSpan leaseAcquireInterval)
         {
-            if (partitionController == null) throw new ArgumentNullException(nameof(partitionController));
-            if (leaseContainer == null) throw new ArgumentNullException(nameof(leaseContainer));
-            if (partitionLoadBalancingStrategy == null) throw new ArgumentNullException(nameof(partitionLoadBalancingStrategy));
+            if (partitionController == null)
+            {
+                throw new ArgumentNullException(nameof(partitionController));
+            }
+
+            if (leaseContainer == null)
+            {
+                throw new ArgumentNullException(nameof(leaseContainer));
+            }
+
+            if (partitionLoadBalancingStrategy == null)
+            {
+                throw new ArgumentNullException(nameof(partitionLoadBalancingStrategy));
+            }
 
             this.partitionController = partitionController;
             this.leaseContainer = leaseContainer;
@@ -38,24 +49,24 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
 
         public override void Start()
         {
-            if (this.runTask != null && !this.runTask.IsCompleted)
+            if (runTask != null && !runTask.IsCompleted)
             {
                 throw new InvalidOperationException("Already started");
             }
 
-            this.cancellationTokenSource = new CancellationTokenSource();
-            this.runTask = this.RunAsync();
+            cancellationTokenSource = new CancellationTokenSource();
+            runTask = RunAsync();
         }
 
         public override async Task StopAsync()
         {
-            if (this.runTask == null)
+            if (runTask == null)
             {
                 throw new InvalidOperationException("Start has to be called before stop");
             }
 
-            this.cancellationTokenSource.Cancel();
-            await this.runTask.ConfigureAwait(false);
+            cancellationTokenSource.Cancel();
+            await runTask.ConfigureAwait(false);
         }
 
         private async Task RunAsync()
@@ -66,14 +77,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 {
                     try
                     {
-                        IEnumerable<DocumentServiceLease> allLeases = await this.leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
-                        IEnumerable<DocumentServiceLease> leasesToTake = this.partitionLoadBalancingStrategy.SelectLeasesToTake(allLeases);
+                        IEnumerable<DocumentServiceLease> allLeases = await leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
+                        IEnumerable<DocumentServiceLease> leasesToTake = partitionLoadBalancingStrategy.SelectLeasesToTake(allLeases);
 
                         foreach (DocumentServiceLease lease in leasesToTake)
                         {
                             try
                             {
-                                await this.partitionController.AddOrUpdateLeaseAsync(lease).ConfigureAwait(false);
+                                await partitionController.AddOrUpdateLeaseAsync(lease).ConfigureAwait(false);
                             }
                             catch (Exception e)
                             {
@@ -88,7 +99,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                         DefaultTrace.TraceError("Partition load balancer iteration failed");
                     }
 
-                    await Task.Delay(this.leaseAcquireInterval, this.cancellationTokenSource.Token).ConfigureAwait(false);
+                    await Task.Delay(leaseAcquireInterval, cancellationTokenSource.Token).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)

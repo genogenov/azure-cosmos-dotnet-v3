@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
             }
 
             this.accountEndpoint = accountEndpoint;
-            this.accountKey = authKeyOrResourceToken;
+            accountKey = authKeyOrResourceToken;
         }
 
         /// <summary>
@@ -80,8 +80,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
-            this.accountEndpoint = CosmosClientOptions.GetAccountEndpoint(connectionString);
-            this.accountKey = CosmosClientOptions.GetAccountKey(connectionString);
+            accountEndpoint = CosmosClientOptions.GetAccountEndpoint(connectionString);
+            accountKey = CosmosClientOptions.GetAccountKey(connectionString);
         }
 
         /// <summary>
@@ -93,8 +93,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of <see cref="CosmosClient"/>.</returns>
         public CosmosClient Build()
         {
-            DefaultTrace.TraceInformation($"CosmosClientBuilder.Build with configuration: {this.clientOptions.GetSerializedConfiguration()}");
-            return new CosmosClient(this.accountEndpoint, this.accountKey, this.clientOptions);
+            DefaultTrace.TraceInformation($"CosmosClientBuilder.Build with configuration: {clientOptions.GetSerializedConfiguration()}");
+            return new CosmosClient(accountEndpoint, accountKey, clientOptions);
         }
 
         /// <summary>
@@ -105,8 +105,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </remarks>
         internal virtual CosmosClient Build(DocumentClient documentClient)
         {
-            DefaultTrace.TraceInformation($"CosmosClientBuilder.Build(DocumentClient) with configuration: {this.clientOptions.GetSerializedConfiguration()}");
-            return new CosmosClient(this.accountEndpoint, this.accountKey, this.clientOptions, documentClient);
+            DefaultTrace.TraceInformation($"CosmosClientBuilder.Build(DocumentClient) with configuration: {clientOptions.GetSerializedConfiguration()}");
+            return new CosmosClient(accountEndpoint, accountKey, clientOptions, documentClient);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>The current <see cref="CosmosClientBuilder"/>.</returns>
         public CosmosClientBuilder WithApplicationName(string applicationName)
         {
-            this.clientOptions.ApplicationName = applicationName;
+            clientOptions.ApplicationName = applicationName;
             return this;
         }
 
@@ -143,10 +143,10 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.ApplicationRegion"/>
         public CosmosClientBuilder WithApplicationRegion(string applicationRegion)
         {
-            this.clientOptions.ApplicationRegion = applicationRegion;
+            clientOptions.ApplicationRegion = applicationRegion;
             return this;
         }
-        
+
         /// <summary>
         /// Set the preferred regions for geo-replicated database accounts in the Azure Cosmos DB service.
         /// </summary>
@@ -170,7 +170,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.ApplicationPreferredRegions"/>
         public CosmosClientBuilder WithApplicationPreferredRegions(IReadOnlyList<string> applicationPreferredRegions)
         {
-            this.clientOptions.ApplicationPreferredRegions = applicationPreferredRegions;
+            clientOptions.ApplicationPreferredRegions = applicationPreferredRegions;
             return this;
         }
 
@@ -200,7 +200,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.LimitToEndpoint"/>
         public CosmosClientBuilder WithLimitToEndpoint(bool limitToEndpoint)
         {
-            this.clientOptions.LimitToEndpoint = limitToEndpoint;
+            clientOptions.LimitToEndpoint = limitToEndpoint;
             return this;
         }
 
@@ -213,7 +213,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.RequestTimeout"/>
         public CosmosClientBuilder WithRequestTimeout(TimeSpan requestTimeout)
         {
-            this.clientOptions.RequestTimeout = requestTimeout;
+            clientOptions.RequestTimeout = requestTimeout;
             return this;
         }
 
@@ -227,8 +227,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.ConnectionMode"/>
         public CosmosClientBuilder WithConnectionModeDirect()
         {
-            this.clientOptions.ConnectionMode = ConnectionMode.Direct;
-            this.clientOptions.ConnectionProtocol = Protocol.Tcp;
+            clientOptions.ConnectionMode = ConnectionMode.Direct;
+            clientOptions.ConnectionProtocol = Protocol.Tcp;
 
             return this;
         }
@@ -279,18 +279,18 @@ namespace Microsoft.Azure.Cosmos.Fluent
             Cosmos.PortReuseMode? portReuseMode = null,
             bool? enableTcpConnectionEndpointRediscovery = null)
         {
-            this.clientOptions.IdleTcpConnectionTimeout = idleTcpConnectionTimeout;
-            this.clientOptions.OpenTcpConnectionTimeout = openTcpConnectionTimeout;
-            this.clientOptions.MaxRequestsPerTcpConnection = maxRequestsPerTcpConnection;
-            this.clientOptions.MaxTcpConnectionsPerEndpoint = maxTcpConnectionsPerEndpoint;
-            this.clientOptions.PortReuseMode = portReuseMode;
+            clientOptions.IdleTcpConnectionTimeout = idleTcpConnectionTimeout;
+            clientOptions.OpenTcpConnectionTimeout = openTcpConnectionTimeout;
+            clientOptions.MaxRequestsPerTcpConnection = maxRequestsPerTcpConnection;
+            clientOptions.MaxTcpConnectionsPerEndpoint = maxTcpConnectionsPerEndpoint;
+            clientOptions.PortReuseMode = portReuseMode;
             if (enableTcpConnectionEndpointRediscovery.HasValue)
             {
-                this.clientOptions.EnableTcpConnectionEndpointRediscovery = enableTcpConnectionEndpointRediscovery.Value;
+                clientOptions.EnableTcpConnectionEndpointRediscovery = enableTcpConnectionEndpointRediscovery.Value;
             }
 
-            this.clientOptions.ConnectionMode = ConnectionMode.Direct;
-            this.clientOptions.ConnectionProtocol = Protocol.Tcp;
+            clientOptions.ConnectionMode = ConnectionMode.Direct;
+            clientOptions.ConnectionProtocol = Protocol.Tcp;
 
             return this;
         }
@@ -303,7 +303,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>The current <see cref="CosmosClientBuilder"/>.</returns>
         public CosmosClientBuilder WithConsistencyLevel(Cosmos.ConsistencyLevel consistencyLevel)
         {
-            this.clientOptions.ConsistencyLevel = consistencyLevel;
+            clientOptions.ConsistencyLevel = consistencyLevel;
             return this;
         }
 
@@ -321,15 +321,15 @@ namespace Microsoft.Azure.Cosmos.Fluent
         public CosmosClientBuilder WithConnectionModeGateway(int? maxConnectionLimit = null,
             IWebProxy webProxy = null)
         {
-            this.clientOptions.ConnectionMode = ConnectionMode.Gateway;
-            this.clientOptions.ConnectionProtocol = Protocol.Https;
+            clientOptions.ConnectionMode = ConnectionMode.Gateway;
+            clientOptions.ConnectionProtocol = Protocol.Https;
 
             if (maxConnectionLimit.HasValue)
             {
-                this.clientOptions.GatewayModeMaxConnectionLimit = maxConnectionLimit.Value;
+                clientOptions.GatewayModeMaxConnectionLimit = maxConnectionLimit.Value;
             }
 
-            this.clientOptions.WebProxy = webProxy;
+            clientOptions.WebProxy = webProxy;
 
             return this;
         }
@@ -351,7 +351,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                     throw new ArgumentException(nameof(customHandlers) + " requires all DelegatingHandler.InnerHandler to be null. The CosmosClient uses the inner handler in building the pipeline.");
                 }
 
-                this.clientOptions.CustomHandlers.Add(handler);
+                clientOptions.CustomHandlers.Add(handler);
             }
 
             return this;
@@ -377,8 +377,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         public CosmosClientBuilder WithThrottlingRetryOptions(TimeSpan maxRetryWaitTimeOnThrottledRequests,
             int maxRetryAttemptsOnThrottledRequests)
         {
-            this.clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = maxRetryWaitTimeOnThrottledRequests;
-            this.clientOptions.MaxRetryAttemptsOnRateLimitedRequests = maxRetryAttemptsOnThrottledRequests;
+            clientOptions.MaxRetryWaitTimeOnRateLimitedRequests = maxRetryWaitTimeOnThrottledRequests;
+            clientOptions.MaxRetryAttemptsOnRateLimitedRequests = maxRetryAttemptsOnThrottledRequests;
             return this;
         }
 
@@ -391,7 +391,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.SerializerOptions"/>
         public CosmosClientBuilder WithSerializerOptions(CosmosSerializationOptions cosmosSerializerOptions)
         {
-            this.clientOptions.SerializerOptions = cosmosSerializerOptions;
+            clientOptions.SerializerOptions = cosmosSerializerOptions;
             return this;
         }
 
@@ -404,7 +404,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.Serializer"/>
         public CosmosClientBuilder WithCustomSerializer(CosmosSerializer cosmosJsonSerializer)
         {
-            this.clientOptions.Serializer = cosmosJsonSerializer;
+            clientOptions.Serializer = cosmosJsonSerializer;
             return this;
         }
 
@@ -416,7 +416,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.AllowBulkExecution"/>
         public CosmosClientBuilder WithBulkExecution(bool enabled)
         {
-            this.clientOptions.AllowBulkExecution = enabled;
+            clientOptions.AllowBulkExecution = enabled;
             return this;
         }
 
@@ -436,7 +436,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <seealso cref="CosmosClientOptions.HttpClientFactory"/>
         public CosmosClientBuilder WithHttpClientFactory(Func<HttpClient> httpClientFactory)
         {
-            this.clientOptions.HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            clientOptions.HttpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             return this;
         }
 
@@ -445,7 +445,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </summary>
         internal CosmosClientBuilder WithSendingRequestEventArgs(EventHandler<SendingRequestEventArgs> sendingRequestEventArgs)
         {
-            this.clientOptions.SendingRequestEventArgs = sendingRequestEventArgs;
+            clientOptions.SendingRequestEventArgs = sendingRequestEventArgs;
             return this;
         }
 
@@ -455,7 +455,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </summary>
         internal CosmosClientBuilder WithSessionContainer(ISessionContainer sessionContainer)
         {
-            this.clientOptions.SessionContainer = sessionContainer;
+            clientOptions.SessionContainer = sessionContainer;
             return this;
         }
 
@@ -464,7 +464,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </summary>
         internal CosmosClientBuilder WithTransportClientHandlerFactory(Func<TransportClient, TransportClient> transportClientHandlerFactory)
         {
-            this.clientOptions.TransportClientHandlerFactory = transportClientHandlerFactory;
+            clientOptions.TransportClientHandlerFactory = transportClientHandlerFactory;
             return this;
         }
 
@@ -473,7 +473,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </summary>
         internal CosmosClientBuilder WithApiType(ApiType apiType)
         {
-            this.clientOptions.ApiType = apiType;
+            clientOptions.ApiType = apiType;
             return this;
         }
 
@@ -486,7 +486,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <param name="storeClientFactory">Instance of store client factory to use to create transport client for an instance of cosmos client.</param>
         internal CosmosClientBuilder WithStoreClientFactory(IStoreClientFactory storeClientFactory)
         {
-            this.clientOptions.StoreClientFactory = storeClientFactory;
+            clientOptions.StoreClientFactory = storeClientFactory;
             return this;
         }
 
@@ -495,7 +495,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// </summary>
         internal CosmosClientBuilder WithCpuMonitorDisabled()
         {
-            this.clientOptions.EnableCpuMonitor = false;
+            clientOptions.EnableCpuMonitor = false;
             return this;
         }
 
@@ -505,10 +505,10 @@ namespace Microsoft.Azure.Cosmos.Fluent
             int? randomSaltForRetryWithMilliseconds,
             int? totalWaitTimeForRetryWithMilliseconds)
         {
-            this.clientOptions.InitialRetryForRetryWithMilliseconds = initialRetryForRetryWithMilliseconds;
-            this.clientOptions.MaximumRetryForRetryWithMilliseconds = maximumRetryForRetryWithMilliseconds;
-            this.clientOptions.RandomSaltForRetryWithMilliseconds = randomSaltForRetryWithMilliseconds;
-            this.clientOptions.TotalWaitTimeForRetryWithMilliseconds = totalWaitTimeForRetryWithMilliseconds;
+            clientOptions.InitialRetryForRetryWithMilliseconds = initialRetryForRetryWithMilliseconds;
+            clientOptions.MaximumRetryForRetryWithMilliseconds = maximumRetryForRetryWithMilliseconds;
+            clientOptions.RandomSaltForRetryWithMilliseconds = randomSaltForRetryWithMilliseconds;
+            clientOptions.TotalWaitTimeForRetryWithMilliseconds = totalWaitTimeForRetryWithMilliseconds;
             return this;
         }
     }

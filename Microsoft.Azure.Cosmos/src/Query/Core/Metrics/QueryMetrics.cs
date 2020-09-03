@@ -33,9 +33,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             IndexUtilizationInfo indexUtilizationInfo,
             ClientSideMetrics clientSideMetrics)
         {
-            this.BackendMetrics = backendMetrics ?? throw new ArgumentNullException(nameof(backendMetrics));
-            this.IndexUtilizationInfo = indexUtilizationInfo ?? throw new ArgumentNullException(nameof(indexUtilizationInfo));
-            this.ClientSideMetrics = clientSideMetrics ?? throw new ArgumentNullException(nameof(clientSideMetrics));
+            BackendMetrics = backendMetrics ?? throw new ArgumentNullException(nameof(backendMetrics));
+            IndexUtilizationInfo = indexUtilizationInfo ?? throw new ArgumentNullException(nameof(indexUtilizationInfo));
+            ClientSideMetrics = clientSideMetrics ?? throw new ArgumentNullException(nameof(clientSideMetrics));
         }
 
         public BackendMetrics BackendMetrics { get; }
@@ -65,7 +65,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// <returns>The stringified <see cref="QueryMetrics"/> instance in the Azure Cosmos database service.</returns>
         public override string ToString()
         {
-            return this.ToTextString();
+            return ToTextString();
         }
 
         private string ToTextString()
@@ -99,9 +99,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 IndexUtilizationInfo.Accumulator indexUtilizationInfoAccumulator,
                 ClientSideMetrics.Accumulator clientSideMetricsAccumulator)
             {
-                this.BackendMetricsAccumulator = backendMetricsAccumulator;
-                this.IndexUtilizationInfoAccumulator = indexUtilizationInfoAccumulator;
-                this.ClientSideMetricsAccumulator = clientSideMetricsAccumulator;
+                BackendMetricsAccumulator = backendMetricsAccumulator;
+                IndexUtilizationInfoAccumulator = indexUtilizationInfoAccumulator;
+                ClientSideMetricsAccumulator = clientSideMetricsAccumulator;
             }
 
             public BackendMetrics.Accumulator BackendMetricsAccumulator { get; }
@@ -118,9 +118,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 }
 
                 return new Accumulator(
-                    backendMetricsAccumulator: this.BackendMetricsAccumulator.Accumulate(queryMetrics.BackendMetrics),
-                    indexUtilizationInfoAccumulator: this.IndexUtilizationInfoAccumulator.Accumulate(queryMetrics.IndexUtilizationInfo),
-                    clientSideMetricsAccumulator: this.ClientSideMetricsAccumulator.Accumulate(queryMetrics.ClientSideMetrics));
+                    backendMetricsAccumulator: BackendMetricsAccumulator.Accumulate(queryMetrics.BackendMetrics),
+                    indexUtilizationInfoAccumulator: IndexUtilizationInfoAccumulator.Accumulate(queryMetrics.IndexUtilizationInfo),
+                    clientSideMetricsAccumulator: ClientSideMetricsAccumulator.Accumulate(queryMetrics.ClientSideMetrics));
             }
 
             public static QueryMetrics ToQueryMetrics(Accumulator accumulator)

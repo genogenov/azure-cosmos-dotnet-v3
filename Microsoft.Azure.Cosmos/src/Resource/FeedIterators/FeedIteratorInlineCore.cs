@@ -30,21 +30,21 @@ namespace Microsoft.Azure.Cosmos
             this.feedIteratorInternal = feedIteratorInternal ?? throw new ArgumentNullException(nameof(feedIteratorInternal));
         }
 
-        public override bool HasMoreResults => this.feedIteratorInternal.HasMoreResults;
+        public override bool HasMoreResults => feedIteratorInternal.HasMoreResults;
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return this.feedIteratorInternal.GetCosmosElementContinuationToken();
+            return feedIteratorInternal.GetCosmosElementContinuationToken();
         }
 
         public override Task<ResponseMessage> ReadNextAsync(CancellationToken cancellationToken = default)
         {
-            return TaskHelper.RunInlineIfNeededAsync(() => this.feedIteratorInternal.ReadNextAsync(cancellationToken));
+            return TaskHelper.RunInlineIfNeededAsync(() => feedIteratorInternal.ReadNextAsync(cancellationToken));
         }
 
         protected override void Dispose(bool disposing)
         {
-            this.feedIteratorInternal.Dispose();
+            feedIteratorInternal.Dispose();
             base.Dispose(disposing);
         }
     }

@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         protected Index(IndexKind kind)
         {
-            this.Kind = kind;
+            Kind = kind;
         }
 
         /// <summary>

@@ -21,12 +21,12 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
         {
             public EagerCosmosBinary(ReadOnlyMemory<byte> value)
             {
-                this.Value = value;
+                Value = value;
             }
 
             public override ReadOnlyMemory<byte> Value { get; }
 
-            public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteBinaryValue(this.Value.Span);
+            public override void WriteTo(IJsonWriter jsonWriter) => jsonWriter.WriteBinaryValue(Value.Span);
         }
     }
 #if INTERNAL

@@ -5,12 +5,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
 {
     using System;
     using System.Collections.Generic;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Json;
-    using Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate;
     using Microsoft.Azure.Cosmos.Query.Core.Metrics;
@@ -100,7 +97,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
 
                 // Draining GROUP BY is broken down into two stages:
                 QueryResponseCore response;
-                if (!this.Source.IsDone)
+                if (!Source.IsDone)
                 {
                     // Stage 1: 
                     // Drain the groupings fully from all continuation and all partitions
@@ -110,7 +107,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                         return sourceResponse;
                     }
 
-                    this.AggregateGroupings(sourceResponse.CosmosElements);
+                    AggregateGroupings(sourceResponse.CosmosElements);
 
                     // We need to give empty pages until the results are fully drained.
                     response = QueryResponseCore.CreateSuccess(
@@ -125,7 +122,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                 {
                     // Stage 2:
                     // Emit the results from the grouping table page by page
-                    IReadOnlyList<CosmosElement> results = this.groupingTable.Drain(maxElements);
+                    IReadOnlyList<CosmosElement> results = groupingTable.Drain(maxElements);
 
                     response = QueryResponseCore.CreateSuccess(
                        result: results,
@@ -141,23 +138,23 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                if (this.IsDone)
+                if (IsDone)
                 {
                     return default;
                 }
 
                 CosmosElement sourceContinuationToken;
-                if (this.Source.IsDone)
+                if (Source.IsDone)
                 {
                     sourceContinuationToken = DoneCosmosElementToken;
                 }
                 else
                 {
-                    sourceContinuationToken = this.Source.GetCosmosElementContinuationToken();
+                    sourceContinuationToken = Source.GetCosmosElementContinuationToken();
                 }
 
                 GroupByContinuationToken groupByContinuationToken = new GroupByContinuationToken(
-                    groupingTableContinuationToken: this.groupingTable.GetCosmosElementContinuationToken(),
+                    groupingTableContinuationToken: groupingTable.GetCosmosElementContinuationToken(),
                     sourceContinuationToken: sourceContinuationToken);
 
                 return GroupByContinuationToken.ToCosmosElement(groupByContinuationToken);
@@ -175,8 +172,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.GroupBy
                     CosmosElement groupingTableContinuationToken,
                     CosmosElement sourceContinuationToken)
                 {
-                    this.GroupingTableContinuationToken = groupingTableContinuationToken;
-                    this.SourceContinuationToken = sourceContinuationToken;
+                    GroupingTableContinuationToken = groupingTableContinuationToken;
+                    SourceContinuationToken = sourceContinuationToken;
                 }
 
                 public CosmosElement GroupingTableContinuationToken { get; }

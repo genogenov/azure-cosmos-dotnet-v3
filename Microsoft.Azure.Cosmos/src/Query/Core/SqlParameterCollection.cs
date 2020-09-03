@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// </summary>
         public SqlParameterCollection()
         {
-            this.parameters = new List<SqlParameter>();
+            parameters = new List<SqlParameter>();
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <returns>The index value for the item.</returns>
         public int IndexOf(SqlParameter item)
         {
-            return this.parameters.IndexOf(item);
+            return parameters.IndexOf(item);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <param name="item">The item to copy into the index.</param>
         public void Insert(int index, SqlParameter item)
         {
-            this.parameters.Insert(index, item);
+            parameters.Insert(index, item);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <param name="index">The location in the index where the item will be removed from.</param>
         public void RemoveAt(int index)
         {
-            this.parameters.RemoveAt(index);
+            parameters.RemoveAt(index);
         }
 
         /// <summary>
@@ -72,8 +72,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <value>The element at the specified index.</value>
         public SqlParameter this[int index]
         {
-            get { return this.parameters[index]; }
-            set { this.parameters[index] = value; }
+            get { return parameters[index]; }
+            set { parameters[index] = value; }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <param name="item">The item to add to the collection.</param>
         public void Add(SqlParameter item)
         {
-            this.parameters.Add(item);
+            parameters.Add(item);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// </summary>
         public void Clear()
         {
-            this.parameters.Clear();
+            parameters.Clear();
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <returns>true if the collection contains a specific value; otherwise, false.</returns>
         public bool Contains(SqlParameter item)
         {
-            return this.parameters.Contains(item);
+            return parameters.Contains(item);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <param name="arrayIndex">The location in the index array in which to start adding elements.</param>
         public void CopyTo(SqlParameter[] array, int arrayIndex)
         {
-            this.parameters.CopyTo(array, arrayIndex);
+            parameters.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <value>The number of elements contained in the collection.</value>
         public int Count
         {
-            get { return this.parameters.Count; }
+            get { return parameters.Count; }
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <returns>true if the first item was removed; otherwise, false.</returns>
         public bool Remove(SqlParameter item)
         {
-            return this.parameters.Remove(item);
+            return parameters.Remove(item);
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <returns>An enumerator for the collection.</returns>
         public IEnumerator<SqlParameter> GetEnumerator()
         {
-            return this.parameters.GetEnumerator();
+            return parameters.GetEnumerator();
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <returns>An enumerator to iterate through the collection. </returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return this.parameters.GetEnumerator();
+            return parameters.GetEnumerator();
         }
     }
 }

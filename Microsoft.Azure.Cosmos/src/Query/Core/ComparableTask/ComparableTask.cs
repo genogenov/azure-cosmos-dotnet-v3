@@ -26,17 +26,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
                 throw new ArgumentNullException(nameof(other));
             }
 
-            return this.CompareToByPriority(other as ComparableTask);
+            return CompareToByPriority(other as ComparableTask);
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as IComparableTask);
+            return Equals(obj as IComparableTask);
         }
 
         public abstract bool Equals(IComparableTask other);
 
-        public override abstract int GetHashCode();
+        public abstract override int GetHashCode();
 
         protected int CompareToByPriority(ComparableTask other)
         {
@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ComparableTask
                 return 0;
             }
 
-            return this.schedulePriority.CompareTo(other.schedulePriority);
+            return schedulePriority.CompareTo(other.schedulePriority);
         }
     }
 }

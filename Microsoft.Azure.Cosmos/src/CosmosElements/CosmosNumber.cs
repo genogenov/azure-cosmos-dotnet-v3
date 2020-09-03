@@ -37,13 +37,13 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosNumber cosmosNumber && this.Equals(cosmosNumber);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosNumber cosmosNumber && Equals(cosmosNumber);
 
         public abstract bool Equals(CosmosNumber cosmosNumber);
 
         public int CompareTo(CosmosNumber other)
         {
-            int thisTypeOrder = this.Accept(CosmosNumberToTypeOrder.Singleton);
+            int thisTypeOrder = Accept(CosmosNumberToTypeOrder.Singleton);
             int otherTypeOrder = other.Accept(CosmosNumberToTypeOrder.Singleton);
 
             if (thisTypeOrder != otherTypeOrder)
@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
             }
 
             // The types are the same so dispatch to each compare operator
-            return this.Accept(CosmosNumberWithinTypeComparer.Singleton, other);
+            return Accept(CosmosNumberWithinTypeComparer.Singleton, other);
         }
 
         public static new CosmosNumber CreateFromBuffer(ReadOnlyMemory<byte> buffer) => CosmosElement.CreateFromBuffer<CosmosNumber>(buffer);

@@ -30,8 +30,8 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("href");
             }
 
-            this.Href = href;
-            this.HrefType = hrefType;
+            Href = href;
+            HrefType = hrefType;
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as LinkedCrs);
+            return Equals(obj as LinkedCrs);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return ((this.Href != null ? this.Href.GetHashCode() : 0) * 397) ^ (this.HrefType != null ? this.HrefType.GetHashCode() : 0);
+                return ((Href != null ? Href.GetHashCode() : 0) * 397) ^ (HrefType != null ? HrefType.GetHashCode() : 0);
             }
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return string.Equals(this.Href, other.Href) && string.Equals(this.HrefType, other.HrefType);
+            return string.Equals(Href, other.Href) && string.Equals(HrefType, other.HrefType);
         }
     }
 }

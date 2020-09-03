@@ -24,14 +24,14 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
             public EagerCosmosArray(IEnumerable<CosmosElement> elements)
             {
-                this.cosmosElements = new List<CosmosElement>(elements);
+                cosmosElements = new List<CosmosElement>(elements);
             }
 
-            public override int Count => this.cosmosElements.Count;
+            public override int Count => cosmosElements.Count;
 
-            public override CosmosElement this[int index] => this.cosmosElements[index];
+            public override CosmosElement this[int index] => cosmosElements[index];
 
-            public override IEnumerator<CosmosElement> GetEnumerator() => this.cosmosElements.GetEnumerator();
+            public override IEnumerator<CosmosElement> GetEnumerator() => cosmosElements.GetEnumerator();
 
             public override void WriteTo(IJsonWriter jsonWriter)
             {

@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression member,
             SqlIdentifier identifier)
         {
-            this.Member = member;
-            this.Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            Member = member;
+            Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
         }
 
         public SqlIdentifier Identifier { get; }

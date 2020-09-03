@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
             TimeSpan? estimationPeriod = null)
         {
             this.dispatchEstimation = dispatchEstimation;
-            this.DispatchPeriod = estimationPeriod;
+            DispatchPeriod = estimationPeriod;
         }
 
         public TimeSpan? DispatchPeriod { get; private set; }
@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedProcessing
         {
             try
             {
-                await this.dispatchEstimation(estimation, cancellationToken).ConfigureAwait(false);
+                await dispatchEstimation(estimation, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception userException)
             {

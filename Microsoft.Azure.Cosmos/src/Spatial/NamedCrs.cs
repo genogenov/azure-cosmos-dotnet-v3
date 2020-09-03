@@ -27,7 +27,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("name");
             }
 
-            this.Name = name;
+            Name = name;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as NamedCrs);
+            return Equals(obj as NamedCrs);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// </returns>
         public override int GetHashCode()
         {
-            return this.Name.GetHashCode();
+            return Name.GetHashCode();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return string.Equals(this.Name, other.Name);
+            return string.Equals(Name, other.Name);
         }
     }
 }

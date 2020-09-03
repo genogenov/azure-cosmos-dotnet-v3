@@ -44,10 +44,21 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             string minInclusive,
             string maxExclusive)
         {
-            if (string.IsNullOrWhiteSpace(containerRid)) throw new ArgumentNullException(nameof(containerRid));
+            if (string.IsNullOrWhiteSpace(containerRid))
+            {
+                throw new ArgumentNullException(nameof(containerRid));
+            }
             // MinInclusive can be an empty string
-            if (minInclusive == null) throw new ArgumentNullException(nameof(minInclusive));
-            if (string.IsNullOrWhiteSpace(maxExclusive)) throw new ArgumentNullException(nameof(maxExclusive));
+            if (minInclusive == null)
+            {
+                throw new ArgumentNullException(nameof(minInclusive));
+            }
+
+            if (string.IsNullOrWhiteSpace(maxExclusive))
+            {
+                throw new ArgumentNullException(nameof(maxExclusive));
+            }
+
             return StandByFeedContinuationToken.SerializeTokens(new CompositeContinuationToken[1] { StandByFeedContinuationToken.CreateCompositeContinuationTokenForRange(minInclusive, maxExclusive, null) });
         }
 
@@ -66,42 +77,49 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             string initialStandByFeedContinuationToken,
             PartitionKeyRangeCacheDelegate pkRangeCacheDelegate)
         {
-            if (string.IsNullOrWhiteSpace(containerRid)) throw new ArgumentNullException(nameof(containerRid));
-            if (pkRangeCacheDelegate == null) throw new ArgumentNullException(nameof(pkRangeCacheDelegate));
+            if (string.IsNullOrWhiteSpace(containerRid))
+            {
+                throw new ArgumentNullException(nameof(containerRid));
+            }
+
+            if (pkRangeCacheDelegate == null)
+            {
+                throw new ArgumentNullException(nameof(pkRangeCacheDelegate));
+            }
 
             this.containerRid = containerRid;
             this.pkRangeCacheDelegate = pkRangeCacheDelegate;
-            this.inputContinuationToken = initialStandByFeedContinuationToken;
+            inputContinuationToken = initialStandByFeedContinuationToken;
         }
 
         public async Task<Tuple<CompositeContinuationToken, string>> GetCurrentTokenAsync(bool forceRefresh = false)
         {
-            Debug.Assert(this.compositeContinuationTokens != null);
-            IReadOnlyList<Documents.PartitionKeyRange> resolvedRanges = await this.TryGetOverlappingRangesAsync(this.currentToken.Range, forceRefresh: forceRefresh);
+            Debug.Assert(compositeContinuationTokens != null);
+            IReadOnlyList<Documents.PartitionKeyRange> resolvedRanges = await TryGetOverlappingRangesAsync(currentToken.Range, forceRefresh: forceRefresh);
             if (resolvedRanges.Count > 1)
             {
-                this.HandleSplit(resolvedRanges);
+                HandleSplit(resolvedRanges);
             }
 
-            return new Tuple<CompositeContinuationToken, string>(this.currentToken, resolvedRanges[0].Id);
+            return new Tuple<CompositeContinuationToken, string>(currentToken, resolvedRanges[0].Id);
         }
 
         public void MoveToNextToken()
         {
-            CompositeContinuationToken recentToken = this.compositeContinuationTokens.Dequeue();
-            this.compositeContinuationTokens.Enqueue(recentToken);
-            this.currentToken = this.compositeContinuationTokens.Peek();
+            CompositeContinuationToken recentToken = compositeContinuationTokens.Dequeue();
+            compositeContinuationTokens.Enqueue(recentToken);
+            currentToken = compositeContinuationTokens.Peek();
         }
 
         public new string ToString()
         {
-            Debug.Assert(this.compositeContinuationTokens != null);
-            if (this.compositeContinuationTokens == null)
+            Debug.Assert(compositeContinuationTokens != null);
+            if (compositeContinuationTokens == null)
             {
                 return null;
             }
 
-            return StandByFeedContinuationToken.SerializeTokens(this.compositeContinuationTokens);
+            return StandByFeedContinuationToken.SerializeTokens(compositeContinuationTokens);
         }
 
         private static CompositeContinuationToken CreateCompositeContinuationTokenForRange(
@@ -118,27 +136,30 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         private void HandleSplit(IReadOnlyList<Documents.PartitionKeyRange> keyRanges)
         {
-            if (keyRanges == null) throw new ArgumentNullException(nameof(keyRanges));
+            if (keyRanges == null)
+            {
+                throw new ArgumentNullException(nameof(keyRanges));
+            }
 
             // Update current
             Documents.PartitionKeyRange firstRange = keyRanges[0];
-            this.currentToken.Range = new Documents.Routing.Range<string>(firstRange.MinInclusive, firstRange.MaxExclusive, true, false);
+            currentToken.Range = new Documents.Routing.Range<string>(firstRange.MinInclusive, firstRange.MaxExclusive, true, false);
             // Add children
             foreach (Documents.PartitionKeyRange keyRange in keyRanges.Skip(1))
             {
-                this.compositeContinuationTokens.Enqueue(StandByFeedContinuationToken.CreateCompositeContinuationTokenForRange(keyRange.MinInclusive, keyRange.MaxExclusive, this.currentToken.Token));
+                compositeContinuationTokens.Enqueue(StandByFeedContinuationToken.CreateCompositeContinuationTokenForRange(keyRange.MinInclusive, keyRange.MaxExclusive, currentToken.Token));
             }
         }
 
         private async Task EnsureInitializedAsync()
         {
-            if (this.compositeContinuationTokens == null)
+            if (compositeContinuationTokens == null)
             {
-                IEnumerable<CompositeContinuationToken> tokens = await this.BuildCompositeTokensAsync(this.inputContinuationToken);
+                IEnumerable<CompositeContinuationToken> tokens = await BuildCompositeTokensAsync(inputContinuationToken);
 
-                this.InitializeCompositeTokens(tokens);
+                InitializeCompositeTokens(tokens);
 
-                Debug.Assert(this.compositeContinuationTokens.Count > 0);
+                Debug.Assert(compositeContinuationTokens.Count > 0);
             }
         }
 
@@ -147,8 +168,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
             if (string.IsNullOrEmpty(initialContinuationToken))
             {
                 // Initialize composite token with all the ranges
-                IReadOnlyList<Documents.PartitionKeyRange> allRanges = await this.pkRangeCacheDelegate(
-                        this.containerRid,
+                IReadOnlyList<Documents.PartitionKeyRange> allRanges = await pkRangeCacheDelegate(
+                        containerRid,
                         new Documents.Routing.Range<string>(
                             Documents.Routing.PartitionKeyInternal.MinimumInclusiveEffectivePartitionKey,
                             Documents.Routing.PartitionKeyInternal.MaximumExclusiveEffectivePartitionKey,
@@ -175,14 +196,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
 
         private void InitializeCompositeTokens(IEnumerable<CompositeContinuationToken> tokens)
         {
-            this.compositeContinuationTokens = new Queue<CompositeContinuationToken>();
+            compositeContinuationTokens = new Queue<CompositeContinuationToken>();
 
             foreach (CompositeContinuationToken token in tokens)
             {
-                this.compositeContinuationTokens.Enqueue(token);
+                compositeContinuationTokens.Enqueue(token);
             }
 
-            this.currentToken = this.compositeContinuationTokens.Peek();
+            currentToken = compositeContinuationTokens.Peek();
         }
 
         private async Task<IReadOnlyList<Documents.PartitionKeyRange>> TryGetOverlappingRangesAsync(
@@ -191,8 +212,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         {
             Debug.Assert(targetRange != null);
 
-            IReadOnlyList<Documents.PartitionKeyRange> keyRanges = await this.pkRangeCacheDelegate(
-                this.containerRid,
+            IReadOnlyList<Documents.PartitionKeyRange> keyRanges = await pkRangeCacheDelegate(
+                containerRid,
                 new Documents.Routing.Range<string>(
                     targetRange.Min,
                     targetRange.Max,

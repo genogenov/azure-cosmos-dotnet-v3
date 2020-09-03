@@ -40,8 +40,8 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         private ThroughputProperties(OfferContentProperties offerContentProperties)
         {
-            this.OfferVersion = Constants.Offers.OfferVersion_V2;
-            this.Content = offerContentProperties;
+            OfferVersion = Constants.Offers.OfferVersion_V2;
+            Content = offerContentProperties;
         }
 
         /// <summary>
@@ -70,21 +70,21 @@ namespace Microsoft.Azure.Cosmos
         [JsonIgnore]
         public int? Throughput
         {
-            get => this.Content?.OfferThroughput;
-            private set => this.Content = OfferContentProperties.CreateManualOfferConent(value.Value);
+            get => Content?.OfferThroughput;
+            private set => Content = OfferContentProperties.CreateManualOfferConent(value.Value);
         }
 
         /// <summary>
         /// The maximum throughput the autoscale will scale to.
         /// </summary>
         [JsonIgnore]
-        public int? AutoscaleMaxThroughput => this.Content?.OfferAutoscaleSettings?.MaxThroughput;
+        public int? AutoscaleMaxThroughput => Content?.OfferAutoscaleSettings?.MaxThroughput;
 
         /// <summary>
         /// The amount to increment if the maximum RUs is getting throttled.
         /// </summary>
         [JsonIgnore]
-        internal int? AutoUpgradeMaxThroughputIncrementPercentage => this.Content?.OfferAutoscaleSettings?.AutoscaleAutoUpgradeProperties?.ThroughputProperties?.IncrementPercent;
+        internal int? AutoUpgradeMaxThroughputIncrementPercentage => Content?.OfferAutoscaleSettings?.AutoscaleAutoUpgradeProperties?.ThroughputProperties?.IncrementPercent;
 
         /// <summary>
         /// The Throughput properties for manual provisioned throughput offering

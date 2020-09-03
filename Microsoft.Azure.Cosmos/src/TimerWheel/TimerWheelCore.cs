@@ -16,7 +16,7 @@ namespace Microsoft.Azure.Cosmos.Timers
         private readonly ConcurrentDictionary<int, ConcurrentQueue<TimerWheelTimer>> timers;
         private readonly int resolutionInTicks;
         private readonly int resolutionInMs;
-        private readonly int buckets;        
+        private readonly int buckets;
         private readonly Timer timer;
         private readonly object subscriptionLock;
         private readonly object timerConcurrencyLock;
@@ -40,12 +40,12 @@ namespace Microsoft.Azure.Cosmos.Timers
                 throw new ArgumentOutOfRangeException(nameof(buckets));
             }
 
-            this.resolutionInMs = (int)resolution;
-            this.resolutionInTicks = (int)TimeSpan.FromMilliseconds(this.resolutionInMs).Ticks;
+            resolutionInMs = (int)resolution;
+            resolutionInTicks = (int)TimeSpan.FromMilliseconds(resolutionInMs).Ticks;
             this.buckets = buckets;
-            this.timers = new ConcurrentDictionary<int, ConcurrentQueue<TimerWheelTimer>>();
-            this.subscriptionLock = new object();
-            this.timerConcurrencyLock = new object();
+            timers = new ConcurrentDictionary<int, ConcurrentQueue<TimerWheelTimer>>();
+            subscriptionLock = new object();
+            timerConcurrencyLock = new object();
         }
 
         internal TimerWheelCore(
@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Cosmos.Timers
             int buckets)
             : this(resolution.TotalMilliseconds, buckets)
         {
-            this.timer = new Timer(this.OnTimer, state: null, this.resolutionInMs, this.resolutionInMs);
+            timer = new Timer(OnTimer, state: null, resolutionInMs, resolutionInMs);
         }
 
         /// <summary>
@@ -70,33 +70,33 @@ namespace Microsoft.Azure.Cosmos.Timers
 
         public override void Dispose()
         {
-            if (this.isDisposed)
+            if (isDisposed)
             {
                 return;
             }
 
-            this.DisposeAllTimers();
+            DisposeAllTimers();
 
-            this.isDisposed = true;
+            isDisposed = true;
         }
 
         public override TimerWheelTimer CreateTimer(TimeSpan timeout)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             int timeoutInMs = (int)timeout.TotalMilliseconds;
-            if (timeoutInMs < this.resolutionInMs)
+            if (timeoutInMs < resolutionInMs)
             {
-                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {this.resolutionInMs} resolution, cannot use a smaller timeout of {timeoutInMs}.");
+                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {resolutionInMs} resolution, cannot use a smaller timeout of {timeoutInMs}.");
             }
 
-            if (timeoutInMs % this.resolutionInMs != 0)
+            if (timeoutInMs % resolutionInMs != 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {this.resolutionInMs} resolution, cannot use a different resolution of {timeoutInMs}.");
+                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {resolutionInMs} resolution, cannot use a different resolution of {timeoutInMs}.");
             }
 
-            if (timeoutInMs > this.resolutionInMs * this.buckets)
+            if (timeoutInMs > resolutionInMs * buckets)
             {
-                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {this.resolutionInMs * this.buckets} max, cannot use a larger timeout of {timeoutInMs}.");
+                throw new ArgumentOutOfRangeException(nameof(timeoutInMs), $"TimerWheel configured with {resolutionInMs * buckets} max, cannot use a larger timeout of {timeoutInMs}.");
             }
 
             return new TimerWheelTimerCore(TimeSpan.FromMilliseconds(timeoutInMs), this);
@@ -104,13 +104,13 @@ namespace Microsoft.Azure.Cosmos.Timers
 
         public override void SubscribeForTimeouts(TimerWheelTimer timer)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             long timerTimeoutInTicks = timer.Timeout.Ticks;
-            int bucket = (int)timerTimeoutInTicks / this.resolutionInTicks;
-            lock (this.subscriptionLock)
+            int bucket = (int)timerTimeoutInTicks / resolutionInTicks;
+            lock (subscriptionLock)
             {
-                int index = this.GetIndexForTimeout(bucket);
-                ConcurrentQueue<TimerWheelTimer> timerQueue = this.timers.GetOrAdd(index,
+                int index = GetIndexForTimeout(bucket);
+                ConcurrentQueue<TimerWheelTimer> timerQueue = timers.GetOrAdd(index,
                         _ =>
                         {
                             return new ConcurrentQueue<TimerWheelTimer>();
@@ -119,13 +119,13 @@ namespace Microsoft.Azure.Cosmos.Timers
             }
         }
 
-        public void OnTimer(Object stateInfo)
+        public void OnTimer(object stateInfo)
         {
-            lock (this.timerConcurrencyLock)
+            lock (timerConcurrencyLock)
             {
-                if (!this.isRunning)
+                if (!isRunning)
                 {
-                    this.isRunning = true;
+                    isRunning = true;
                 }
                 else
                 {
@@ -135,7 +135,7 @@ namespace Microsoft.Azure.Cosmos.Timers
 
             try
             {
-                if (this.timers.TryGetValue(this.expirationIndex, out ConcurrentQueue<TimerWheelTimer> timerQueue))
+                if (timers.TryGetValue(expirationIndex, out ConcurrentQueue<TimerWheelTimer> timerQueue))
                 {
                     while (timerQueue.TryDequeue(out TimerWheelTimer timer))
                     {
@@ -143,9 +143,9 @@ namespace Microsoft.Azure.Cosmos.Timers
                     }
                 }
 
-                if (++this.expirationIndex == this.buckets)
+                if (++expirationIndex == buckets)
                 {
-                    this.expirationIndex = 0;
+                    expirationIndex = 0;
                 }
             }
             catch (Exception ex)
@@ -154,19 +154,19 @@ namespace Microsoft.Azure.Cosmos.Timers
             }
             finally
             {
-                lock (this.timerConcurrencyLock)
+                lock (timerConcurrencyLock)
                 {
-                    this.isRunning = false;
+                    isRunning = false;
                 }
             }
         }
 
         private int GetIndexForTimeout(int bucket)
         {
-            int index = bucket + this.expirationIndex;
-            if (index > this.buckets)
+            int index = bucket + expirationIndex;
+            if (index > buckets)
             {
-                index -= this.buckets;
+                index -= buckets;
             }
 
             return index - 1; // zero based
@@ -174,7 +174,7 @@ namespace Microsoft.Azure.Cosmos.Timers
 
         private void DisposeAllTimers()
         {
-            foreach (KeyValuePair<int, ConcurrentQueue<TimerWheelTimer>> kv in this.timers)
+            foreach (KeyValuePair<int, ConcurrentQueue<TimerWheelTimer>> kv in timers)
             {
                 ConcurrentQueue<TimerWheelTimer> pooledTimerQueue = kv.Value;
                 while (pooledTimerQueue.TryDequeue(out TimerWheelTimer timer))
@@ -183,12 +183,12 @@ namespace Microsoft.Azure.Cosmos.Timers
                 }
             }
 
-            this.timer?.Dispose();
+            timer?.Dispose();
         }
 
         private void ThrowIfDisposed()
         {
-            if (this.isDisposed)
+            if (isDisposed)
             {
                 throw new ObjectDisposedException("TimerWheel is disposed.");
             }

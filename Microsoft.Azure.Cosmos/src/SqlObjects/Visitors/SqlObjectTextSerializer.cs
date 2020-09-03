@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
 
         public SqlObjectTextSerializer(bool prettyPrint)
         {
-            this.writer = new StringWriter(CultureInfo.InvariantCulture);
+            writer = new StringWriter(CultureInfo.InvariantCulture);
             this.prettyPrint = prettyPrint;
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             sqlAliasedCollectionExpression.Collection.Accept(this);
             if (sqlAliasedCollectionExpression.Alias != null)
             {
-                this.writer.Write(" AS ");
+                writer.Write(" AS ");
                 sqlAliasedCollectionExpression.Alias.Accept(this);
             }
         }
@@ -44,111 +44,111 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             int numberOfItems = sqlArrayCreateScalarExpression.Items.Count();
             if (numberOfItems == 0)
             {
-                this.writer.Write("[]");
+                writer.Write("[]");
             }
             else if (numberOfItems == 1)
             {
-                this.writer.Write("[");
+                writer.Write("[");
                 sqlArrayCreateScalarExpression.Items[0].Accept(this);
-                this.writer.Write("]");
+                writer.Write("]");
             }
             else
             {
-                this.WriteStartContext("[");
+                WriteStartContext("[");
 
                 for (int i = 0; i < sqlArrayCreateScalarExpression.Items.Length; i++)
                 {
                     if (i > 0)
                     {
-                        this.WriteDelimiter(",");
+                        WriteDelimiter(",");
                     }
 
                     sqlArrayCreateScalarExpression.Items[i].Accept(this);
                 }
 
-                this.WriteEndContext("]");
+                WriteEndContext("]");
             }
         }
 
         public override void Visit(SqlArrayIteratorCollectionExpression sqlArrayIteratorCollectionExpression)
         {
             sqlArrayIteratorCollectionExpression.Identifier.Accept(this);
-            this.writer.Write(" IN ");
+            writer.Write(" IN ");
             sqlArrayIteratorCollectionExpression.Collection.Accept(this);
         }
 
         public override void Visit(SqlArrayScalarExpression sqlArrayScalarExpression)
         {
-            this.writer.Write("ARRAY");
-            this.WriteStartContext("(");
+            writer.Write("ARRAY");
+            WriteStartContext("(");
             sqlArrayScalarExpression.SqlQuery.Accept(this);
-            this.WriteEndContext(")");
+            WriteEndContext(")");
         }
 
         public override void Visit(SqlBetweenScalarExpression sqlBetweenScalarExpression)
         {
-            this.writer.Write("(");
+            writer.Write("(");
             sqlBetweenScalarExpression.Expression.Accept(this);
 
             if (sqlBetweenScalarExpression.Not)
             {
-                this.writer.Write(" NOT");
+                writer.Write(" NOT");
             }
 
-            this.writer.Write(" BETWEEN ");
+            writer.Write(" BETWEEN ");
             sqlBetweenScalarExpression.StartInclusive.Accept(this);
-            this.writer.Write(" AND ");
+            writer.Write(" AND ");
             sqlBetweenScalarExpression.EndInclusive.Accept(this);
-            this.writer.Write(")");
+            writer.Write(")");
         }
 
         public override void Visit(SqlBinaryScalarExpression sqlBinaryScalarExpression)
         {
-            this.writer.Write("(");
+            writer.Write("(");
             sqlBinaryScalarExpression.LeftExpression.Accept(this);
-            this.writer.Write(" ");
-            this.writer.Write(SqlObjectTextSerializer.SqlBinaryScalarOperatorKindToString(sqlBinaryScalarExpression.OperatorKind));
-            this.writer.Write(" ");
+            writer.Write(" ");
+            writer.Write(SqlObjectTextSerializer.SqlBinaryScalarOperatorKindToString(sqlBinaryScalarExpression.OperatorKind));
+            writer.Write(" ");
             sqlBinaryScalarExpression.RightExpression.Accept(this);
-            this.writer.Write(")");
+            writer.Write(")");
         }
 
         public override void Visit(SqlBooleanLiteral sqlBooleanLiteral)
         {
-            this.writer.Write(sqlBooleanLiteral.Value ? "true" : "false");
+            writer.Write(sqlBooleanLiteral.Value ? "true" : "false");
         }
 
         public override void Visit(SqlCoalesceScalarExpression sqlCoalesceScalarExpression)
         {
-            this.writer.Write("(");
+            writer.Write("(");
             sqlCoalesceScalarExpression.Left.Accept(this);
-            this.writer.Write(" ?? ");
+            writer.Write(" ?? ");
             sqlCoalesceScalarExpression.Right.Accept(this);
-            this.writer.Write(")");
+            writer.Write(")");
         }
 
         public override void Visit(SqlConditionalScalarExpression sqlConditionalScalarExpression)
         {
-            this.writer.Write('(');
+            writer.Write('(');
             sqlConditionalScalarExpression.Condition.Accept(this);
-            this.writer.Write(" ? ");
+            writer.Write(" ? ");
             sqlConditionalScalarExpression.Consequent.Accept(this);
-            this.writer.Write(" : ");
+            writer.Write(" : ");
             sqlConditionalScalarExpression.Alternative.Accept(this);
-            this.writer.Write(')');
+            writer.Write(')');
         }
 
         public override void Visit(SqlExistsScalarExpression sqlExistsScalarExpression)
         {
-            this.writer.Write("EXISTS");
-            this.WriteStartContext("(");
+            writer.Write("EXISTS");
+            WriteStartContext("(");
             sqlExistsScalarExpression.Subquery.Accept(this);
-            this.WriteEndContext(")");
+            WriteEndContext(")");
         }
 
         public override void Visit(SqlFromClause sqlFromClause)
         {
-            this.writer.Write("FROM ");
+            writer.Write("FROM ");
             sqlFromClause.Expression.Accept(this);
         }
 
@@ -156,53 +156,53 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         {
             if (sqlFunctionCallScalarExpression.IsUdf)
             {
-                this.writer.Write("udf.");
+                writer.Write("udf.");
             }
 
             sqlFunctionCallScalarExpression.Name.Accept(this);
             int numberOfArguments = sqlFunctionCallScalarExpression.Arguments.Count();
             if (numberOfArguments == 0)
             {
-                this.writer.Write("()");
+                writer.Write("()");
             }
             else if (numberOfArguments == 1)
             {
-                this.writer.Write("(");
+                writer.Write("(");
                 sqlFunctionCallScalarExpression.Arguments[0].Accept(this);
-                this.writer.Write(")");
+                writer.Write(")");
             }
             else
             {
-                this.WriteStartContext("(");
+                WriteStartContext("(");
 
                 for (int i = 0; i < sqlFunctionCallScalarExpression.Arguments.Length; i++)
                 {
                     if (i > 0)
                     {
-                        this.WriteDelimiter(",");
+                        WriteDelimiter(",");
                     }
 
                     sqlFunctionCallScalarExpression.Arguments[i].Accept(this);
                 }
 
-                this.WriteEndContext(")");
+                WriteEndContext(")");
             }
         }
 
         public override void Visit(SqlGroupByClause sqlGroupByClause)
         {
-            this.writer.Write("GROUP BY ");
+            writer.Write("GROUP BY ");
             sqlGroupByClause.Expressions[0].Accept(this);
             for (int i = 1; i < sqlGroupByClause.Expressions.Length; i++)
             {
-                this.writer.Write(", ");
+                writer.Write(", ");
                 sqlGroupByClause.Expressions[i].Accept(this);
             }
         }
 
         public override void Visit(SqlIdentifier sqlIdentifier)
         {
-            this.writer.Write(sqlIdentifier.Value);
+            writer.Write(sqlIdentifier.Value);
         }
 
         public override void Visit(SqlIdentifierPathExpression sqlIdentifierPathExpression)
@@ -212,7 +212,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
                 sqlIdentifierPathExpression.ParentPath.Accept(this);
             }
 
-            this.writer.Write(".");
+            writer.Write(".");
 
             sqlIdentifierPathExpression.Value.Accept(this);
         }
@@ -228,57 +228,57 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
 
         public override void Visit(SqlInScalarExpression sqlInScalarExpression)
         {
-            this.writer.Write("(");
+            writer.Write("(");
             sqlInScalarExpression.Needle.Accept(this);
             if (sqlInScalarExpression.Not)
             {
-                this.writer.Write(" NOT");
+                writer.Write(" NOT");
             }
 
-            this.writer.Write(" IN ");
+            writer.Write(" IN ");
 
             int numberOfItems = sqlInScalarExpression.Haystack.Count();
             if (numberOfItems == 0)
             {
-                this.writer.Write("()");
+                writer.Write("()");
             }
             else if (numberOfItems == 1)
             {
-                this.writer.Write("(");
+                writer.Write("(");
                 sqlInScalarExpression.Haystack[0].Accept(this);
-                this.writer.Write(")");
+                writer.Write(")");
             }
             else
             {
-                this.WriteStartContext("(");
+                WriteStartContext("(");
 
                 for (int i = 0; i < sqlInScalarExpression.Haystack.Length; i++)
                 {
                     if (i > 0)
                     {
-                        this.WriteDelimiter(",");
+                        WriteDelimiter(",");
                     }
 
                     sqlInScalarExpression.Haystack[i].Accept(this);
                 }
 
-                this.WriteEndContext(")");
+                WriteEndContext(")");
             }
-            this.writer.Write(")");
+            writer.Write(")");
         }
 
         public override void Visit(SqlJoinCollectionExpression sqlJoinCollectionExpression)
         {
             sqlJoinCollectionExpression.Left.Accept(this);
-            this.WriteNewline();
-            this.WriteTab();
-            this.writer.Write(" JOIN ");
+            WriteNewline();
+            WriteTab();
+            writer.Write(" JOIN ");
             sqlJoinCollectionExpression.Right.Accept(this);
         }
 
         public override void Visit(SqlLimitSpec sqlObject)
         {
-            this.writer.Write("LIMIT ");
+            writer.Write("LIMIT ");
             sqlObject.LimitExpression.Accept(this);
         }
 
@@ -290,19 +290,19 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
         public override void Visit(SqlMemberIndexerScalarExpression sqlMemberIndexerScalarExpression)
         {
             sqlMemberIndexerScalarExpression.Member.Accept(this);
-            this.writer.Write("[");
+            writer.Write("[");
             sqlMemberIndexerScalarExpression.Indexer.Accept(this);
-            this.writer.Write("]");
+            writer.Write("]");
         }
 
         public override void Visit(SqlNullLiteral sqlNullLiteral)
         {
-            this.writer.Write("null");
+            writer.Write("null");
         }
 
         public override void Visit(SqlNumberLiteral sqlNumberLiteral)
         {
-            SqlObjectTextSerializer.WriteNumber64(this.writer.GetStringBuilder(), sqlNumberLiteral.Value);
+            SqlObjectTextSerializer.WriteNumber64(writer.GetStringBuilder(), sqlNumberLiteral.Value);
         }
 
         public override void Visit(SqlNumberPathExpression sqlNumberPathExpression)
@@ -312,9 +312,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
                 sqlNumberPathExpression.ParentPath.Accept(this);
             }
 
-            this.writer.Write("[");
+            writer.Write("[");
             sqlNumberPathExpression.Value.Accept(this);
-            this.writer.Write("]");
+            writer.Write("]");
         }
 
         public override void Visit(SqlObjectCreateScalarExpression sqlObjectCreateScalarExpression)
@@ -322,62 +322,62 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             int numberOfProperties = sqlObjectCreateScalarExpression.Properties.Count();
             if (numberOfProperties == 0)
             {
-                this.writer.Write("{}");
+                writer.Write("{}");
             }
             else if (numberOfProperties == 1)
             {
-                this.writer.Write("{");
+                writer.Write("{");
                 sqlObjectCreateScalarExpression.Properties.First().Accept(this);
-                this.writer.Write("}");
+                writer.Write("}");
             }
             else
             {
-                this.WriteStartContext("{");
+                WriteStartContext("{");
                 bool firstItemProcessed = false;
 
                 foreach (SqlObjectProperty property in sqlObjectCreateScalarExpression.Properties)
                 {
                     if (firstItemProcessed)
                     {
-                        this.WriteDelimiter(",");
+                        WriteDelimiter(",");
                     }
 
                     property.Accept(this);
                     firstItemProcessed = true;
                 }
 
-                this.WriteEndContext("}");
+                WriteEndContext("}");
             }
         }
 
         public override void Visit(SqlObjectProperty sqlObjectProperty)
         {
             sqlObjectProperty.Name.Accept(this);
-            this.writer.Write(": ");
+            writer.Write(": ");
             sqlObjectProperty.Value.Accept(this);
         }
 
         public override void Visit(SqlOffsetLimitClause sqlObject)
         {
             sqlObject.OffsetSpec.Accept(this);
-            this.writer.Write(" ");
+            writer.Write(" ");
             sqlObject.LimitSpec.Accept(this);
         }
 
         public override void Visit(SqlOffsetSpec sqlObject)
         {
-            this.writer.Write("OFFSET ");
+            writer.Write("OFFSET ");
             sqlObject.OffsetExpression.Accept(this);
         }
 
         public override void Visit(SqlOrderbyClause sqlOrderByClause)
         {
-            this.writer.Write("ORDER BY ");
+            writer.Write("ORDER BY ");
             sqlOrderByClause.OrderbyItems[0].Accept(this);
 
             for (int i = 1; i < sqlOrderByClause.OrderbyItems.Length; i++)
             {
-                this.writer.Write(", ");
+                writer.Write(", ");
                 sqlOrderByClause.OrderbyItems[i].Accept(this);
             }
         }
@@ -387,17 +387,17 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             sqlOrderByItem.Expression.Accept(this);
             if (sqlOrderByItem.IsDescending)
             {
-                this.writer.Write(" DESC");
+                writer.Write(" DESC");
             }
             else
             {
-                this.writer.Write(" ASC");
+                writer.Write(" ASC");
             }
         }
 
         public override void Visit(SqlParameter sqlParameter)
         {
-            this.writer.Write(sqlParameter.Name);
+            writer.Write(sqlParameter.Name);
         }
 
         public override void Visit(SqlParameterRefScalarExpression sqlParameterRefScalarExpression)
@@ -412,9 +412,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
 
         public override void Visit(SqlPropertyName sqlPropertyName)
         {
-            this.writer.Write('"');
-            this.writer.Write(sqlPropertyName.Value);
-            this.writer.Write('"');
+            writer.Write('"');
+            writer.Write(sqlPropertyName.Value);
+            writer.Write('"');
         }
 
         public override void Visit(SqlPropertyRefScalarExpression sqlPropertyRefScalarExpression)
@@ -422,7 +422,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             if (sqlPropertyRefScalarExpression.Member != null)
             {
                 sqlPropertyRefScalarExpression.Member.Accept(this);
-                this.writer.Write(".");
+                writer.Write(".");
             }
 
             sqlPropertyRefScalarExpression.Identifier.Accept(this);
@@ -434,48 +434,48 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
 
             if (sqlQuery.FromClause != null)
             {
-                this.WriteDelimiter(string.Empty);
+                WriteDelimiter(string.Empty);
                 sqlQuery.FromClause.Accept(this);
             }
 
             if (sqlQuery.WhereClause != null)
             {
-                this.WriteDelimiter(string.Empty);
+                WriteDelimiter(string.Empty);
                 sqlQuery.WhereClause.Accept(this);
             }
 
             if (sqlQuery.GroupByClause != null)
             {
                 sqlQuery.GroupByClause.Accept(this);
-                this.writer.Write(" ");
+                writer.Write(" ");
             }
 
             if (sqlQuery.OrderbyClause != null)
             {
-                this.WriteDelimiter(string.Empty);
+                WriteDelimiter(string.Empty);
                 sqlQuery.OrderbyClause.Accept(this);
             }
 
             if (sqlQuery.OffsetLimitClause != null)
             {
-                this.WriteDelimiter(string.Empty);
+                WriteDelimiter(string.Empty);
                 sqlQuery.OffsetLimitClause.Accept(this);
             }
         }
 
         public override void Visit(SqlSelectClause sqlSelectClause)
         {
-            this.writer.Write("SELECT ");
+            writer.Write("SELECT ");
 
             if (sqlSelectClause.HasDistinct)
             {
-                this.writer.Write("DISTINCT ");
+                writer.Write("DISTINCT ");
             }
 
             if (sqlSelectClause.TopSpec != null)
             {
                 sqlSelectClause.TopSpec.Accept(this);
-                this.writer.Write(" ");
+                writer.Write(" ");
             }
 
             sqlSelectClause.SelectSpec.Accept(this);
@@ -486,7 +486,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             sqlSelectItem.Expression.Accept(this);
             if (sqlSelectItem.Alias != null)
             {
-                this.writer.Write(" AS ");
+                writer.Write(" AS ");
                 sqlSelectItem.Alias.Accept(this);
             }
         }
@@ -505,41 +505,41 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             else
             {
                 bool processedFirstItem = false;
-                this.indentLevel++;
-                this.WriteNewline();
-                this.WriteTab();
+                indentLevel++;
+                WriteNewline();
+                WriteTab();
 
                 foreach (SqlSelectItem item in sqlSelectListSpec.Items)
                 {
                     if (processedFirstItem)
                     {
-                        this.WriteDelimiter(",");
+                        WriteDelimiter(",");
                     }
 
                     item.Accept(this);
                     processedFirstItem = true;
                 }
 
-                this.indentLevel--;
+                indentLevel--;
             }
         }
 
         public override void Visit(SqlSelectStarSpec sqlSelectStarSpec)
         {
-            this.writer.Write("*");
+            writer.Write("*");
         }
 
         public override void Visit(SqlSelectValueSpec sqlSelectValueSpec)
         {
-            this.writer.Write("VALUE ");
+            writer.Write("VALUE ");
             sqlSelectValueSpec.Expression.Accept(this);
         }
 
         public override void Visit(SqlStringLiteral sqlStringLiteral)
         {
-            this.writer.Write("\"");
-            SqlObjectTextSerializer.WriteEscapedString(this.writer.GetStringBuilder(), sqlStringLiteral.Value.AsSpan());
-            this.writer.Write("\"");
+            writer.Write("\"");
+            SqlObjectTextSerializer.WriteEscapedString(writer.GetStringBuilder(), sqlStringLiteral.Value.AsSpan());
+            writer.Write("\"");
         }
 
         public override void Visit(SqlStringPathExpression sqlStringPathExpression)
@@ -549,100 +549,100 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
                 sqlStringPathExpression.ParentPath.Accept(this);
             }
 
-            this.writer.Write("[");
+            writer.Write("[");
             sqlStringPathExpression.Value.Accept(this);
-            this.writer.Write("]");
+            writer.Write("]");
         }
 
         public override void Visit(SqlSubqueryCollection sqlSubqueryCollection)
         {
-            this.WriteStartContext("(");
+            WriteStartContext("(");
             sqlSubqueryCollection.Query.Accept(this);
-            this.WriteEndContext(")");
+            WriteEndContext(")");
         }
 
         public override void Visit(SqlSubqueryScalarExpression sqlSubqueryScalarExpression)
         {
-            this.WriteStartContext("(");
+            WriteStartContext("(");
             sqlSubqueryScalarExpression.Query.Accept(this);
-            this.WriteEndContext(")");
+            WriteEndContext(")");
         }
 
         public override void Visit(SqlTopSpec sqlTopSpec)
         {
-            this.writer.Write("TOP ");
+            writer.Write("TOP ");
             sqlTopSpec.TopExpresion.Accept(this);
         }
 
         public override void Visit(SqlUnaryScalarExpression sqlUnaryScalarExpression)
         {
-            this.writer.Write("(");
-            this.writer.Write(SqlObjectTextSerializer.SqlUnaryScalarOperatorKindToString(sqlUnaryScalarExpression.OperatorKind));
-            this.writer.Write(" ");
+            writer.Write("(");
+            writer.Write(SqlObjectTextSerializer.SqlUnaryScalarOperatorKindToString(sqlUnaryScalarExpression.OperatorKind));
+            writer.Write(" ");
             sqlUnaryScalarExpression.Expression.Accept(this);
-            this.writer.Write(")");
+            writer.Write(")");
         }
 
         public override void Visit(SqlUndefinedLiteral sqlUndefinedLiteral)
         {
-            this.writer.Write("undefined");
+            writer.Write("undefined");
         }
 
         public override void Visit(SqlWhereClause sqlWhereClause)
         {
-            this.writer.Write("WHERE ");
+            writer.Write("WHERE ");
             sqlWhereClause.FilterExpression.Accept(this);
         }
 
         public override string ToString()
         {
-            return this.writer.ToString();
+            return writer.ToString();
         }
 
         private void WriteStartContext(string startCharacter)
         {
-            this.indentLevel++;
-            this.writer.Write(startCharacter);
-            this.WriteNewline();
-            this.WriteTab();
+            indentLevel++;
+            writer.Write(startCharacter);
+            WriteNewline();
+            WriteTab();
         }
 
         private void WriteDelimiter(string delimiter)
         {
-            this.writer.Write(delimiter);
-            this.writer.Write(' ');
-            this.WriteNewline();
-            this.WriteTab();
+            writer.Write(delimiter);
+            writer.Write(' ');
+            WriteNewline();
+            WriteTab();
         }
 
         private void WriteEndContext(string endCharacter)
         {
-            this.indentLevel--;
-            this.WriteNewline();
-            this.WriteTab();
-            this.writer.Write(endCharacter);
+            indentLevel--;
+            WriteNewline();
+            WriteTab();
+            writer.Write(endCharacter);
         }
 
         private void WriteNewline()
         {
-            if (this.prettyPrint)
+            if (prettyPrint)
             {
-                this.writer.WriteLine();
+                writer.WriteLine();
             }
         }
 
         private void WriteTab()
         {
-            if (this.prettyPrint)
+            if (prettyPrint)
             {
-                for (int i = 0; i < this.indentLevel; i++)
+                for (int i = 0; i < indentLevel; i++)
                 {
-                    this.writer.Write(Tab);
+                    writer.Write(Tab);
                 }
             }
         }
 
-        unsafe private static void WriteNumber64(StringBuilder stringBuilder, Number64 value)
+        private static unsafe void WriteNumber64(StringBuilder stringBuilder, Number64 value)
         {
             const int MaxNumberLength = 32;
             Span<byte> buffer = stackalloc byte[MaxNumberLength];
@@ -671,7 +671,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
             }
         }
 
-        unsafe private static void WriteEscapedString(StringBuilder stringBuilder, ReadOnlySpan<char> unescapedString)
+        private static unsafe void WriteEscapedString(StringBuilder stringBuilder, ReadOnlySpan<char> unescapedString)
         {
             while (!unescapedString.IsEmpty)
             {
@@ -743,7 +743,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects.Visitors
                             break;
 
                         default:
-                            char wideCharToEscape = (char)character;
+                            char wideCharToEscape = character;
                             // We got a control character (U+0000 through U+001F).
                             stringBuilder.Append('\\');
                             stringBuilder.Append('u');

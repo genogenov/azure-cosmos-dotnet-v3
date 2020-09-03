@@ -32,7 +32,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.Parallel
         {
             get
             {
-                IEnumerable<ItemProducer> activeItemProducers = this.GetActiveItemProducers();
+                IEnumerable<ItemProducer> activeItemProducers = GetActiveItemProducers();
                 string continuationToken;
                 if (activeItemProducers.Any())
                 {
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext.Parallel
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            IEnumerable<ItemProducer> activeItemProducers = this.GetActiveItemProducers();
+            IEnumerable<ItemProducer> activeItemProducers = GetActiveItemProducers();
             if (!activeItemProducers.Any())
             {
                 return default;

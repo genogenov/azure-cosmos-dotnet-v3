@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
         public ChangeFeedStartFromBeginning(FeedRangeInternal feedRange)
             : base()
         {
-            this.FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
+            FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
         }
 
         /// <summary>

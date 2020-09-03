@@ -22,10 +22,25 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
 
         public BootstrapperCore(PartitionSynchronizer synchronizer, DocumentServiceLeaseStore leaseStore, TimeSpan lockTime, TimeSpan sleepTime)
         {
-            if (synchronizer == null) throw new ArgumentNullException(nameof(synchronizer));
-            if (leaseStore == null) throw new ArgumentNullException(nameof(leaseStore));
-            if (lockTime <= TimeSpan.Zero) throw new ArgumentException("should be positive", nameof(lockTime));
-            if (sleepTime <= TimeSpan.Zero) throw new ArgumentException("should be positive", nameof(sleepTime));
+            if (synchronizer == null)
+            {
+                throw new ArgumentNullException(nameof(synchronizer));
+            }
+
+            if (leaseStore == null)
+            {
+                throw new ArgumentNullException(nameof(leaseStore));
+            }
+
+            if (lockTime <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("should be positive", nameof(lockTime));
+            }
+
+            if (sleepTime <= TimeSpan.Zero)
+            {
+                throw new ArgumentException("should be positive", nameof(sleepTime));
+            }
 
             this.synchronizer = synchronizer;
             this.leaseStore = leaseStore;
@@ -37,29 +52,32 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
         {
             while (true)
             {
-                bool initialized = await this.leaseStore.IsInitializedAsync().ConfigureAwait(false);
-                if (initialized) break;
+                bool initialized = await leaseStore.IsInitializedAsync().ConfigureAwait(false);
+                if (initialized)
+                {
+                    break;
+                }
 
-                bool isLockAcquired = await this.leaseStore.AcquireInitializationLockAsync(this.lockTime).ConfigureAwait(false);
+                bool isLockAcquired = await leaseStore.AcquireInitializationLockAsync(lockTime).ConfigureAwait(false);
 
                 try
                 {
                     if (!isLockAcquired)
                     {
                         DefaultTrace.TraceInformation("Another instance is initializing the store");
-                        await Task.Delay(this.sleepTime).ConfigureAwait(false);
+                        await Task.Delay(sleepTime).ConfigureAwait(false);
                         continue;
                     }
 
                     DefaultTrace.TraceInformation("Initializing the store");
-                    await this.synchronizer.CreateMissingLeasesAsync().ConfigureAwait(false);
-                    await this.leaseStore.MarkInitializedAsync().ConfigureAwait(false);
+                    await synchronizer.CreateMissingLeasesAsync().ConfigureAwait(false);
+                    await leaseStore.MarkInitializedAsync().ConfigureAwait(false);
                 }
                 finally
                 {
                     if (isLockAcquired)
                     {
-                        await this.leaseStore.ReleaseInitializationLockAsync().ConfigureAwait(false);
+                        await leaseStore.ReleaseInitializationLockAsync().ConfigureAwait(false);
                     }
                 }
 

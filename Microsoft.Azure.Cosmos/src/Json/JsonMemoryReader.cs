@@ -16,31 +16,31 @@ namespace Microsoft.Azure.Cosmos.Json
             this.buffer = buffer;
         }
 
-        public bool IsEof => this.position >= this.buffer.Length;
+        public bool IsEof => position >= buffer.Length;
 
-        public int Position => this.position;
+        public int Position => position;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte Read()
         {
-            byte value = this.position < this.buffer.Length ? (byte)this.buffer.Span[this.position] : (byte)0;
-            this.position++;
+            byte value = position < buffer.Length ? buffer.Span[position] : (byte)0;
+            position++;
             return value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte Peek() => this.position < this.buffer.Length ? (byte)this.buffer.Span[this.position] : (byte)0;
+        public byte Peek() => position < buffer.Length ? buffer.Span[position] : (byte)0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<byte> GetBufferedRawJsonToken() => this.buffer.Slice(this.position);
+        public ReadOnlyMemory<byte> GetBufferedRawJsonToken() => buffer.Slice(position);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<byte> GetBufferedRawJsonToken(
-            int startPosition) => this.buffer.Slice(startPosition);
+            int startPosition) => buffer.Slice(startPosition);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlyMemory<byte> GetBufferedRawJsonToken(
             int startPosition,
-            int endPosition) => this.buffer.Slice(startPosition, endPosition - startPosition);
+            int endPosition) => buffer.Slice(startPosition, endPosition - startPosition);
     }
 }

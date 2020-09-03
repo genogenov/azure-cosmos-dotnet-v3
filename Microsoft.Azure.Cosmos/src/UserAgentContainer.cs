@@ -22,20 +22,20 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.cosmosBaseUserAgent == null)
+                if (cosmosBaseUserAgent == null)
                 {
-                    this.cosmosBaseUserAgent = this.CreateBaseUserAgentString();
+                    cosmosBaseUserAgent = CreateBaseUserAgentString();
                 }
 
-                return this.cosmosBaseUserAgent;
+                return cosmosBaseUserAgent;
             }
         }
 
         internal void SetFeatures(string features)
         {
             // Regenerate base user agent to account for features
-            this.cosmosBaseUserAgent = this.CreateBaseUserAgentString(features);
-            this.Suffix = string.Empty;
+            cosmosBaseUserAgent = CreateBaseUserAgentString(features);
+            Suffix = string.Empty;
         }
 
         private string CreateBaseUserAgentString(string features = null)

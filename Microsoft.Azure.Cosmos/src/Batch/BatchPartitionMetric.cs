@@ -36,9 +36,9 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentException("numberOfThrottles must be non negative");
             }
 
-            this.NumberOfItemsOperatedOn = numberOfItemsOperatedOn;
-            this.TimeTakenInMilliseconds = timeTakenInMilliseconds;
-            this.NumberOfThrottles = numberOfThrottles;
+            NumberOfItemsOperatedOn = numberOfItemsOperatedOn;
+            TimeTakenInMilliseconds = timeTakenInMilliseconds;
+            NumberOfThrottles = numberOfThrottles;
         }
 
         /// <summary>
@@ -82,9 +82,9 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentException("numberOfThrottles must be non negative");
             }
 
-            this.NumberOfItemsOperatedOn += numberOfDocumentsOperatedOn;
-            this.TimeTakenInMilliseconds += timeTakenInMilliseconds;
-            this.NumberOfThrottles += numberOfThrottles;
+            NumberOfItemsOperatedOn += numberOfDocumentsOperatedOn;
+            TimeTakenInMilliseconds += timeTakenInMilliseconds;
+            NumberOfThrottles += numberOfThrottles;
         }
     }
 }

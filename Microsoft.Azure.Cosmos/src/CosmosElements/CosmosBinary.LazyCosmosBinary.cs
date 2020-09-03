@@ -35,7 +35,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
                 this.jsonNavigator = jsonNavigator;
                 this.jsonNavigatorNode = jsonNavigatorNode;
-                this.lazyBytes = new Lazy<ReadOnlyMemory<byte>>(() =>
+                lazyBytes = new Lazy<ReadOnlyMemory<byte>>(() =>
                 {
                     if (!this.jsonNavigator.TryGetBufferedBinaryValue(
                         this.jsonNavigatorNode,
@@ -49,9 +49,9 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
                 });
             }
 
-            public override ReadOnlyMemory<byte> Value => this.lazyBytes.Value;
+            public override ReadOnlyMemory<byte> Value => lazyBytes.Value;
 
-            public override void WriteTo(IJsonWriter jsonWriter) => this.jsonNavigator.WriteTo(this.jsonNavigatorNode, jsonWriter);
+            public override void WriteTo(IJsonWriter jsonWriter) => jsonNavigator.WriteTo(jsonNavigatorNode, jsonWriter);
         }
     }
 #if INTERNAL

@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression member,
             SqlScalarExpression indexer)
         {
-            this.Member = member ?? throw new ArgumentNullException(nameof(member));
-            this.Indexer = indexer ?? throw new ArgumentNullException(nameof(indexer));
+            Member = member ?? throw new ArgumentNullException(nameof(member));
+            Indexer = indexer ?? throw new ArgumentNullException(nameof(indexer));
         }
 
         public SqlScalarExpression Member { get; }

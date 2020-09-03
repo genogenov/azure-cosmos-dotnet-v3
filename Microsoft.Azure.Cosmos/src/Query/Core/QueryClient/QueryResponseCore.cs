@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryClient
     {
         private static readonly IReadOnlyList<CosmosElement> EmptyList = new List<CosmosElement>().AsReadOnly();
         internal static readonly string EmptyGuidString = Guid.Empty.ToString();
-        
+
         private QueryResponseCore(
             IReadOnlyList<CosmosElement> result,
             bool isSuccess,
@@ -35,17 +35,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.QueryClient
             SubStatusCodes? subStatusCode,
             CosmosQueryExecutionInfo cosmosQueryExecutionInfo = default)
         {
-            this.IsSuccess = isSuccess;
-            this.CosmosElements = result;
-            this.StatusCode = statusCode;
-            this.ActivityId = activityId;
-            this.ResponseLengthBytes = responseLengthBytes;
-            this.RequestCharge = requestCharge;
-            this.DisallowContinuationTokenMessage = disallowContinuationTokenMessage;
-            this.ContinuationToken = continuationToken;
-            this.CosmosException = cosmosException;
-            this.SubStatusCode = subStatusCode;
-            this.CosmosQueryExecutionInfo = cosmosQueryExecutionInfo;
+            IsSuccess = isSuccess;
+            CosmosElements = result;
+            StatusCode = statusCode;
+            ActivityId = activityId;
+            ResponseLengthBytes = responseLengthBytes;
+            RequestCharge = requestCharge;
+            DisallowContinuationTokenMessage = disallowContinuationTokenMessage;
+            ContinuationToken = continuationToken;
+            CosmosException = cosmosException;
+            SubStatusCode = subStatusCode;
+            CosmosQueryExecutionInfo = cosmosQueryExecutionInfo;
         }
 
         internal IReadOnlyList<CosmosElement> CosmosElements { get; }

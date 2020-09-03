@@ -35,10 +35,10 @@ namespace Microsoft.Azure.Cosmos.Pagination
             cancellationToken.ThrowIfCancellationRequested();
 
             return new CrossPartitionRangePageAsyncEnumerator<TPage, TState>(
-                this.feedRangeProvider,
-                this.createPartitionRangeEnumerator,
-                this.comparer,
-                this.state);
+                feedRangeProvider,
+                createPartitionRangeEnumerator,
+                comparer,
+                state);
         }
     }
 }

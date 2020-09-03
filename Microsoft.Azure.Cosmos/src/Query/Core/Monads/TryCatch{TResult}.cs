@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
     using System;
     using System.Diagnostics;
     using System.Runtime.ExceptionServices;
-    using System.Threading;
     using System.Threading.Tasks;
 
 #if INTERNAL
@@ -26,17 +25,17 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             this.either = either;
         }
 
-        public bool Succeeded => this.either.IsRight;
+        public bool Succeeded => either.IsRight;
 
-        public bool Failed => !this.Succeeded;
+        public bool Failed => !Succeeded;
 
         public TResult Result
         {
             get
             {
-                if (this.Succeeded)
+                if (Succeeded)
                 {
-                    return this.either.FromRight(default);
+                    return either.FromRight(default);
                 }
                 else
                 {
@@ -50,9 +49,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         {
             get
             {
-                if (!this.Succeeded)
+                if (!Succeeded)
                 {
-                    return this.either.FromLeft(default);
+                    return either.FromLeft(default);
                 }
                 else
                 {
@@ -66,15 +65,15 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             Action<TResult> onSuccess,
             Action<Exception> onError)
         {
-            this.either.Match(onLeft: onError, onRight: onSuccess);
+            either.Match(onLeft: onError, onRight: onSuccess);
         }
 
         public TryCatch<TResult> Try(
             Action<TResult> onSuccess)
         {
-            if (this.Succeeded)
+            if (Succeeded)
             {
-                onSuccess(this.either.FromRight(default));
+                onSuccess(either.FromRight(default));
             }
 
             return this;
@@ -84,13 +83,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             Func<TResult, T> onSuccess)
         {
             TryCatch<T> matchResult;
-            if (this.Succeeded)
+            if (Succeeded)
             {
-                matchResult = TryCatch<T>.FromResult(onSuccess(this.either.FromRight(default)));
+                matchResult = TryCatch<T>.FromResult(onSuccess(either.FromRight(default)));
             }
             else
             {
-                matchResult = TryCatch<T>.FromException(this.either.FromLeft(default));
+                matchResult = TryCatch<T>.FromException(either.FromLeft(default));
             }
 
             return matchResult;
@@ -100,13 +99,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
             Func<TResult, Task<T>> onSuccess)
         {
             TryCatch<T> matchResult;
-            if (this.Succeeded)
+            if (Succeeded)
             {
-                matchResult = TryCatch<T>.FromResult(await onSuccess(this.either.FromRight(default)));
+                matchResult = TryCatch<T>.FromResult(await onSuccess(either.FromRight(default)));
             }
             else
             {
-                matchResult = TryCatch<T>.FromException(this.either.FromLeft(default));
+                matchResult = TryCatch<T>.FromException(either.FromLeft(default));
             }
 
             return matchResult;
@@ -115,9 +114,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public TryCatch<TResult> Catch(
             Action<Exception> onError)
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                onError(this.either.FromLeft(default));
+                onError(either.FromLeft(default));
             }
 
             return this;
@@ -126,9 +125,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public TryCatch<TResult> Catch(
             Func<Exception, TryCatch<TResult>> onError)
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                return onError(this.either.FromLeft(default));
+                return onError(either.FromLeft(default));
             }
 
             return this;
@@ -137,9 +136,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public async Task<TryCatch<TResult>> CatchAsync(
             Func<Exception, Task> onError)
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                await onError(this.either.FromLeft(default));
+                await onError(either.FromLeft(default));
             }
 
             return this;
@@ -148,9 +147,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
         public async Task<TryCatch<TResult>> CatchAsync(
             Func<Exception, Task<TryCatch<TResult>>> onError)
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                return await onError(this.either.FromLeft(default));
+                return await onError(either.FromLeft(default));
             }
 
             return this;
@@ -158,9 +157,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
         public void ThrowIfFailed()
         {
-            if (!this.Succeeded)
+            if (!Succeeded)
             {
-                ExceptionDispatchInfo.Capture(this.Exception).Throw();
+                ExceptionDispatchInfo.Capture(Exception).Throw();
             }
         }
 
@@ -173,7 +172,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
             if (obj is TryCatch<TResult> other)
             {
-                return this.Equals(other);
+                return Equals(other);
             }
 
             return false;
@@ -181,12 +180,12 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
         public bool Equals(TryCatch<TResult> other)
         {
-            return this.either.Equals(other.either);
+            return either.Equals(other.either);
         }
 
         public override int GetHashCode()
         {
-            return this.either.GetHashCode();
+            return either.GetHashCode();
         }
 
         public static TryCatch<TResult> FromResult(TResult result)
@@ -215,22 +214,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Monads
 
             result = tryCatch.Result;
             return true;
-        }
-
-        public static T UnsafeGetResult<T>(TryCatch<T> tryCatch)
-        {
-            tryCatch.ThrowIfFailed();
-            return tryCatch.Result;
-        }
-
-        public static Task<T> UnsafeGetResultAsync<T>(Task<TryCatch<T>> tryCatch, CancellationToken cancellationToken)
-        {
-            return tryCatch
-                .ContinueWith(antecedent =>
-                {
-                    antecedent.Result.ThrowIfFailed();
-                    return antecedent.Result.Result;
-                }, cancellationToken);
         }
     }
 }

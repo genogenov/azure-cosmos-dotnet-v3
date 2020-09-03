@@ -34,18 +34,18 @@ namespace Microsoft.Azure.Cosmos.CosmosElements
 
         public override TResult Accept<TArg, TResult>(ICosmosElementVisitor<TArg, TResult> cosmosElementVisitor, TArg input) => cosmosElementVisitor.Visit(this, input);
 
-        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosBinary cosmosBinary && this.Equals(cosmosBinary);
+        public override bool Equals(CosmosElement cosmosElement) => cosmosElement is CosmosBinary cosmosBinary && Equals(cosmosBinary);
 
-        public bool Equals(CosmosBinary cosmosBinary) => this.Value.Span.SequenceEqual(cosmosBinary.Value.Span);
+        public bool Equals(CosmosBinary cosmosBinary) => Value.Span.SequenceEqual(cosmosBinary.Value.Span);
 
         public override int GetHashCode()
         {
             uint hash = HashSeed;
-            hash = MurmurHash3.Hash32(this.Value.Span, hash);
+            hash = MurmurHash3.Hash32(Value.Span, hash);
             return (int)hash;
         }
 
-        public int CompareTo(CosmosBinary cosmosBinary) => this.Value.Span.SequenceCompareTo(cosmosBinary.Value.Span);
+        public int CompareTo(CosmosBinary cosmosBinary) => Value.Span.SequenceCompareTo(cosmosBinary.Value.Span);
 
         public static CosmosBinary Create(
             IJsonNavigator jsonNavigator,

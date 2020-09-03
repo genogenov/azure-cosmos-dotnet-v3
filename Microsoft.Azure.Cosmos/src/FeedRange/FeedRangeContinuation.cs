@@ -29,8 +29,8 @@ namespace Microsoft.Azure.Cosmos
             string containerRid,
             FeedRangeInternal feedRange)
         {
-            this.FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
-            this.ContainerRid = containerRid;
+            FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
+            ContainerRid = containerRid;
         }
 
         public abstract string GetContinuation();

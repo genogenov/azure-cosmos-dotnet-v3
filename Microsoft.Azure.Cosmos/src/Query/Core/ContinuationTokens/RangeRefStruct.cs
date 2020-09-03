@@ -24,8 +24,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
                 throw new ArgumentNullException(nameof(max));
             }
 
-            this.Min = min;
-            this.Max = max;
+            Min = min;
+            Max = max;
         }
 
         public string Min { get; }
@@ -41,10 +41,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
             jsonWriter.WriteObjectStart();
 
             jsonWriter.WriteFieldName(RangeRefStruct.MinPropertyName);
-            jsonWriter.WriteStringValue(this.Min);
+            jsonWriter.WriteStringValue(Min);
 
             jsonWriter.WriteFieldName(RangeRefStruct.MaxPropertyName);
-            jsonWriter.WriteStringValue(this.Max);
+            jsonWriter.WriteStringValue(Max);
 
             jsonWriter.WriteObjectEnd();
         }

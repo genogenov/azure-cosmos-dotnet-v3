@@ -36,7 +36,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(path));
             }
 
-            this.compositePaths.Add(new CompositePath() { Path = path });
+            compositePaths.Add(new CompositePath() { Path = path });
             return this;
         }
 
@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(path));
             }
 
-            this.compositePaths.Add(new CompositePath() { Path = path, Order = sortOrder });
+            compositePaths.Add(new CompositePath() { Path = path, Order = sortOrder });
             return this;
         }
 
@@ -65,8 +65,8 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of the parent.</returns>
         public T Attach()
         {
-            this.attachCallback(this.compositePaths);
-            return this.parent;
+            attachCallback(compositePaths);
+            return parent;
         }
     }
 }

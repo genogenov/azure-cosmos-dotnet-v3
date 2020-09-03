@@ -39,7 +39,8 @@ namespace Microsoft.Azure.Cosmos
 #else
         internal
 #endif
-        IReadOnlyDictionary<string, object> Properties { get; set; }
+        IReadOnlyDictionary<string, object> Properties
+        { get; set; }
 
         /// <summary>
         /// Gets or sets the boolean to use effective partition key routing in the cosmos db request.
@@ -72,22 +73,22 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="request">The <see cref="RequestMessage"/></param>
         internal virtual void PopulateRequestOptions(RequestMessage request)
         {
-            if (this.Properties != null)
+            if (Properties != null)
             {
-                foreach (KeyValuePair<string, object> property in this.Properties)
+                foreach (KeyValuePair<string, object> property in Properties)
                 {
                     request.Properties[property.Key] = property.Value;
                 }
             }
 
-            if (this.IfMatchEtag != null)
+            if (IfMatchEtag != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.IfMatch, this.IfMatchEtag);
+                request.Headers.Add(HttpConstants.HttpHeaders.IfMatch, IfMatchEtag);
             }
 
-            if (this.IfNoneMatchEtag != null)
+            if (IfNoneMatchEtag != null)
             {
-                request.Headers.Add(HttpConstants.HttpHeaders.IfNoneMatch, this.IfNoneMatchEtag);
+                request.Headers.Add(HttpConstants.HttpHeaders.IfNoneMatch, IfNoneMatchEtag);
             }
         }
 
@@ -98,7 +99,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>True if the object exists in the request options. False if the value was not passed in as a request option</returns>
         internal bool TryGetResourceUri(out Uri resourceUri)
         {
-            if (this.Properties != null && this.Properties.TryGetValue(HandlerConstants.ResourceUri, out object requestOptesourceUri))
+            if (Properties != null && Properties.TryGetValue(HandlerConstants.ResourceUri, out object requestOptesourceUri))
             {
                 Uri uri = requestOptesourceUri as Uri;
                 if (uri == null || uri.IsAbsoluteUri)

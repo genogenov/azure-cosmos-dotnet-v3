@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
            SqlScalarExpression expression,
            SqlIdentifier alias)
         {
-            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
-            this.Alias = alias;
+            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            Alias = alias;
         }
 
         public SqlScalarExpression Expression { get; }

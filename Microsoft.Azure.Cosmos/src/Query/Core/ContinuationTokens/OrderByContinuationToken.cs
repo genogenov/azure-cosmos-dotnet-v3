@@ -96,11 +96,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
             }
 
             //// filter is allowed to be null.
-            this.CompositeContinuationToken = compositeContinuationToken ?? throw new ArgumentNullException(nameof(compositeContinuationToken));
-            this.OrderByItems = orderByItems ?? throw new ArgumentNullException(nameof(orderByItems));
-            this.Rid = rid;
-            this.SkipCount = skipCount;
-            this.Filter = filter;
+            CompositeContinuationToken = compositeContinuationToken ?? throw new ArgumentNullException(nameof(compositeContinuationToken));
+            OrderByItems = orderByItems ?? throw new ArgumentNullException(nameof(orderByItems));
+            Rid = rid;
+            SkipCount = skipCount;
+            Filter = filter;
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
         }
 
         [JsonIgnore]
-        public Range<string> PartitionRange => this.CompositeContinuationToken.Range;
+        public Range<string> PartitionRange => CompositeContinuationToken.Range;
 
         public static CosmosElement ToCosmosElement(OrderByContinuationToken orderByContinuationToken)
         {
@@ -221,7 +221,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
 
             CosmosArray orderByItems = CosmosArray.Create(orderByItemsRaw);
 
-            CosmosElement filter = orderByContinuationToken.Filter == null ? (CosmosElement)CosmosNull.Create() : (CosmosElement)CosmosString.Create(orderByContinuationToken.Filter);
+            CosmosElement filter = orderByContinuationToken.Filter == null ? CosmosNull.Create() : (CosmosElement)CosmosString.Create(orderByContinuationToken.Filter);
 
             CosmosObject cosmosObject = CosmosObject.Create(
                 new Dictionary<string, CosmosElement>()

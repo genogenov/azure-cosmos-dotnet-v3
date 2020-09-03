@@ -20,7 +20,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
         public PipelineContinuationTokenV1(CosmosElement sourceContinuationToken)
             : base(PipelineContinuationTokenV1.VersionNumber)
         {
-            this.SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
+            SourceContinuationToken = sourceContinuationToken ?? throw new ArgumentNullException(nameof(sourceContinuationToken));
         }
 
         public CosmosElement SourceContinuationToken { get; }
@@ -31,11 +31,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ContinuationTokens
             {
                 {
                     PipelineContinuationToken.VersionPropertyName,
-                    CosmosString.Create(this.Version.ToString())
+                    CosmosString.Create(Version.ToString())
                 },
                 {
                     PipelineContinuationTokenV1.SourceContinuationTokenPropertyName,
-                    this.SourceContinuationToken
+                    SourceContinuationToken
                 },
             }).ToString();
         }

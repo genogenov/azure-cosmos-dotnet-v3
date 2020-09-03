@@ -6,16 +6,13 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.CosmosElements.Numbers;
-    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
     using Microsoft.Azure.Cosmos.Query.Core.QueryClient;
-    using Microsoft.Azure.Documents;
 
     internal abstract partial class SkipDocumentQueryExecutionComponent : DocumentQueryExecutionComponentBase
     {
@@ -76,10 +73,10 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                 }
 
                 // skip the documents but keep all the other headers
-                IReadOnlyList<CosmosElement> documentsAfterSkip = sourcePage.CosmosElements.Skip(this.skipCount).ToList();
+                IReadOnlyList<CosmosElement> documentsAfterSkip = sourcePage.CosmosElements.Skip(skipCount).ToList();
 
                 int numberOfDocumentsSkipped = sourcePage.CosmosElements.Count() - documentsAfterSkip.Count();
-                this.skipCount -= numberOfDocumentsSkipped;
+                skipCount -= numberOfDocumentsSkipped;
 
                 return QueryResponseCore.CreateSuccess(
                     result: documentsAfterSkip,
@@ -92,14 +89,14 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
 
             public override CosmosElement GetCosmosElementContinuationToken()
             {
-                if (this.IsDone)
+                if (IsDone)
                 {
                     return default;
                 }
 
                 OffsetContinuationToken offsetContinuationToken = new OffsetContinuationToken(
-                    offset: this.skipCount,
-                    sourceToken: this.Source.GetCosmosElementContinuationToken());
+                    offset: skipCount,
+                    sourceToken: Source.GetCosmosElementContinuationToken());
                 return OffsetContinuationToken.ToCosmosElement(offsetContinuationToken);
             }
 
@@ -126,8 +123,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                         throw new ArgumentOutOfRangeException(nameof(offset));
                     }
 
-                    this.Offset = (int)offset;
-                    this.SourceToken = sourceToken;
+                    Offset = (int)offset;
+                    SourceToken = sourceToken;
                 }
 
                 /// <summary>

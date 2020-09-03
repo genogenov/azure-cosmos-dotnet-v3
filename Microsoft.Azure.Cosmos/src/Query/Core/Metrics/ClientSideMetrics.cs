@@ -35,9 +35,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             double requestCharge,
             IEnumerable<FetchExecutionRange> fetchExecutionRanges)
         {
-            this.Retries = retries;
-            this.RequestCharge = requestCharge;
-            this.FetchExecutionRanges = fetchExecutionRanges ?? throw new ArgumentNullException(nameof(fetchExecutionRanges));
+            Retries = retries;
+            RequestCharge = requestCharge;
+            FetchExecutionRanges = fetchExecutionRanges ?? throw new ArgumentNullException(nameof(fetchExecutionRanges));
         }
 
         /// <summary>
@@ -59,9 +59,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         {
             public Accumulator(long retries, double requestCharge, IEnumerable<FetchExecutionRange> fetchExecutionRanges)
             {
-                this.Retries = retries;
-                this.RequestCharge = requestCharge;
-                this.FetchExecutionRanges = fetchExecutionRanges;
+                Retries = retries;
+                RequestCharge = requestCharge;
+                FetchExecutionRanges = fetchExecutionRanges;
             }
 
             public long Retries { get; }
@@ -78,9 +78,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
                 }
 
                 return new Accumulator(
-                    retries: this.Retries + clientSideMetrics.Retries,
-                    requestCharge: this.RequestCharge + clientSideMetrics.RequestCharge,
-                    fetchExecutionRanges: (this.FetchExecutionRanges ?? Enumerable.Empty<FetchExecutionRange>()).Concat(clientSideMetrics.FetchExecutionRanges));
+                    retries: Retries + clientSideMetrics.Retries,
+                    requestCharge: RequestCharge + clientSideMetrics.RequestCharge,
+                    fetchExecutionRanges: (FetchExecutionRanges ?? Enumerable.Empty<FetchExecutionRange>()).Concat(clientSideMetrics.FetchExecutionRanges));
             }
 
             public static ClientSideMetrics ToClientSideMetrics(Accumulator accumulator)

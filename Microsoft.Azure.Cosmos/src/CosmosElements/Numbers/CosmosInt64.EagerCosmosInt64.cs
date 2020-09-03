@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.CosmosElements.Numbers
 
             public override long GetValue()
             {
-                return this.number;
+                return number;
             }
         }
     }

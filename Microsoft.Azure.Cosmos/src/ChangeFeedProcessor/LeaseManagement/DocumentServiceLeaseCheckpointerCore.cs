@@ -34,10 +34,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 throw new ArgumentException("continuationToken must be a non-empty string", nameof(continuationToken));
             }
 
-            return await this.leaseUpdater.UpdateLeaseAsync(
+            return await leaseUpdater.UpdateLeaseAsync(
                 lease,
                 lease.Id,
-                this.requestOptionsFactory.GetPartitionKey(lease.Id),
+                requestOptionsFactory.GetPartitionKey(lease.Id),
                 serverLease =>
                 {
                     if (serverLease.Owner != lease.Owner)

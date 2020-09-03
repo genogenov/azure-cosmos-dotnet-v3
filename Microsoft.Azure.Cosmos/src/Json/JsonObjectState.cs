@@ -56,10 +56,10 @@ namespace Microsoft.Azure.Cosmos.Json
             Debug.Assert(JsonMaxNestingDepth < (1 << 15), "JsonMaxNestingDepth must be less than 2^15");
 
             this.readMode = readMode;
-            this.nestingStackBitmap = new byte[JsonMaxNestingDepth / 8];
-            this.nestingStackIndex = -1;
-            this.CurrentTokenType = JsonTokenType.NotStarted;
-            this.currentContext = JsonObjectContext.None;
+            nestingStackBitmap = new byte[JsonMaxNestingDepth / 8];
+            nestingStackIndex = -1;
+            CurrentTokenType = JsonTokenType.NotStarted;
+            currentContext = JsonObjectContext.None;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                return this.nestingStackIndex + 1;
+                return nestingStackIndex + 1;
             }
         }
 
@@ -106,7 +106,7 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                return (this.CurrentTokenType != JsonTokenType.FieldName) && (this.currentContext == JsonObjectContext.Object);
+                return (CurrentTokenType != JsonTokenType.FieldName) && (currentContext == JsonObjectContext.Object);
             }
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                return this.currentContext == JsonObjectContext.Array;
+                return currentContext == JsonObjectContext.Array;
             }
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                return this.currentContext == JsonObjectContext.Object;
+                return currentContext == JsonObjectContext.Object;
             }
         }
 
@@ -139,12 +139,12 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                if (this.nestingStackIndex < 0)
+                if (nestingStackIndex < 0)
                 {
                     return JsonObjectContext.None;
                 }
 
-                return (this.nestingStackBitmap[this.nestingStackIndex / 8] & this.Mask) == 0 ? JsonObjectContext.Array : JsonObjectContext.Object;
+                return (nestingStackBitmap[nestingStackIndex / 8] & Mask) == 0 ? JsonObjectContext.Array : JsonObjectContext.Object;
             }
         }
 
@@ -155,7 +155,7 @@ namespace Microsoft.Azure.Cosmos.Json
         {
             get
             {
-                return (byte)(1 << (this.nestingStackIndex % 8));
+                return (byte)(1 << (nestingStackIndex % 8));
             }
         }
 
@@ -181,22 +181,22 @@ namespace Microsoft.Azure.Cosmos.Json
                 case JsonTokenType.UInt32:
                 case JsonTokenType.Binary:
                 case JsonTokenType.Guid:
-                    this.RegisterValue(jsonTokenType);
+                    RegisterValue(jsonTokenType);
                     break;
                 case JsonTokenType.BeginArray:
-                    this.RegisterBeginArray();
+                    RegisterBeginArray();
                     break;
                 case JsonTokenType.EndArray:
-                    this.RegisterEndArray();
+                    RegisterEndArray();
                     break;
                 case JsonTokenType.BeginObject:
-                    this.RegisterBeginObject();
+                    RegisterBeginObject();
                     break;
                 case JsonTokenType.EndObject:
-                    this.RegisterEndObject();
+                    RegisterEndObject();
                     break;
                 case JsonTokenType.FieldName:
-                    this.RegisterFieldName();
+                    RegisterFieldName();
                     break;
                 default:
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, RMResources.UnexpectedJsonTokenType, jsonTokenType));
@@ -209,22 +209,22 @@ namespace Microsoft.Azure.Cosmos.Json
         /// <param name="isArray">Whether the JsonObjectContext is an array.</param>
         private void Push(bool isArray)
         {
-            if (this.nestingStackIndex + 1 >= JsonMaxNestingDepth)
+            if (nestingStackIndex + 1 >= JsonMaxNestingDepth)
             {
                 throw new InvalidOperationException(RMResources.JsonMaxNestingExceeded);
             }
 
-            this.nestingStackIndex++;
+            nestingStackIndex++;
 
             if (isArray)
             {
-                this.nestingStackBitmap[this.nestingStackIndex / 8] &= (byte)~this.Mask;
-                this.currentContext = JsonObjectContext.Array;
+                nestingStackBitmap[nestingStackIndex / 8] &= (byte)~Mask;
+                currentContext = JsonObjectContext.Array;
             }
             else
             {
-                this.nestingStackBitmap[this.nestingStackIndex / 8] |= this.Mask;
-                this.currentContext = JsonObjectContext.Object;
+                nestingStackBitmap[nestingStackIndex / 8] |= Mask;
+                currentContext = JsonObjectContext.Object;
             }
         }
 
@@ -234,17 +234,17 @@ namespace Microsoft.Azure.Cosmos.Json
         /// <param name="jsonTokenType">The jsonTokenType to register</param>
         private void RegisterValue(JsonTokenType jsonTokenType)
         {
-            if ((this.currentContext == JsonObjectContext.Object) && (this.CurrentTokenType != JsonTokenType.FieldName))
+            if ((currentContext == JsonObjectContext.Object) && (CurrentTokenType != JsonTokenType.FieldName))
             {
                 throw new JsonMissingPropertyException();
             }
 
-            if ((this.currentContext == JsonObjectContext.None) && (this.CurrentTokenType != JsonTokenType.NotStarted))
+            if ((currentContext == JsonObjectContext.None) && (CurrentTokenType != JsonTokenType.NotStarted))
             {
                 throw new JsonPropertyArrayOrObjectNotStartedException();
             }
 
-            this.CurrentTokenType = jsonTokenType;
+            CurrentTokenType = jsonTokenType;
         }
 
         /// <summary>
@@ -253,8 +253,8 @@ namespace Microsoft.Azure.Cosmos.Json
         private void RegisterBeginArray()
         {
             // An array start is also a value
-            this.RegisterValue(JsonTokenType.BeginArray);
-            this.Push(true);
+            RegisterValue(JsonTokenType.BeginArray);
+            Push(true);
         }
 
         /// <summary>
@@ -262,9 +262,9 @@ namespace Microsoft.Azure.Cosmos.Json
         /// </summary>
         private void RegisterEndArray()
         {
-            if (this.currentContext != JsonObjectContext.Array)
+            if (currentContext != JsonObjectContext.Array)
             {
-                if (this.readMode)
+                if (readMode)
                 {
                     throw new JsonUnexpectedEndArrayException();
                 }
@@ -274,9 +274,9 @@ namespace Microsoft.Azure.Cosmos.Json
                 }
             }
 
-            this.nestingStackIndex--;
-            this.CurrentTokenType = JsonTokenType.EndArray;
-            this.currentContext = this.RetrieveCurrentContext;
+            nestingStackIndex--;
+            CurrentTokenType = JsonTokenType.EndArray;
+            currentContext = RetrieveCurrentContext;
         }
 
         /// <summary>
@@ -285,8 +285,8 @@ namespace Microsoft.Azure.Cosmos.Json
         private void RegisterBeginObject()
         {
             // An object start is also a value
-            this.RegisterValue(JsonTokenType.BeginObject);
-            this.Push(false);
+            RegisterValue(JsonTokenType.BeginObject);
+            Push(false);
         }
 
         /// <summary>
@@ -294,9 +294,9 @@ namespace Microsoft.Azure.Cosmos.Json
         /// </summary>
         private void RegisterEndObject()
         {
-            if (this.currentContext != JsonObjectContext.Object)
+            if (currentContext != JsonObjectContext.Object)
             {
-                if (this.readMode)
+                if (readMode)
                 {
                     throw new JsonUnexpectedEndObjectException();
                 }
@@ -307,9 +307,9 @@ namespace Microsoft.Azure.Cosmos.Json
             }
 
             // check if we have a property name but not a value
-            if (this.CurrentTokenType == JsonTokenType.FieldName)
+            if (CurrentTokenType == JsonTokenType.FieldName)
             {
-                if (this.readMode)
+                if (readMode)
                 {
                     throw new JsonUnexpectedEndObjectException();
                 }
@@ -319,9 +319,9 @@ namespace Microsoft.Azure.Cosmos.Json
                 }
             }
 
-            this.nestingStackIndex--;
-            this.CurrentTokenType = JsonTokenType.EndObject;
-            this.currentContext = this.RetrieveCurrentContext;
+            nestingStackIndex--;
+            CurrentTokenType = JsonTokenType.EndObject;
+            currentContext = RetrieveCurrentContext;
         }
 
         /// <summary>
@@ -329,17 +329,17 @@ namespace Microsoft.Azure.Cosmos.Json
         /// </summary>
         private void RegisterFieldName()
         {
-            if (this.currentContext != JsonObjectContext.Object)
+            if (currentContext != JsonObjectContext.Object)
             {
                 throw new JsonObjectNotStartedException();
             }
 
-            if (this.CurrentTokenType == JsonTokenType.FieldName)
+            if (CurrentTokenType == JsonTokenType.FieldName)
             {
                 throw new JsonPropertyAlreadyAddedException();
             }
 
-            this.CurrentTokenType = JsonTokenType.FieldName;
+            CurrentTokenType = JsonTokenType.FieldName;
         }
     }
 }

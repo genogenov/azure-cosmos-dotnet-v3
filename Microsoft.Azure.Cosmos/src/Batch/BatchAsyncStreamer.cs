@@ -41,12 +41,12 @@ namespace Microsoft.Azure.Cosmos
 
         private TimerWheelTimer congestionControlTimer;
         private Task congestionControlTask;
-        private SemaphoreSlim limiter;
+        private readonly SemaphoreSlim limiter;
 
         private int congestionDegreeOfConcurrency = 1;
         private long congestionWaitTimeInMilliseconds = 1000;
-        private BatchPartitionMetric oldPartitionMetric;
-        private BatchPartitionMetric partitionMetric;
+        private readonly BatchPartitionMetric oldPartitionMetric;
+        private readonly BatchPartitionMetric partitionMetric;
 
         public BatchAsyncStreamer(
             int maxBatchOperationCount,
@@ -99,149 +99,149 @@ namespace Microsoft.Azure.Cosmos
             this.retrier = retrier;
             this.timerWheel = timerWheel;
             this.serializerCore = serializerCore;
-            this.currentBatcher = this.CreateBatchAsyncBatcher();
-            this.ResetTimer();
+            currentBatcher = CreateBatchAsyncBatcher();
+            ResetTimer();
 
             this.limiter = limiter;
-            this.oldPartitionMetric = new BatchPartitionMetric();
-            this.partitionMetric = new BatchPartitionMetric();
+            oldPartitionMetric = new BatchPartitionMetric();
+            partitionMetric = new BatchPartitionMetric();
             this.maxDegreeOfConcurrency = maxDegreeOfConcurrency;
 
-            this.StartCongestionControlTimer();
+            StartCongestionControlTimer();
         }
 
         public void Add(ItemBatchOperation operation)
         {
             BatchAsyncBatcher toDispatch = null;
-            lock (this.dispatchLimiter)
+            lock (dispatchLimiter)
             {
-                while (!this.currentBatcher.TryAdd(operation))
+                while (!currentBatcher.TryAdd(operation))
                 {
                     // Batcher is full
-                    toDispatch = this.GetBatchToDispatchAndCreate();
+                    toDispatch = GetBatchToDispatchAndCreate();
                 }
             }
 
             if (toDispatch != null)
             {
                 // Discarded for Fire & Forget
-                _ = toDispatch.DispatchAsync(this.partitionMetric, this.cancellationTokenSource.Token);
+                _ = toDispatch.DispatchAsync(partitionMetric, cancellationTokenSource.Token);
             }
         }
 
         public void Dispose()
         {
-            this.cancellationTokenSource.Cancel();
-            this.cancellationTokenSource.Dispose();
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource.Dispose();
 
-            this.currentTimer.CancelTimer();
-            this.currentTimer = null;
-            this.timerTask = null;
+            currentTimer.CancelTimer();
+            currentTimer = null;
+            timerTask = null;
 
-            if (this.congestionControlTimer != null)
+            if (congestionControlTimer != null)
             {
-                this.congestionControlTimer.CancelTimer();
-                this.congestionControlTimer = null;
-                this.congestionControlTask = null;
+                congestionControlTimer.CancelTimer();
+                congestionControlTimer = null;
+                congestionControlTask = null;
             }
         }
 
         private void ResetTimer()
         {
-            this.currentTimer = this.timerWheel.CreateTimer(BatchAsyncStreamer.batchTimeout);
-            this.timerTask = this.currentTimer.StartTimerAsync().ContinueWith((task) =>
+            currentTimer = timerWheel.CreateTimer(BatchAsyncStreamer.batchTimeout);
+            timerTask = currentTimer.StartTimerAsync().ContinueWith((task) =>
             {
                 if (task.IsCompleted)
                 {
-                    this.DispatchTimer();
+                    DispatchTimer();
                 }
-            }, this.cancellationTokenSource.Token);
+            }, cancellationTokenSource.Token);
         }
 
         private void StartCongestionControlTimer()
         {
-            this.congestionControlTimer = this.timerWheel.CreateTimer(BatchAsyncStreamer.congestionControllerDelay);
-            this.congestionControlTask = this.congestionControlTimer.StartTimerAsync().ContinueWith(async (task) =>
+            congestionControlTimer = timerWheel.CreateTimer(BatchAsyncStreamer.congestionControllerDelay);
+            congestionControlTask = congestionControlTimer.StartTimerAsync().ContinueWith(async (task) =>
             {
-                await this.RunCongestionControlAsync();
-            }, this.cancellationTokenSource.Token);
+                await RunCongestionControlAsync();
+            }, cancellationTokenSource.Token);
         }
 
         private void DispatchTimer()
         {
-            if (this.cancellationTokenSource.IsCancellationRequested)
+            if (cancellationTokenSource.IsCancellationRequested)
             {
                 return;
             }
 
             BatchAsyncBatcher toDispatch;
-            lock (this.dispatchLimiter)
+            lock (dispatchLimiter)
             {
-                toDispatch = this.GetBatchToDispatchAndCreate();
+                toDispatch = GetBatchToDispatchAndCreate();
             }
 
             if (toDispatch != null)
             {
                 // Discarded for Fire & Forget
-                _ = toDispatch.DispatchAsync(this.partitionMetric, this.cancellationTokenSource.Token);
+                _ = toDispatch.DispatchAsync(partitionMetric, cancellationTokenSource.Token);
             }
 
-            this.ResetTimer();
+            ResetTimer();
         }
 
         private BatchAsyncBatcher GetBatchToDispatchAndCreate()
         {
-            if (this.currentBatcher.IsEmpty)
+            if (currentBatcher.IsEmpty)
             {
                 return null;
             }
 
-            BatchAsyncBatcher previousBatcher = this.currentBatcher;
-            this.currentBatcher = this.CreateBatchAsyncBatcher();
+            BatchAsyncBatcher previousBatcher = currentBatcher;
+            currentBatcher = CreateBatchAsyncBatcher();
             return previousBatcher;
         }
 
         private BatchAsyncBatcher CreateBatchAsyncBatcher()
         {
-            return new BatchAsyncBatcher(this.maxBatchOperationCount, this.maxBatchByteSize, this.serializerCore, this.executor, this.retrier);
+            return new BatchAsyncBatcher(maxBatchOperationCount, maxBatchByteSize, serializerCore, executor, retrier);
         }
 
         private async Task RunCongestionControlAsync()
         {
-            while (!this.cancellationTokenSource.Token.IsCancellationRequested)
+            while (!cancellationTokenSource.Token.IsCancellationRequested)
             {
-                long elapsedTimeInMilliseconds = this.partitionMetric.TimeTakenInMilliseconds - this.oldPartitionMetric.TimeTakenInMilliseconds;
+                long elapsedTimeInMilliseconds = partitionMetric.TimeTakenInMilliseconds - oldPartitionMetric.TimeTakenInMilliseconds;
 
-                if (elapsedTimeInMilliseconds >= this.congestionWaitTimeInMilliseconds)
+                if (elapsedTimeInMilliseconds >= congestionWaitTimeInMilliseconds)
                 {
-                    long diffThrottle = this.partitionMetric.NumberOfThrottles - this.oldPartitionMetric.NumberOfThrottles;
-                    long changeItemsCount = this.partitionMetric.NumberOfItemsOperatedOn - this.oldPartitionMetric.NumberOfItemsOperatedOn;
-                    this.oldPartitionMetric.Add(changeItemsCount, elapsedTimeInMilliseconds, diffThrottle);
+                    long diffThrottle = partitionMetric.NumberOfThrottles - oldPartitionMetric.NumberOfThrottles;
+                    long changeItemsCount = partitionMetric.NumberOfItemsOperatedOn - oldPartitionMetric.NumberOfItemsOperatedOn;
+                    oldPartitionMetric.Add(changeItemsCount, elapsedTimeInMilliseconds, diffThrottle);
 
                     if (diffThrottle > 0)
                     {
                         // Decrease should not lead to degreeOfConcurrency 0 as this will just block the thread here and no one would release it.
-                        int decreaseCount = Math.Min(this.congestionDecreaseFactor, this.congestionDegreeOfConcurrency / 2);
+                        int decreaseCount = Math.Min(congestionDecreaseFactor, congestionDegreeOfConcurrency / 2);
 
                         // We got a throttle so we need to back off on the degree of concurrency.
                         for (int i = 0; i < decreaseCount; i++)
                         {
-                            await this.limiter.WaitAsync(this.cancellationTokenSource.Token);
+                            await limiter.WaitAsync(cancellationTokenSource.Token);
                         }
 
-                        this.congestionDegreeOfConcurrency -= decreaseCount;
+                        congestionDegreeOfConcurrency -= decreaseCount;
 
                         // In case of throttling increase the wait time, so as to converge max degreeOfConcurrency
-                        this.congestionWaitTimeInMilliseconds += 1000;
+                        congestionWaitTimeInMilliseconds += 1000;
                     }
 
                     if (changeItemsCount > 0 && diffThrottle == 0)
                     {
-                        if (this.congestionDegreeOfConcurrency + this.congestionIncreaseFactor <= this.maxDegreeOfConcurrency)
+                        if (congestionDegreeOfConcurrency + congestionIncreaseFactor <= maxDegreeOfConcurrency)
                         {
                             // We aren't getting throttles, so we should bump up the degree of concurrency.
-                            this.limiter.Release(this.congestionIncreaseFactor);
-                            this.congestionDegreeOfConcurrency += this.congestionIncreaseFactor;
+                            limiter.Release(congestionIncreaseFactor);
+                            congestionDegreeOfConcurrency += congestionIncreaseFactor;
                         }
                     }
                 }
@@ -251,7 +251,7 @@ namespace Microsoft.Azure.Cosmos
                 }
             }
 
-            this.StartCongestionControlTimer();
+            StartCongestionControlTimer();
         }
     }
 }

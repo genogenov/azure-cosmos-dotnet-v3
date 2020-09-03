@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Diagnostics;
-    using System.Globalization;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -35,13 +34,13 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchItemRequestOptions requestOptions = null,
             CosmosDiagnosticsContext diagnosticsContext = null)
         {
-            this.OperationType = operationType;
-            this.OperationIndex = operationIndex;
-            this.PartitionKey = partitionKey;
-            this.Id = id;
-            this.ResourceStream = resourceStream;
-            this.RequestOptions = requestOptions;
-            this.DiagnosticsContext = diagnosticsContext;
+            OperationType = operationType;
+            OperationIndex = operationIndex;
+            PartitionKey = partitionKey;
+            Id = id;
+            ResourceStream = resourceStream;
+            RequestOptions = requestOptions;
+            DiagnosticsContext = diagnosticsContext;
         }
 
         public ItemBatchOperation(
@@ -52,13 +51,13 @@ namespace Microsoft.Azure.Cosmos
             Stream resourceStream = null,
             TransactionalBatchItemRequestOptions requestOptions = null)
         {
-            this.OperationType = operationType;
-            this.OperationIndex = operationIndex;
-            this.ContainerInternal = containerCore;
-            this.Id = id;
-            this.ResourceStream = resourceStream;
-            this.RequestOptions = requestOptions;
-            this.DiagnosticsContext = null;
+            OperationType = operationType;
+            OperationIndex = operationIndex;
+            ContainerInternal = containerCore;
+            Id = id;
+            ResourceStream = resourceStream;
+            RequestOptions = requestOptions;
+            DiagnosticsContext = null;
         }
 
         public PartitionKey? PartitionKey { get; internal set; }
@@ -86,15 +85,15 @@ namespace Microsoft.Azure.Cosmos
             get
             {
                 Debug.Assert(
-                    this.ResourceStream == null || !this.body.IsEmpty,
+                    ResourceStream == null || !body.IsEmpty,
                     "ResourceBody read without materialization of ResourceStream");
 
-                return this.body;
+                return body;
             }
 
             set
             {
-                this.body = value;
+                body = value;
             }
         }
 
@@ -111,7 +110,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         internal static Result WriteOperation(ref RowWriter writer, TypeArgument typeArg, ItemBatchOperation operation)
@@ -266,38 +265,38 @@ namespace Microsoft.Azure.Cosmos
         {
             int length = 0;
 
-            if (this.PartitionKeyJson != null)
+            if (PartitionKeyJson != null)
             {
-                length += this.PartitionKeyJson.Length;
+                length += PartitionKeyJson.Length;
             }
 
-            if (this.Id != null)
+            if (Id != null)
             {
-                length += this.Id.Length;
+                length += Id.Length;
             }
 
-            length += this.body.Length;
+            length += body.Length;
 
-            if (this.RequestOptions != null)
+            if (RequestOptions != null)
             {
-                if (this.RequestOptions.IfMatchEtag != null)
+                if (RequestOptions.IfMatchEtag != null)
                 {
-                    length += this.RequestOptions.IfMatchEtag.Length;
+                    length += RequestOptions.IfMatchEtag.Length;
                 }
 
-                if (this.RequestOptions.IfNoneMatchEtag != null)
+                if (RequestOptions.IfNoneMatchEtag != null)
                 {
-                    length += this.RequestOptions.IfNoneMatchEtag.Length;
+                    length += RequestOptions.IfNoneMatchEtag.Length;
                 }
 
-                if (this.RequestOptions.IndexingDirective.HasValue)
+                if (RequestOptions.IndexingDirective.HasValue)
                 {
                     length += 7; // "Default", "Include", "Exclude" are possible values
                 }
 
-                if (this.RequestOptions.Properties != null)
+                if (RequestOptions.Properties != null)
                 {
-                    if (this.RequestOptions.Properties.TryGetValue(WFConstants.BackendHeaders.BinaryId, out object binaryIdObj))
+                    if (RequestOptions.Properties.TryGetValue(WFConstants.BackendHeaders.BinaryId, out object binaryIdObj))
                     {
                         if (binaryIdObj is byte[] binaryId)
                         {
@@ -305,7 +304,7 @@ namespace Microsoft.Azure.Cosmos
                         }
                     }
 
-                    if (this.RequestOptions.Properties.TryGetValue(WFConstants.BackendHeaders.EffectivePartitionKey, out object epkObj))
+                    if (RequestOptions.Properties.TryGetValue(WFConstants.BackendHeaders.EffectivePartitionKey, out object epkObj))
                     {
                         if (epkObj is byte[] epk)
                         {
@@ -325,9 +324,9 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="cancellationToken"><see cref="CancellationToken"/> for cancellation.</param>
         internal virtual async Task MaterializeResourceAsync(CosmosSerializerCore serializerCore, CancellationToken cancellationToken)
         {
-            if (this.body.IsEmpty && this.ResourceStream != null)
+            if (body.IsEmpty && ResourceStream != null)
             {
-                this.body = await BatchExecUtils.StreamToMemoryAsync(this.ResourceStream, cancellationToken);
+                body = await BatchExecUtils.StreamToMemoryAsync(ResourceStream, cancellationToken);
             }
         }
 
@@ -337,12 +336,12 @@ namespace Microsoft.Azure.Cosmos
         /// <exception cref="InvalidOperationException">If the operation already had an attached context.</exception>
         internal void AttachContext(ItemBatchOperationContext context)
         {
-            if (this.Context != null)
+            if (Context != null)
             {
                 throw new InvalidOperationException("Cannot modify the current context of an operation.");
             }
 
-            this.Context = context;
+            Context = context;
         }
 
         /// <summary>
@@ -351,13 +350,13 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="disposing">Indicates whether to dispose managed resources or not.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing && !this.isDisposed)
+            if (disposing && !isDisposed)
             {
-                this.isDisposed = true;
-                if (this.ResourceStream != null)
+                isDisposed = true;
+                if (ResourceStream != null)
                 {
-                    this.ResourceStream.Dispose();
-                    this.ResourceStream = null;
+                    ResourceStream.Dispose();
+                    ResourceStream = null;
                 }
             }
         }
@@ -376,7 +375,7 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchItemRequestOptions requestOptions = null)
             : base(operationType, operationIndex, partitionKey: partitionKey, id: id, requestOptions: requestOptions)
         {
-            this.Resource = resource;
+            Resource = resource;
         }
 
         public ItemBatchOperation(
@@ -388,7 +387,7 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchItemRequestOptions requestOptions = null)
             : base(operationType, operationIndex, containerCore: containerCore, id: id, requestOptions: requestOptions)
         {
-            this.Resource = resource;
+            Resource = resource;
         }
 
         public T Resource { get; private set; }
@@ -400,9 +399,9 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="cancellationToken"><see cref="CancellationToken"/> for cancellation.</param>
         internal override Task MaterializeResourceAsync(CosmosSerializerCore serializerCore, CancellationToken cancellationToken)
         {
-            if (this.body.IsEmpty && this.Resource != null)
+            if (body.IsEmpty && Resource != null)
             {
-                this.ResourceStream = serializerCore.ToStream(this.Resource);
+                ResourceStream = serializerCore.ToStream(Resource);
                 return base.MaterializeResourceAsync(serializerCore, cancellationToken);
             }
 

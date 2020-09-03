@@ -22,7 +22,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public DocumentServiceLeaseUpdaterCosmos(Container container)
         {
-            if (container == null) throw new ArgumentNullException(nameof(container));
+            if (container == null)
+            {
+                throw new ArgumentNullException(nameof(container));
+            }
+
             this.container = container;
         }
 
@@ -42,7 +46,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                 }
 
                 lease.Timestamp = DateTime.UtcNow;
-                DocumentServiceLeaseCore leaseDocument = await this.TryReplaceLeaseAsync((DocumentServiceLeaseCore)lease, partitionKey, itemId).ConfigureAwait(false);
+                DocumentServiceLeaseCore leaseDocument = await TryReplaceLeaseAsync((DocumentServiceLeaseCore)lease, partitionKey, itemId).ConfigureAwait(false);
                 if (leaseDocument != null)
                 {
                     return leaseDocument;
@@ -52,7 +56,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
                 try
                 {
-                    DocumentServiceLeaseCore serverLease = await this.container.TryGetItemAsync<DocumentServiceLeaseCore>(partitionKey, itemId);
+                    DocumentServiceLeaseCore serverLease = await container.TryGetItemAsync<DocumentServiceLeaseCore>(partitionKey, itemId);
 
                     DefaultTrace.TraceInformation(
                     "Lease with token {0} update failed because the lease with concurrency token '{1}' was updated by host '{2}' with concurrency token '{3}'. Will retry, {4} retry(s) left.",
@@ -81,8 +85,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
         {
             try
             {
-                ItemRequestOptions itemRequestOptions = this.CreateIfMatchOptions(lease);
-                ItemResponse<DocumentServiceLeaseCore> response = await this.container.TryReplaceItemAsync<DocumentServiceLeaseCore>(
+                ItemRequestOptions itemRequestOptions = CreateIfMatchOptions(lease);
+                ItemResponse<DocumentServiceLeaseCore> response = await container.TryReplaceItemAsync<DocumentServiceLeaseCore>(
                     itemId,
                     lease,
                     partitionKey,

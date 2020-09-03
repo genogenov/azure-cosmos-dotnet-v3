@@ -50,7 +50,7 @@ namespace Microsoft.Azure.Cosmos
                 writer.WritePropertyName(PatchConstants.PropertyNames.Path);
                 writer.WriteValue(operation.Path);
 
-                if (operation.TrySerializeValueParameter(this.userSerializer, out string valueParam))
+                if (operation.TrySerializeValueParameter(userSerializer, out string valueParam))
                 {
                     writer.WritePropertyName(PatchConstants.PropertyNames.Value);
                     writer.WriteRawValue(valueParam);

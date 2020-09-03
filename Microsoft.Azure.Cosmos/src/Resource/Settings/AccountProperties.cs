@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         internal AccountProperties()
         {
-            this.QueryEngineConfigurationInternal = new Lazy<IDictionary<string, object>>(() => QueryStringToDictConverter());
+            QueryEngineConfigurationInternal = new Lazy<IDictionary<string, object>>(() => QueryStringToDictConverter());
         }
 
         /// <summary>
@@ -33,14 +33,14 @@ namespace Microsoft.Azure.Cosmos
         /// this database account from the Azure Cosmos DB service.
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<AccountRegion> WritableRegions => this.WriteLocationsInternal;
+        public IEnumerable<AccountRegion> WritableRegions => WriteLocationsInternal;
 
         /// <summary>
         /// Gets the list of locations representing the readable regions of
         /// this database account from the Azure Cosmos DB service.
         /// </summary>
         [JsonIgnore]
-        public IEnumerable<AccountRegion> ReadableRegions => this.ReadLocationsInternal;
+        public IEnumerable<AccountRegion> ReadableRegions => ReadLocationsInternal;
 
         /// <summary>
         /// Gets the Id of the resource in the Azure Cosmos DB service.
@@ -97,13 +97,13 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.writeRegions == null)
+                if (writeRegions == null)
                 {
-                    this.writeRegions = new Collection<AccountRegion>();
+                    writeRegions = new Collection<AccountRegion>();
                 }
-                return this.writeRegions;
+                return writeRegions;
             }
-            set => this.writeRegions = value;
+            set => writeRegions = value;
         }
 
         [JsonProperty(PropertyName = Constants.Properties.ReadableLocations)]
@@ -111,13 +111,13 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                if (this.readRegions == null)
+                if (readRegions == null)
                 {
-                    this.readRegions = new Collection<AccountRegion>();
+                    readRegions = new Collection<AccountRegion>();
                 }
-                return this.readRegions;
+                return readRegions;
             }
-            set => this.readRegions = value;
+            set => readRegions = value;
         }
 
         /// <summary>
@@ -214,7 +214,7 @@ namespace Microsoft.Azure.Cosmos
         [JsonProperty(PropertyName = Constants.Properties.ReadPolicy)]
         internal ReadPolicy ReadPolicy { get; set; }
 
-        internal IDictionary<string, object> QueryEngineConfiguration => this.QueryEngineConfigurationInternal.Value;
+        internal IDictionary<string, object> QueryEngineConfiguration => QueryEngineConfigurationInternal.Value;
 
         [JsonProperty(PropertyName = Constants.Properties.QueryEngineConfiguration)]
         internal string QueryEngineConfigurationString { get; set; }
@@ -224,9 +224,9 @@ namespace Microsoft.Azure.Cosmos
 
         private IDictionary<string, object> QueryStringToDictConverter()
         {
-            if (!string.IsNullOrEmpty(this.QueryEngineConfigurationString))
+            if (!string.IsNullOrEmpty(QueryEngineConfigurationString))
             {
-                return JsonConvert.DeserializeObject<Dictionary<string, object>>(this.QueryEngineConfigurationString);
+                return JsonConvert.DeserializeObject<Dictionary<string, object>>(QueryEngineConfigurationString);
             }
             else
             {

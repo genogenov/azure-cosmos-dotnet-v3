@@ -47,9 +47,9 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(createCustomWriter));
             }
 
-            this.ContentSerializationFormat = contentSerializationFormat;
-            this.CreateCustomNavigatorCallback = createCustomNavigator;
-            this.CreateCustomWriterCallback = createCustomWriter;
+            ContentSerializationFormat = contentSerializationFormat;
+            CreateCustomNavigatorCallback = createCustomNavigator;
+            CreateCustomWriterCallback = createCustomWriter;
         }
     }
 }

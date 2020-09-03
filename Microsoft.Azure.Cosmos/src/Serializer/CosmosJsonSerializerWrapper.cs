@@ -13,12 +13,12 @@ namespace Microsoft.Azure.Cosmos
 
         public CosmosJsonSerializerWrapper(CosmosSerializer cosmosJsonSerializer)
         {
-            this.InternalJsonSerializer = cosmosJsonSerializer ?? throw new ArgumentNullException(nameof(cosmosJsonSerializer));
+            InternalJsonSerializer = cosmosJsonSerializer ?? throw new ArgumentNullException(nameof(cosmosJsonSerializer));
         }
 
         public override T FromStream<T>(Stream stream)
         {
-            T item = this.InternalJsonSerializer.FromStream<T>(stream);
+            T item = InternalJsonSerializer.FromStream<T>(stream);
             if (stream.CanRead)
             {
                 throw new InvalidOperationException("Json Serializer left an open stream.");
@@ -29,7 +29,7 @@ namespace Microsoft.Azure.Cosmos
 
         public override Stream ToStream<T>(T input)
         {
-            Stream stream = this.InternalJsonSerializer.ToStream<T>(input);
+            Stream stream = InternalJsonSerializer.ToStream<T>(input);
             if (stream == null)
             {
                 throw new InvalidOperationException("Json Serializer returned a null stream.");

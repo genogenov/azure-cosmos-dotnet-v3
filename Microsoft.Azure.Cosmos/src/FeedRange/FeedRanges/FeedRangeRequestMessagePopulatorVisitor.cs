@@ -20,21 +20,21 @@ namespace Microsoft.Azure.Cosmos
 
         public void Visit(FeedRangePartitionKey feedRange)
         {
-            this.request.Headers.PartitionKey = feedRange.PartitionKey.ToJsonString();
+            request.Headers.PartitionKey = feedRange.PartitionKey.ToJsonString();
         }
 
         public void Visit(FeedRangePartitionKeyRange feedRange)
         {
-            this.request.PartitionKeyRangeId = new Documents.PartitionKeyRangeIdentity(feedRange.PartitionKeyRangeId);
+            request.PartitionKeyRangeId = new Documents.PartitionKeyRangeIdentity(feedRange.PartitionKeyRangeId);
         }
 
         public void Visit(FeedRangeEpk feedRange)
         {
             // In case EPK has already been set by compute
-            if (!this.request.Properties.ContainsKey(HandlerConstants.StartEpkString))
+            if (!request.Properties.ContainsKey(HandlerConstants.StartEpkString))
             {
-                this.request.Properties[HandlerConstants.StartEpkString] = feedRange.Range.Min;
-                this.request.Properties[HandlerConstants.EndEpkString] = feedRange.Range.Max;
+                request.Properties[HandlerConstants.StartEpkString] = feedRange.Range.Min;
+                request.Properties[HandlerConstants.EndEpkString] = feedRange.Range.Max;
             }
         }
     }

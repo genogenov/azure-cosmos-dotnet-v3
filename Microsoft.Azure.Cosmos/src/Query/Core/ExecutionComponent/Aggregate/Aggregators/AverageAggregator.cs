@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.CosmosElements;
     using Microsoft.Azure.Cosmos.CosmosElements.Numbers;
-    using Microsoft.Azure.Cosmos.Json;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.Monads;
 
@@ -44,7 +43,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             }
 
             AverageInfo newInfo = tryCreateAverageInfo.Result;
-            this.globalAverage += newInfo;
+            globalAverage += newInfo;
         }
 
         /// <summary>
@@ -53,7 +52,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
         /// <returns>The current running average or undefined if any of the intermediate averages resulted in an undefined value.</returns>
         public CosmosElement GetResult()
         {
-            return this.globalAverage.GetAverage();
+            return globalAverage.GetAverage();
         }
 
         public static TryCatch<IAggregator> TryCreate(CosmosElement continuationToken)
@@ -82,7 +81,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
 
         public CosmosElement GetCosmosElementContinuationToken()
         {
-            return AverageInfo.ToCosmosElement(this.globalAverage);
+            return AverageInfo.ToCosmosElement(globalAverage);
         }
 
         /// <summary>
@@ -100,8 +99,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             /// <param name="count">The count.</param>
             public AverageInfo(double? sum, long count)
             {
-                this.Sum = sum;
-                this.Count = count;
+                Sum = sum;
+                Count = count;
             }
 
             public static CosmosElement ToCosmosElement(AverageInfo averageInfo)
@@ -156,7 +155,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
                 }
 
                 long count = Number64.ToLong(cosmosCount.Value);
-                
+
                 return TryCatch<AverageInfo>.FromResult(new AverageInfo(sum, count));
             }
 
@@ -200,19 +199,19 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.Aggregate.Aggrega
             /// <returns>The average or undefined if any of the intermediate averages resulted in an undefined value.</returns>
             public CosmosNumber GetAverage()
             {
-                if (!this.Sum.HasValue || this.Count <= 0)
+                if (!Sum.HasValue || Count <= 0)
                 {
                     return null;
                 }
 
-                return CosmosNumber64.Create(this.Sum.Value / (double)this.Count);
+                return CosmosNumber64.Create(Sum.Value / Count);
             }
 
             public override string ToString()
             {
                 return $@"{{
-                    {(this.Sum.HasValue ? $@"""{SumName}"" : {this.Sum.Value}," : string.Empty)}
-                    ""{CountName}"" : {this.Count}
+                    {(Sum.HasValue ? $@"""{SumName}"" : {Sum.Value}," : string.Empty)}
+                    ""{CountName}"" : {Count}
                 }}";
             }
         }

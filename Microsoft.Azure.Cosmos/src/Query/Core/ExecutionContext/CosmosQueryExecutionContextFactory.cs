@@ -534,38 +534,38 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                 bool forcePassthrough,
                 TestInjections testInjections)
             {
-                this.SqlQuerySpec = sqlQuerySpec ?? throw new ArgumentNullException(nameof(sqlQuerySpec));
-                this.InitialUserContinuationToken = initialUserContinuationToken;
-                this.InitialFeedRange = initialFeedRange;
+                SqlQuerySpec = sqlQuerySpec ?? throw new ArgumentNullException(nameof(sqlQuerySpec));
+                InitialUserContinuationToken = initialUserContinuationToken;
+                InitialFeedRange = initialFeedRange;
 
                 int resolvedMaxConcurrency = maxConcurrency.GetValueOrDefault(InputParameters.DefaultMaxConcurrency);
                 if (resolvedMaxConcurrency < 0)
                 {
                     resolvedMaxConcurrency = int.MaxValue;
                 }
-                this.MaxConcurrency = resolvedMaxConcurrency;
+                MaxConcurrency = resolvedMaxConcurrency;
 
                 int resolvedMaxItemCount = maxItemCount.GetValueOrDefault(InputParameters.DefaultMaxItemCount);
                 if (resolvedMaxItemCount < 0)
                 {
                     resolvedMaxItemCount = int.MaxValue;
                 }
-                this.MaxItemCount = resolvedMaxItemCount;
+                MaxItemCount = resolvedMaxItemCount;
 
                 int resolvedMaxBufferedItemCount = maxBufferedItemCount.GetValueOrDefault(InputParameters.DefaultMaxBufferedItemCount);
                 if (resolvedMaxBufferedItemCount < 0)
                 {
                     resolvedMaxBufferedItemCount = int.MaxValue;
                 }
-                this.MaxBufferedItemCount = resolvedMaxBufferedItemCount;
+                MaxBufferedItemCount = resolvedMaxBufferedItemCount;
 
-                this.PartitionKey = partitionKey;
-                this.Properties = properties;
-                this.PartitionedQueryExecutionInfo = partitionedQueryExecutionInfo;
-                this.ExecutionEnvironment = executionEnvironment.GetValueOrDefault(InputParameters.DefaultExecutionEnvironment);
-                this.ReturnResultsInDeterministicOrder = returnResultsInDeterministicOrder.GetValueOrDefault(InputParameters.DefaultReturnResultsInDeterministicOrder);
-                this.ForcePassthrough = forcePassthrough;
-                this.TestInjections = testInjections;
+                PartitionKey = partitionKey;
+                Properties = properties;
+                PartitionedQueryExecutionInfo = partitionedQueryExecutionInfo;
+                ExecutionEnvironment = executionEnvironment.GetValueOrDefault(InputParameters.DefaultExecutionEnvironment);
+                ReturnResultsInDeterministicOrder = returnResultsInDeterministicOrder.GetValueOrDefault(InputParameters.DefaultReturnResultsInDeterministicOrder);
+                ForcePassthrough = forcePassthrough;
+                TestInjections = testInjections;
             }
 
             public SqlQuerySpec SqlQuerySpec { get; }
@@ -694,7 +694,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionContext
                     public override bool Visit(SqlInScalarExpression sqlInScalarExpression)
                     {
                         bool hasAggregates = false;
-                        for (int i = 0; i < sqlInScalarExpression.Haystack.Length; i++)
+                        for (int i = 0; i < sqlInScalarExpression.Haystack.Count; i++)
                         {
                             hasAggregates |= sqlInScalarExpression.Haystack[i].Accept(this);
                         }

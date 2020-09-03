@@ -14,7 +14,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
             DocumentContainerState state = null)
             : base(state)
         {
-            this.Records = records ?? throw new ArgumentNullException(nameof(records));
+            Records = records ?? throw new ArgumentNullException(nameof(records));
         }
 
         public IReadOnlyList<Record> Records { get; }

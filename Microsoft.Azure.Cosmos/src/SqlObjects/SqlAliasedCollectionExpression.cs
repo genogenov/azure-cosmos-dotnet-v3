@@ -25,8 +25,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlCollection collection,
             SqlIdentifier alias)
         {
-            this.Collection = collection ?? throw new ArgumentNullException(nameof(collection));
-            this.Alias = alias;
+            Collection = collection ?? throw new ArgumentNullException(nameof(collection));
+            Alias = alias;
         }
 
         public SqlCollection Collection { get; }

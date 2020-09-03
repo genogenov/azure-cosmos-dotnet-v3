@@ -43,9 +43,9 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public SchedulingStopwatch()
         {
-            this.turnaroundTimeStopwatch = new Stopwatch();
-            this.responseTimeStopwatch = new Stopwatch();
-            this.runTimeStopwatch = new Stopwatch();
+            turnaroundTimeStopwatch = new Stopwatch();
+            responseTimeStopwatch = new Stopwatch();
+            runTimeStopwatch = new Stopwatch();
         }
 
         /// <summary>
@@ -57,11 +57,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
             get
             {
                 return new SchedulingTimeSpan(
-                    this.turnaroundTimeStopwatch.Elapsed,
-                    this.responseTimeStopwatch.Elapsed,
-                    this.runTimeStopwatch.Elapsed,
-                    this.turnaroundTimeStopwatch.Elapsed - this.runTimeStopwatch.Elapsed,
-                    this.numPreemptions);
+                    turnaroundTimeStopwatch.Elapsed,
+                    responseTimeStopwatch.Elapsed,
+                    runTimeStopwatch.Elapsed,
+                    turnaroundTimeStopwatch.Elapsed - runTimeStopwatch.Elapsed,
+                    numPreemptions);
             }
         }
 
@@ -71,8 +71,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public void Ready()
         {
-            this.turnaroundTimeStopwatch.Start();
-            this.responseTimeStopwatch.Start();
+            turnaroundTimeStopwatch.Start();
+            responseTimeStopwatch.Start();
         }
 
         /// <summary>
@@ -81,25 +81,25 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public void Start()
         {
-            if (!this.runTimeStopwatch.IsRunning)
+            if (!runTimeStopwatch.IsRunning)
             {
-                if (!this.responded)
+                if (!responded)
                 {
                     // This is the first time the process got a response, so the response time stopwatch needs to stop.
-                    this.responseTimeStopwatch.Stop();
-                    this.responded = true;
+                    responseTimeStopwatch.Stop();
+                    responded = true;
                 }
 
-                this.runTimeStopwatch.Start();
+                runTimeStopwatch.Start();
             }
         }
 
         public void Stop()
         {
-            if (this.runTimeStopwatch.IsRunning)
+            if (runTimeStopwatch.IsRunning)
             {
-                this.runTimeStopwatch.Stop();
-                this.numPreemptions++;
+                runTimeStopwatch.Stop();
+                numPreemptions++;
             }
         }
 
@@ -110,8 +110,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         /// </summary>
         public void Terminate()
         {
-            this.turnaroundTimeStopwatch.Stop();
-            this.responseTimeStopwatch.Stop();
+            turnaroundTimeStopwatch.Stop();
+            responseTimeStopwatch.Stop();
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core.Metrics
         public override string ToString()
         {
             // Just passing on to the SchedulingTimeSpan ToString function.
-            return this.Elapsed.ToString();
+            return Elapsed.ToString();
         }
     }
 }

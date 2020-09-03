@@ -19,8 +19,8 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlIdentifier input,
             SqlPathExpression relativePath)
         {
-            this.Input = input ?? throw new ArgumentNullException(nameof(input));
-            this.RelativePath = relativePath;
+            Input = input ?? throw new ArgumentNullException(nameof(input));
+            RelativePath = relativePath;
         }
 
         public SqlIdentifier Input { get; }

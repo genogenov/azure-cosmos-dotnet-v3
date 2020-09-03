@@ -38,12 +38,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
                     return null;
                 }
 
-                if (!this.container.TryGetValue(itemId, out DocumentServiceLease currentLease))
+                if (!container.TryGetValue(itemId, out DocumentServiceLease currentLease))
                 {
                     throw new LeaseLostException(lease);
                 }
 
-                if (this.container.TryUpdate(itemId, lease, currentLease))
+                if (container.TryUpdate(itemId, lease, currentLease))
                 {
                     return Task.FromResult(lease);
                 }

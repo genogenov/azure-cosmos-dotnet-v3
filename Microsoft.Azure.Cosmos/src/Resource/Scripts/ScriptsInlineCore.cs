@@ -4,7 +4,6 @@
 
 namespace Microsoft.Azure.Cosmos.Scripts
 {
-    using System;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateStoredProcedureAsync),
                 requestOptions,
                 (diagnostics) => base.CreateStoredProcedureAsync(diagnostics, storedProcedureProperties, requestOptions, cancellationToken));
@@ -81,7 +80,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadStoredProcedureAsync),
                 requestOptions,
                 (diagnostics) => base.ReadStoredProcedureAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -92,7 +91,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReplaceStoredProcedureAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceStoredProcedureAsync(diagnostics, storedProcedureProperties, requestOptions, cancellationToken));
@@ -103,7 +102,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(DeleteStoredProcedureAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteStoredProcedureAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -116,7 +115,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             StoredProcedureRequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ExecuteStoredProcedureAsync),
                 requestOptions,
                 (diagnostics) => base.ExecuteStoredProcedureAsync<TOutput>(diagnostics, storedProcedureId, partitionKey, parameters, requestOptions, cancellationToken));
@@ -129,7 +128,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             StoredProcedureRequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ExecuteStoredProcedureStreamAsync),
                 requestOptions,
                 (diagnostics) => base.ExecuteStoredProcedureStreamAsync(diagnostics, storedProcedureId, partitionKey, parameters, requestOptions, cancellationToken));
@@ -142,7 +141,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             StoredProcedureRequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ExecuteStoredProcedureStreamAsync),
                 requestOptions,
                 (diagnostics) => base.ExecuteStoredProcedureStreamAsync(diagnostics, storedProcedureId, streamPayload, partitionKey, requestOptions, cancellationToken));
@@ -153,7 +152,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateTriggerAsync),
                 requestOptions,
                 (diagnostics) => base.CreateTriggerAsync(diagnostics, triggerProperties, requestOptions, cancellationToken));
@@ -208,7 +207,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadTriggerAsync),
                 requestOptions,
                 (diagnostics) => base.ReadTriggerAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -219,7 +218,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReplaceTriggerAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceTriggerAsync(diagnostics, triggerProperties, requestOptions, cancellationToken));
@@ -230,7 +229,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(DeleteTriggerAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteTriggerAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -241,7 +240,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(CreateUserDefinedFunctionAsync),
                 requestOptions,
                 (diagnostics) => base.CreateUserDefinedFunctionAsync(diagnostics, userDefinedFunctionProperties, requestOptions, cancellationToken));
@@ -296,7 +295,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReadUserDefinedFunctionAsync),
                 requestOptions,
                 (diagnostics) => base.ReadUserDefinedFunctionAsync(diagnostics, id, requestOptions, cancellationToken));
@@ -307,7 +306,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(ReplaceUserDefinedFunctionAsync),
                 requestOptions,
                 (diagnostics) => base.ReplaceUserDefinedFunctionAsync(diagnostics, userDefinedFunctionProperties, requestOptions, cancellationToken));
@@ -318,7 +317,7 @@ namespace Microsoft.Azure.Cosmos.Scripts
             RequestOptions requestOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return this.ClientContext.OperationHelperAsync(
+            return ClientContext.OperationHelperAsync(
                 nameof(DeleteUserDefinedFunctionAsync),
                 requestOptions,
                 (diagnostics) => base.DeleteUserDefinedFunctionAsync(diagnostics, id, requestOptions, cancellationToken));

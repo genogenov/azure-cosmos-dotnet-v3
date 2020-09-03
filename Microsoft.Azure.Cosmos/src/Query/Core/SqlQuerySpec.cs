@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// <param name="parameters">The <see cref="T:Microsoft.Azure.Documents.SqlParameterCollection"/> instance, which represents the collection of query parameters.</param>
         public SqlQuerySpec(string queryText, SqlParameterCollection parameters)
         {
-            this.QueryText = queryText;
+            QueryText = queryText;
             this.parameters = parameters ?? throw new ArgumentNullException("parameters");
         }
 
@@ -61,11 +61,11 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         {
             get
             {
-                return this.parameters;
+                return parameters;
             }
             set
             {
-                this.parameters = value ?? throw new ArgumentNullException("value");
+                parameters = value ?? throw new ArgumentNullException("value");
             }
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Azure.Cosmos.Query.Core
         /// </summary>
         public bool ShouldSerializeParameters()
         {
-            return this.parameters.Count > 0;
+            return parameters.Count > 0;
         }
     }
 }

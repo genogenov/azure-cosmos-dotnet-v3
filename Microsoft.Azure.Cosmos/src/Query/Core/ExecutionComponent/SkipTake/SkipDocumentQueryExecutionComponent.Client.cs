@@ -89,16 +89,16 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                 }
 
                 // skip the documents but keep all the other headers
-                IReadOnlyList<CosmosElement> documentsAfterSkip = sourcePage.CosmosElements.Skip(this.skipCount).ToList();
+                IReadOnlyList<CosmosElement> documentsAfterSkip = sourcePage.CosmosElements.Skip(skipCount).ToList();
 
                 int numberOfDocumentsSkipped = sourcePage.CosmosElements.Count() - documentsAfterSkip.Count();
-                this.skipCount -= numberOfDocumentsSkipped;
+                skipCount -= numberOfDocumentsSkipped;
 
                 string updatedContinuationToken;
                 if (sourcePage.DisallowContinuationTokenMessage == null)
                 {
                     updatedContinuationToken = new OffsetContinuationToken(
-                        offset: this.skipCount,
+                        offset: skipCount,
                         sourceToken: sourcePage.ContinuationToken).ToString();
                 }
                 else
@@ -137,8 +137,8 @@ namespace Microsoft.Azure.Cosmos.Query.Core.ExecutionComponent.SkipTake
                         throw new ArgumentException($"{nameof(offset)} must be a non negative number.");
                     }
 
-                    this.Offset = offset;
-                    this.SourceToken = sourceToken;
+                    Offset = offset;
+                    SourceToken = sourceToken;
                 }
 
                 /// <summary>

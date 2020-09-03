@@ -31,7 +31,7 @@ namespace Microsoft.Azure.Cosmos
         {
             this.container = container;
             this.partitionKey = partitionKey;
-            this.operations = new List<ItemBatchOperation>();
+            operations = new List<ItemBatchOperation>();
         }
 
         public override TransactionalBatch CreateItem<T>(
@@ -43,12 +43,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(item));
             }
 
-            this.operations.Add(new ItemBatchOperation<T>(
+            operations.Add(new ItemBatchOperation<T>(
                     operationType: OperationType.Create,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     resource: item,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -62,12 +62,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(streamPayload));
             }
 
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                     operationType: OperationType.Create,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     resourceStream: streamPayload,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -81,12 +81,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(id));
             }
 
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                     operationType: OperationType.Read,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     id: id,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -100,12 +100,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(item));
             }
 
-            this.operations.Add(new ItemBatchOperation<T>(
+            operations.Add(new ItemBatchOperation<T>(
                     operationType: OperationType.Upsert,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     resource: item,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -119,12 +119,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(streamPayload));
             }
 
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                     operationType: OperationType.Upsert,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     resourceStream: streamPayload,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -144,13 +144,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(item));
             }
 
-            this.operations.Add(new ItemBatchOperation<T>(
+            operations.Add(new ItemBatchOperation<T>(
                     operationType: OperationType.Replace,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     id: id,
                     resource: item,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -170,13 +170,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(streamPayload));
             }
 
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                     operationType: OperationType.Replace,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     id: id,
                     resourceStream: streamPayload,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -190,12 +190,12 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(id));
             }
 
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                     operationType: OperationType.Delete,
-                    operationIndex: this.operations.Count,
+                    operationIndex: operations.Count,
                     id: id,
                     requestOptions: requestOptions,
-                    containerCore: this.container));
+                    containerCore: container));
 
             return this;
         }
@@ -203,7 +203,7 @@ namespace Microsoft.Azure.Cosmos
         public override Task<TransactionalBatchResponse> ExecuteAsync(
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.ExecuteAsync(
+            return ExecuteAsync(
                 requestOptions: null,
                 cancellationToken: cancellationToken);
         }
@@ -218,19 +218,19 @@ namespace Microsoft.Azure.Cosmos
             TransactionalBatchRequestOptions requestOptions,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.container.ClientContext.OperationHelperAsync(
+            return container.ClientContext.OperationHelperAsync(
                 nameof(ExecuteAsync),
                 requestOptions,
                 (diagnostics) =>
                 {
                     BatchExecutor executor = new BatchExecutor(
-                                    container: this.container,
-                                    partitionKey: this.partitionKey,
-                                    operations: this.operations,
+                                    container: container,
+                                    partitionKey: partitionKey,
+                                    operations: operations,
                                     batchOptions: requestOptions,
                                     diagnosticsContext: diagnostics);
 
-                    this.operations = new List<ItemBatchOperation>();
+                    operations = new List<ItemBatchOperation>();
                     return executor.ExecuteAsync(cancellationToken);
                 });
         }
@@ -247,13 +247,13 @@ namespace Microsoft.Azure.Cosmos
             Stream patchStream,
             TransactionalBatchItemRequestOptions requestOptions = null)
         {
-            this.operations.Add(new ItemBatchOperation(
+            operations.Add(new ItemBatchOperation(
                 operationType: OperationType.Patch,
-                operationIndex: this.operations.Count,
+                operationIndex: operations.Count,
                 id: id,
                 resourceStream: patchStream,
                 requestOptions: requestOptions,
-                containerCore: this.container));
+                containerCore: container));
 
             return this;
         }
@@ -286,13 +286,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(patchOperations));
             }
 
-            this.operations.Add(new ItemBatchOperation<IReadOnlyList<PatchOperation>>(
+            operations.Add(new ItemBatchOperation<IReadOnlyList<PatchOperation>>(
                 operationType: OperationType.Patch,
-                operationIndex: this.operations.Count,
+                operationIndex: operations.Count,
                 id: id,
                 resource: patchOperations,
                 requestOptions: requestOptions,
-                containerCore: this.container));
+                containerCore: container));
 
             return this;
         }

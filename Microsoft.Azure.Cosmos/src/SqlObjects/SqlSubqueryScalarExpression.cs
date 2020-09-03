@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlSubqueryScalarExpression(SqlQuery query)
         {
-            this.Query = query ?? throw new ArgumentNullException(nameof(query));
+            Query = query ?? throw new ArgumentNullException(nameof(query));
         }
 
         public SqlQuery Query { get; }

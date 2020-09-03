@@ -24,7 +24,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
         {
             this.observerFactory = observerFactory ?? throw new ArgumentNullException(nameof(observerFactory));
             this.leaseManager = leaseManager ?? throw new ArgumentNullException(nameof(leaseManager));
-            this.changeFeedLeaseOptions = options ?? throw new ArgumentNullException(nameof(options));
+            changeFeedLeaseOptions = options ?? throw new ArgumentNullException(nameof(options));
             this.partitionProcessorFactory = partitionProcessorFactory ?? throw new ArgumentNullException(nameof(partitionProcessorFactory));
         }
 
@@ -35,9 +35,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.FeedManagement
                 throw new ArgumentNullException(nameof(lease));
             }
 
-            ChangeFeedObserver<T> changeFeedObserver = this.observerFactory.CreateObserver();
-            FeedProcessor processor = this.partitionProcessorFactory.Create(lease, changeFeedObserver);
-            LeaseRenewerCore renewer = new LeaseRenewerCore(lease, this.leaseManager, this.changeFeedLeaseOptions.LeaseRenewInterval);
+            ChangeFeedObserver<T> changeFeedObserver = observerFactory.CreateObserver();
+            FeedProcessor processor = partitionProcessorFactory.Create(lease, changeFeedObserver);
+            LeaseRenewerCore renewer = new LeaseRenewerCore(lease, leaseManager, changeFeedLeaseOptions.LeaseRenewInterval);
 
             return new PartitionSupervisorCore<T>(lease, changeFeedObserver, processor, renewer);
         }

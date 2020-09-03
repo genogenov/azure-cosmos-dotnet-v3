@@ -56,13 +56,13 @@ namespace Microsoft.Azure.Cosmos
         {
             if (partitionKeyValue == null)
             {
-                this.InternalKey = PartitionKey.NullPartitionKeyInternal;
+                InternalKey = PartitionKey.NullPartitionKeyInternal;
             }
             else
             {
-                this.InternalKey = new Documents.PartitionKey(partitionKeyValue).InternalKey;
+                InternalKey = new Documents.PartitionKey(partitionKeyValue).InternalKey;
             }
-            this.IsNone = false;
+            IsNone = false;
         }
 
         /// <summary>
@@ -71,8 +71,8 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="partitionKeyValue">The value to use as partition key.</param>
         public PartitionKey(bool partitionKeyValue)
         {
-            this.InternalKey = partitionKeyValue ? TruePartitionKeyInternal : FalsePartitionKeyInternal;
-            this.IsNone = false;
+            InternalKey = partitionKeyValue ? TruePartitionKeyInternal : FalsePartitionKeyInternal;
+            IsNone = false;
         }
 
         /// <summary>
@@ -81,8 +81,8 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="partitionKeyValue">The value to use as partition key.</param>
         public PartitionKey(double partitionKeyValue)
         {
-            this.InternalKey = new Documents.PartitionKey(partitionKeyValue).InternalKey;
-            this.IsNone = false;
+            InternalKey = new Documents.PartitionKey(partitionKeyValue).InternalKey;
+            IsNone = false;
         }
 
         /// <summary>
@@ -91,8 +91,8 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="value">The value to use as partition key.</param>
         internal PartitionKey(object value)
         {
-            this.InternalKey = new Documents.PartitionKey(value).InternalKey;
-            this.IsNone = false;
+            InternalKey = new Documents.PartitionKey(value).InternalKey;
+            IsNone = false;
         }
 
         /// <summary>
@@ -101,8 +101,8 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="partitionKeyInternal">The value to use as partition key.</param>
         internal PartitionKey(PartitionKeyInternal partitionKeyInternal)
         {
-            this.InternalKey = partitionKeyInternal;
-            this.IsNone = false;
+            InternalKey = partitionKeyInternal;
+            IsNone = false;
         }
 
         /// <summary>
@@ -112,8 +112,8 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="isNone">The value to decide partitionKey is None.</param>
         private PartitionKey(PartitionKeyInternal partitionKeyInternal, bool isNone = false)
         {
-            this.InternalKey = partitionKeyInternal;
-            this.IsNone = isNone;
+            InternalKey = partitionKeyInternal;
+            IsNone = isNone;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Azure.Cosmos
         {
             if (obj is PartitionKey partitionkey)
             {
-                return this.Equals(partitionkey);
+                return Equals(partitionkey);
             }
 
             return false;
@@ -137,12 +137,12 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
-            if (this.InternalKey == null)
+            if (InternalKey == null)
             {
                 return PartitionKey.NullPartitionKeyInternal.GetHashCode();
             }
 
-            return this.InternalKey.GetHashCode();
+            return InternalKey.GetHashCode();
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>true if <paramref name="other"/> has the same value as this instance; otherwise, false.</returns>
         public bool Equals(PartitionKey other)
         {
-            PartitionKeyInternal partitionKeyInternal = this.InternalKey;
+            PartitionKeyInternal partitionKeyInternal = InternalKey;
             PartitionKeyInternal otherPartitionKeyInternal = other.InternalKey;
             if (partitionKeyInternal == null)
             {
@@ -173,17 +173,17 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The string representation of the partition key value</returns>
         public override string ToString()
         {
-            if (this.InternalKey == null)
+            if (InternalKey == null)
             {
                 return PartitionKey.NullPartitionKeyInternal.ToJsonString();
             }
 
-            return this.InternalKey.ToJsonString();
+            return InternalKey.ToJsonString();
         }
 
         internal string ToJsonString()
         {
-            return this.InternalKey.ToJsonString();
+            return InternalKey.ToJsonString();
         }
 
         internal static bool TryParseJsonString(string partitionKeyString, out PartitionKey partitionKey)

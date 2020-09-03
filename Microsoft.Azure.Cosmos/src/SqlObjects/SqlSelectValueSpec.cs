@@ -18,7 +18,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
         private SqlSelectValueSpec(
             SqlScalarExpression expression)
         {
-            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public SqlScalarExpression Expression { get; }

@@ -8,7 +8,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Diagnostics;
     using System.IO;
     using System.Net;
-    using System.Text;
     using Microsoft.Azure.Cosmos.Resource.CosmosExceptions;
     using Microsoft.Azure.Documents;
 
@@ -22,9 +21,9 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public ResponseMessage()
         {
-            this.Headers = new Headers();
-            this.DiagnosticsContext = new CosmosDiagnosticsContextCore();
-            this.CosmosException = null;
+            Headers = new Headers();
+            DiagnosticsContext = new CosmosDiagnosticsContextCore();
+            CosmosException = null;
         }
 
         /// <summary>
@@ -43,14 +42,14 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentOutOfRangeException(nameof(statusCode));
             }
 
-            this.StatusCode = statusCode;
-            this.RequestMessage = requestMessage;
-            this.Headers = new Headers();
-            this.DiagnosticsContext = requestMessage?.DiagnosticsContext ?? new CosmosDiagnosticsContextCore();
+            StatusCode = statusCode;
+            RequestMessage = requestMessage;
+            Headers = new Headers();
+            DiagnosticsContext = requestMessage?.DiagnosticsContext ?? new CosmosDiagnosticsContextCore();
 
             if (!string.IsNullOrEmpty(errorMessage))
             {
-                this.CosmosException = CosmosExceptionFactory.Create(
+                CosmosException = CosmosExceptionFactory.Create(
                     statusCode,
                     requestMessage,
                     errorMessage);
@@ -72,11 +71,11 @@ namespace Microsoft.Azure.Cosmos
             CosmosException cosmosException,
             CosmosDiagnosticsContext diagnostics)
         {
-            this.StatusCode = statusCode;
-            this.RequestMessage = requestMessage;
-            this.CosmosException = cosmosException;
-            this.Headers = headers ?? new Headers();
-            this.DiagnosticsContext = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
+            StatusCode = statusCode;
+            RequestMessage = requestMessage;
+            CosmosException = cosmosException;
+            Headers = headers ?? new Headers();
+            DiagnosticsContext = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
         }
 
         /// <summary>
@@ -89,18 +88,18 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public virtual Stream Content
         {
-            get => this.content;
+            get => content;
             set
             {
-                this.CheckDisposed();
-                this.content = value;
+                CheckDisposed();
+                content = value;
             }
         }
 
         /// <summary>
         /// Gets the reason for a failure in the current response.
         /// </summary>
-        public virtual string ErrorMessage => this.CosmosException?.Message;
+        public virtual string ErrorMessage => CosmosException?.Message;
 
         /// <summary>
         /// Gets the current <see cref="ResponseMessage"/> HTTP headers.
@@ -113,7 +112,7 @@ namespace Microsoft.Azure.Cosmos
         /// <remarks>
         /// This is only used in feed operations like query and change feed
         /// </remarks>
-        public virtual string ContinuationToken => this.Headers?.ContinuationToken;
+        public virtual string ContinuationToken => Headers?.ContinuationToken;
 
         /// <summary>
         /// Gets the original request message
@@ -123,7 +122,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Gets the cosmos diagnostic information for the current request to Azure Cosmos DB service
         /// </summary>
-        public virtual CosmosDiagnostics Diagnostics => this.DiagnosticsContext.Diagnostics;
+        public virtual CosmosDiagnostics Diagnostics => DiagnosticsContext.Diagnostics;
 
         internal CosmosDiagnosticsContext DiagnosticsContext { get; }
 
@@ -136,7 +135,7 @@ namespace Microsoft.Azure.Cosmos
         /// <summary>
         /// Asserts if the current <see cref="HttpStatusCode"/> is a success.
         /// </summary>
-        public virtual bool IsSuccessStatusCode => this.StatusCode.IsSuccess();
+        public virtual bool IsSuccessStatusCode => StatusCode.IsSuccess();
 
         /// <summary>
         /// Checks if the current <see cref="ResponseMessage"/> has a successful status code, otherwise, throws.
@@ -145,7 +144,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The current <see cref="ResponseMessage"/>.</returns>
         public virtual ResponseMessage EnsureSuccessStatusCode()
         {
-            if (!this.IsSuccessStatusCode)
+            if (!IsSuccessStatusCode)
             {
                 throw CosmosExceptionFactory.Create(this);
             }
@@ -158,12 +157,12 @@ namespace Microsoft.Azure.Cosmos
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         internal string GetResourceAddress()
         {
-            string resourceLink = this.RequestMessage?.RequestUriString;
+            string resourceLink = RequestMessage?.RequestUriString;
             if (PathsHelper.TryParsePathSegments(
                 resourceLink,
                 out bool isFeed,
@@ -184,28 +183,28 @@ namespace Microsoft.Azure.Cosmos
         /// <param name="disposing">True to dispose of content</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing && !this.disposed)
+            if (disposing && !disposed)
             {
-                this.disposed = true;
-                if (this.content != null)
+                disposed = true;
+                if (content != null)
                 {
-                    this.content.Dispose();
-                    this.content = null;
+                    content.Dispose();
+                    content = null;
                 }
 
-                if (this.RequestMessage != null)
+                if (RequestMessage != null)
                 {
-                    this.RequestMessage.Dispose();
-                    this.RequestMessage = null;
+                    RequestMessage.Dispose();
+                    RequestMessage = null;
                 }
             }
         }
 
         private void CheckDisposed()
         {
-            if (this.disposed)
+            if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().ToString());
+                throw new ObjectDisposedException(GetType().ToString());
             }
         }
     }

@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentException("rings");
             }
 
-            this.Rings = new ReadOnlyCollection<LinearRing>(rings);
+            Rings = new ReadOnlyCollection<LinearRing>(rings);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as PolygonCoordinates);
+            return Equals(obj as PolygonCoordinates);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return this.Rings.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
+                return Rings.Aggregate(0, (current, value) => (current * 397) ^ value.GetHashCode());
             }
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return this.Rings.SequenceEqual(other.Rings);
+            return Rings.SequenceEqual(other.Rings);
         }
     }
 }

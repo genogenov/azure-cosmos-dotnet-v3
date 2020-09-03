@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public FeedException(string message, string lastContinuation)
             : base(message)
         {
-            this.LastContinuation = lastContinuation;
+            LastContinuation = lastContinuation;
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         protected FeedException(string message, string lastContinuation, Exception innerException)
             : base(message, innerException)
         {
-            this.LastContinuation = lastContinuation;
+            LastContinuation = lastContinuation;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         protected FeedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            this.LastContinuation = (string)info.GetValue("LastContinuation", typeof(string));
+            LastContinuation = (string)info.GetValue("LastContinuation", typeof(string));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Exceptions
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue("LastContinuation", this.LastContinuation);
+            info.AddValue("LastContinuation", LastContinuation);
         }
     }
 }

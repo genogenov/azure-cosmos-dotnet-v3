@@ -45,10 +45,10 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
 
         public override async Task CreateMissingLeasesAsync()
         {
-            List<PartitionKeyRange> ranges = await this.EnumPartitionKeyRangesAsync().ConfigureAwait(false);
+            List<PartitionKeyRange> ranges = await EnumPartitionKeyRangesAsync().ConfigureAwait(false);
             HashSet<string> partitionIds = new HashSet<string>(ranges.Select(range => range.Id));
-            DefaultTrace.TraceInformation("Source collection: '{0}', {1} partition(s)", this.container.LinkUri.ToString(), partitionIds.Count);
-            await this.CreateLeasesAsync(partitionIds).ConfigureAwait(false);
+            DefaultTrace.TraceInformation("Source collection: '{0}', {1} partition(s)", container.LinkUri.ToString(), partitionIds.Count);
+            await CreateLeasesAsync(partitionIds).ConfigureAwait(false);
         }
 
         public override async Task<IEnumerable<DocumentServiceLease>> SplitPartitionAsync(DocumentServiceLease lease)
@@ -64,7 +64,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
             DefaultTrace.TraceInformation("Partition {0} is gone due to split", partitionId);
 
             // After split the childs are either all or none available
-            List<PartitionKeyRange> ranges = await this.EnumPartitionKeyRangesAsync().ConfigureAwait(false);
+            List<PartitionKeyRange> ranges = await EnumPartitionKeyRangesAsync().ConfigureAwait(false);
             List<string> addedPartitionIds = ranges.Where(range => range.Parents.Contains(partitionId)).Select(range => range.Id).ToList();
             if (addedPartitionIds.Count == 0)
             {
@@ -76,13 +76,13 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
             await addedPartitionIds.ForEachAsync(
                 async addedRangeId =>
                 {
-                    DocumentServiceLease newLease = await this.leaseManager.CreateLeaseIfNotExistAsync(addedRangeId, lastContinuationToken).ConfigureAwait(false);
+                    DocumentServiceLease newLease = await leaseManager.CreateLeaseIfNotExistAsync(addedRangeId, lastContinuationToken).ConfigureAwait(false);
                     if (newLease != null)
                     {
                         newLeases.Enqueue(newLease);
                     }
                 },
-                this.degreeOfParallelism).ConfigureAwait(false);
+                degreeOfParallelism).ConfigureAwait(false);
 
             DefaultTrace.TraceInformation("partition {0} split into {1}", partitionId, string.Join(", ", newLeases.Select(l => l.CurrentLeaseToken)));
 
@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
 
         private async Task<List<PartitionKeyRange>> EnumPartitionKeyRangesAsync()
         {
-            string containerUri = this.container.LinkUri.ToString();
+            string containerUri = container.LinkUri.ToString();
             string partitionKeyRangesPath = string.Format(CultureInfo.InvariantCulture, "{0}/pkranges", containerUri);
 
             IDocumentFeedResponse<PartitionKeyRange> response = null;
@@ -100,11 +100,11 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
             {
                 FeedOptions feedOptions = new FeedOptions
                 {
-                    MaxItemCount = this.maxBatchSize,
+                    MaxItemCount = maxBatchSize,
                     RequestContinuationToken = response?.ResponseContinuation,
                 };
 
-                response = await this.container.ClientContext.DocumentClient.ReadPartitionKeyRangeFeedAsync(containerUri, feedOptions).ConfigureAwait(false);
+                response = await container.ClientContext.DocumentClient.ReadPartitionKeyRangeFeedAsync(containerUri, feedOptions).ConfigureAwait(false);
                 IEnumerator<PartitionKeyRange> enumerator = response.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
@@ -126,14 +126,14 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Bootstrapping
         private async Task CreateLeasesAsync(HashSet<string> partitionIds)
         {
             // Get leases after getting ranges, to make sure that no other hosts checked in continuation token for split partition after we got leases.
-            IEnumerable<DocumentServiceLease> leases = await this.leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
+            IEnumerable<DocumentServiceLease> leases = await leaseContainer.GetAllLeasesAsync().ConfigureAwait(false);
             HashSet<string> existingPartitionIds = new HashSet<string>(leases.Select(lease => lease.CurrentLeaseToken));
             HashSet<string> addedPartitionIds = new HashSet<string>(partitionIds);
             addedPartitionIds.ExceptWith(existingPartitionIds);
 
             await addedPartitionIds.ForEachAsync(
-                async addedRangeId => { await this.leaseManager.CreateLeaseIfNotExistAsync(addedRangeId, continuationToken: null).ConfigureAwait(false); },
-                this.degreeOfParallelism).ConfigureAwait(false);
+                async addedRangeId => { await leaseManager.CreateLeaseIfNotExistAsync(addedRangeId, continuationToken: null).ConfigureAwait(false); },
+                degreeOfParallelism).ConfigureAwait(false);
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Microsoft.Azure.Cosmos.Query
 
         private readonly Guid correlatedActivityId;
 
-        private IDocumentQueryExecutionContext innerExecutionContext;
+        private readonly IDocumentQueryExecutionContext innerExecutionContext;
 
         private ProxyDocumentQueryExecutionContext(
             IDocumentQueryExecutionContext innerExecutionContext,
@@ -96,17 +96,17 @@ namespace Microsoft.Azure.Cosmos.Query
 
         public bool IsDone
         {
-            get { return this.innerExecutionContext.IsDone; }
+            get { return innerExecutionContext.IsDone; }
         }
 
         public void Dispose()
         {
-            this.innerExecutionContext.Dispose();
+            innerExecutionContext.Dispose();
         }
 
         public async Task<DocumentFeedResponse<CosmosElement>> ExecuteNextFeedResponseAsync(CancellationToken token)
         {
-            if (this.IsDone)
+            if (IsDone)
             {
                 throw new InvalidOperationException(RMResources.DocumentQueryExecutionContextIsDone);
             }
@@ -115,7 +115,7 @@ namespace Microsoft.Azure.Cosmos.Query
 
             try
             {
-                return await this.innerExecutionContext.ExecuteNextFeedResponseAsync(token);
+                return await innerExecutionContext.ExecuteNextFeedResponseAsync(token);
             }
             catch (DocumentClientException ex)
             {
@@ -131,14 +131,14 @@ namespace Microsoft.Azure.Cosmos.Query
                     JsonConvert.DeserializeObject<PartitionedQueryExecutionInfo>(error.AdditionalErrorInfo);
 
             DefaultDocumentQueryExecutionContext queryExecutionContext =
-                (DefaultDocumentQueryExecutionContext)this.innerExecutionContext;
+                (DefaultDocumentQueryExecutionContext)innerExecutionContext;
 
             List<PartitionKeyRange> partitionKeyRanges =
                 await
                     queryExecutionContext.GetTargetPartitionKeyRangesAsync(collection.ResourceId,
                         partitionedQueryExecutionInfo.QueryRanges);
 
-            DocumentQueryExecutionContextBase.InitParams constructorParams = new DocumentQueryExecutionContextBase.InitParams(this.client, this.resourceTypeEnum, this.resourceType, this.expression, this.feedOptions, this.resourceLink, false, correlatedActivityId);
+            DocumentQueryExecutionContextBase.InitParams constructorParams = new DocumentQueryExecutionContextBase.InitParams(client, resourceTypeEnum, resourceType, expression, feedOptions, resourceLink, false, correlatedActivityId);
             // Devnote this will get replace by the new v3 to v2 logic
             throw new NotSupportedException("v2 query excution context is currently not supported.");
 

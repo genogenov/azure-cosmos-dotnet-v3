@@ -20,9 +20,9 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
             SqlScalarExpression consequent,
             SqlScalarExpression alternative)
         {
-            this.Condition = condition ?? throw new ArgumentNullException(nameof(condition));
-            this.Consequent = consequent ?? throw new ArgumentNullException(nameof(consequent));
-            this.Alternative = alternative ?? throw new ArgumentNullException(nameof(alternative));
+            Condition = condition ?? throw new ArgumentNullException(nameof(condition));
+            Consequent = consequent ?? throw new ArgumentNullException(nameof(consequent));
+            Alternative = alternative ?? throw new ArgumentNullException(nameof(alternative));
         }
 
         public SqlScalarExpression Condition { get; }

@@ -6,7 +6,6 @@ namespace Microsoft.Azure.Cosmos
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using Microsoft.Azure.Cosmos.Query.Core;
 
     /// <summary>
@@ -36,8 +35,8 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(query));
             }
 
-            this.QueryText = query;
-            this.SqlParameters = new Dictionary<string, SqlParameter>();
+            QueryText = query;
+            SqlParameters = new Dictionary<string, SqlParameter>();
         }
 
         /// <summary>
@@ -53,11 +52,11 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(sqlQuery));
             }
 
-            this.QueryText = sqlQuery.QueryText;
-            this.SqlParameters = new Dictionary<string, SqlParameter>();
+            QueryText = sqlQuery.QueryText;
+            SqlParameters = new Dictionary<string, SqlParameter>();
             foreach (SqlParameter sqlParameter in sqlQuery.Parameters)
             {
-                this.SqlParameters.Add(sqlParameter.Name, sqlParameter);
+                SqlParameters.Add(sqlParameter.Name, sqlParameter);
             }
         }
 
@@ -86,13 +85,13 @@ namespace Microsoft.Azure.Cosmos
                 throw new ArgumentNullException(nameof(name));
             }
 
-            this.SqlParameters[name] = new SqlParameter(name, value);
+            SqlParameters[name] = new SqlParameter(name, value);
             return this;
         }
 
         internal SqlQuerySpec ToSqlQuerySpec()
         {
-            return new SqlQuerySpec(this.QueryText, new SqlParameterCollection(this.SqlParameters.Values));
+            return new SqlQuerySpec(QueryText, new SqlParameterCollection(SqlParameters.Values));
         }
 
         /// <summary>
@@ -102,7 +101,7 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                return this.SqlParameters;
+                return SqlParameters;
             }
         }
     }

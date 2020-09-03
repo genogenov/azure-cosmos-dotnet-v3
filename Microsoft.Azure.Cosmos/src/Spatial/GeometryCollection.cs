@@ -45,7 +45,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("geometries");
             }
 
-            this.Geometries = new ReadOnlyCollection<Geometry>(geometries);
+            Geometries = new ReadOnlyCollection<Geometry>(geometries);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as GeometryCollection);
+            return Equals(obj as GeometryCollection);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return this.Geometries.Aggregate(base.GetHashCode(), (current, value) => (current * 397) ^ value.GetHashCode());
+                return Geometries.Aggregate(base.GetHashCode(), (current, value) => (current * 397) ^ value.GetHashCode());
             }
         }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return base.Equals(other) && this.Geometries.SequenceEqual(other.Geometries);
+            return base.Equals(other) && Geometries.SequenceEqual(other.Geometries);
         }
     }
 }

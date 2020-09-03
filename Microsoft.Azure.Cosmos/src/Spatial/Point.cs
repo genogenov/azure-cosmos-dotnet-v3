@@ -56,7 +56,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 throw new ArgumentNullException("position");
             }
 
-            this.Position = position;
+            Position = position;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
                 return true;
             }
 
-            return base.Equals(other) && this.Position.Equals(other.Position);
+            return base.Equals(other) && Position.Equals(other.Position);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         /// <param name="obj">The object to compare with the current object. </param>
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as Point);
+            return Equals(obj as Point);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Microsoft.Azure.Cosmos.Spatial
         {
             unchecked
             {
-                return (base.GetHashCode() * 397) ^ this.Position.GetHashCode();
+                return (base.GetHashCode() * 397) ^ Position.GetHashCode();
             }
         }
     }

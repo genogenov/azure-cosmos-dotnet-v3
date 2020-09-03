@@ -19,17 +19,17 @@ namespace Microsoft.Azure.Cosmos
         internal TransactionalBatchOperationResult(
             HttpStatusCode statusCode)
         {
-            this.StatusCode = statusCode;
+            StatusCode = statusCode;
         }
 
         internal TransactionalBatchOperationResult(TransactionalBatchOperationResult other)
         {
-            this.StatusCode = other.StatusCode;
-            this.SubStatusCode = other.SubStatusCode;
-            this.ETag = other.ETag;
-            this.ResourceStream = other.ResourceStream;
-            this.RequestCharge = other.RequestCharge;
-            this.RetryAfter = other.RetryAfter;
+            StatusCode = other.StatusCode;
+            SubStatusCode = other.SubStatusCode;
+            ETag = other.ETag;
+            ResourceStream = other.ResourceStream;
+            RequestCharge = other.RequestCharge;
+            RetryAfter = other.RetryAfter;
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Cosmos
         {
             get
             {
-                int statusCodeInt = (int)this.StatusCode;
+                int statusCodeInt = (int)StatusCode;
                 return statusCodeInt >= 200 && statusCodeInt <= 299;
             }
         }
@@ -203,20 +203,20 @@ namespace Microsoft.Azure.Cosmos
         {
             Headers headers = new Headers()
             {
-                SubStatusCode = this.SubStatusCode,
-                ETag = this.ETag,
-                RetryAfter = this.RetryAfter,
-                RequestCharge = this.RequestCharge,
+                SubStatusCode = SubStatusCode,
+                ETag = ETag,
+                RetryAfter = RetryAfter,
+                RequestCharge = RequestCharge,
             };
-             
+
             ResponseMessage responseMessage = new ResponseMessage(
-                statusCode: this.StatusCode,
+                statusCode: StatusCode,
                 requestMessage: null,
                 headers: headers,
                 cosmosException: null,
-                diagnostics: this.DiagnosticsContext ?? new CosmosDiagnosticsContextCore())
+                diagnostics: DiagnosticsContext ?? new CosmosDiagnosticsContextCore())
             {
-                Content = this.ResourceStream
+                Content = ResourceStream
             };
 
             return responseMessage;
@@ -239,7 +239,7 @@ namespace Microsoft.Azure.Cosmos
         internal TransactionalBatchOperationResult(TransactionalBatchOperationResult result, T resource)
             : base(result)
         {
-            this.Resource = resource;
+            Resource = resource;
         }
 
         /// <summary>

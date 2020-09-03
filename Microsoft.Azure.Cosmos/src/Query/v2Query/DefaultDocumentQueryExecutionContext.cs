@@ -43,12 +43,12 @@ namespace Microsoft.Azure.Cosmos.Query
             : base(constructorParams)
         {
             this.isContinuationExpected = isContinuationExpected;
-            this.fetchSchedulingMetrics = new SchedulingStopwatch();
-            this.fetchSchedulingMetrics.Ready();
-            this.fetchExecutionRangeAccumulator = new FetchExecutionRangeAccumulator();
-            this.providedRangesCache = new Dictionary<string, IReadOnlyList<Range<string>>>();
-            this.retries = -1;
-            this.partitionRoutingHelper = new PartitionRoutingHelper();
+            fetchSchedulingMetrics = new SchedulingStopwatch();
+            fetchSchedulingMetrics.Ready();
+            fetchExecutionRangeAccumulator = new FetchExecutionRangeAccumulator();
+            providedRangesCache = new Dictionary<string, IReadOnlyList<Range<string>>>();
+            retries = -1;
+            partitionRoutingHelper = new PartitionRoutingHelper();
         }
 
         public static Task<DefaultDocumentQueryExecutionContext> CreateAsync(
@@ -68,9 +68,9 @@ namespace Microsoft.Azure.Cosmos.Query
 
         protected override async Task<DocumentFeedResponse<CosmosElement>> ExecuteInternalAsync(CancellationToken token)
         {
-            CollectionCache collectionCache = await this.Client.GetCollectionCacheAsync();
-            PartitionKeyRangeCache partitionKeyRangeCache = await this.Client.GetPartitionKeyRangeCacheAsync();
-            IDocumentClientRetryPolicy retryPolicyInstance = this.Client.ResetSessionTokenRetryPolicy.GetRequestPolicy();
+            CollectionCache collectionCache = await Client.GetCollectionCacheAsync();
+            PartitionKeyRangeCache partitionKeyRangeCache = await Client.GetPartitionKeyRangeCacheAsync();
+            IDocumentClientRetryPolicy retryPolicyInstance = Client.ResetSessionTokenRetryPolicy.GetRequestPolicy();
             retryPolicyInstance = new InvalidPartitionExceptionRetryPolicy(retryPolicyInstance);
             if (base.ResourceTypeEnum.IsPartitioned())
             {
@@ -84,18 +84,18 @@ namespace Microsoft.Azure.Cosmos.Query
             return await BackoffRetryUtility<DocumentFeedResponse<CosmosElement>>.ExecuteAsync(
                 async () =>
                 {
-                    this.fetchExecutionRangeAccumulator.BeginFetchRange();
-                    ++this.retries;
-                    Tuple<DocumentFeedResponse<CosmosElement>, string> responseAndPartitionIdentifier = await this.ExecuteOnceAsync(retryPolicyInstance, token);
+                    fetchExecutionRangeAccumulator.BeginFetchRange();
+                    ++retries;
+                    Tuple<DocumentFeedResponse<CosmosElement>, string> responseAndPartitionIdentifier = await ExecuteOnceAsync(retryPolicyInstance, token);
                     DocumentFeedResponse<CosmosElement> response = responseAndPartitionIdentifier.Item1;
                     string partitionIdentifier = responseAndPartitionIdentifier.Item2;
                     if (!string.IsNullOrEmpty(response.ResponseHeaders[HttpConstants.HttpHeaders.QueryMetrics]))
                     {
-                        this.fetchExecutionRangeAccumulator.EndFetchRange(
+                        fetchExecutionRangeAccumulator.EndFetchRange(
                             partitionIdentifier,
                             response.ActivityId,
                             response.Count,
-                            this.retries);
+                            retries);
                         response = new DocumentFeedResponse<CosmosElement>(
                             response,
                             response.Count,
@@ -109,9 +109,9 @@ namespace Microsoft.Azure.Cosmos.Query
                                         BackendMetrics.ParseFromDelimitedString(response.ResponseHeaders[HttpConstants.HttpHeaders.QueryMetrics]),
                                         IndexUtilizationInfo.CreateFromString(response.ResponseHeaders[HttpConstants.HttpHeaders.IndexUtilization]),
                                         new ClientSideMetrics(
-                                            this.retries,
+                                            retries,
                                             response.RequestCharge,
-                                            this.fetchExecutionRangeAccumulator.GetExecutionRanges()))
+                                            fetchExecutionRangeAccumulator.GetExecutionRanges()))
                                 }
                             },
                             response.RequestStatistics,
@@ -119,7 +119,7 @@ namespace Microsoft.Azure.Cosmos.Query
                             response.ResponseLengthBytes);
                     }
 
-                    this.retries = -1;
+                    retries = -1;
                     return response;
                 },
                 retryPolicyInstance,
@@ -133,23 +133,23 @@ namespace Microsoft.Azure.Cosmos.Query
             // Don't reuse request, as the rest of client SDK doesn't reuse requests between retries.
             // The code leaves some temporary garbage in request (in RequestContext etc.),
             // which shold be erased during retries.
-            using (DocumentServiceRequest request = await this.CreateRequestAsync())
+            using (DocumentServiceRequest request = await CreateRequestAsync())
             {
                 DocumentFeedResponse<CosmosElement> feedRespose;
                 string partitionIdentifier;
                 // We need to determine how to execute the request:
                 if (LogicalPartitionKeyProvided(request))
                 {
-                    feedRespose = await this.ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
+                    feedRespose = await ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
                     partitionIdentifier = $"PKId({request.Headers[HttpConstants.HttpHeaders.PartitionKey]})";
                 }
                 else if (PhysicalPartitionKeyRangeIdProvided(this))
                 {
-                    CollectionCache collectionCache = await this.Client.GetCollectionCacheAsync();
+                    CollectionCache collectionCache = await Client.GetCollectionCacheAsync();
                     ContainerProperties collection = await collectionCache.ResolveCollectionAsync(request, CancellationToken.None);
 
                     request.RouteTo(new PartitionKeyRangeIdentity(collection.ResourceId, base.PartitionKeyRangeId));
-                    feedRespose = await this.ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
+                    feedRespose = await ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
                     partitionIdentifier = base.PartitionKeyRangeId;
                 }
                 else
@@ -158,20 +158,19 @@ namespace Microsoft.Azure.Cosmos.Query
                     if (ServiceInteropAvailable())
                     {
                         // Get the routing map provider
-                        CollectionCache collectionCache = await this.Client.GetCollectionCacheAsync();
+                        CollectionCache collectionCache = await Client.GetCollectionCacheAsync();
                         ContainerProperties collection = await collectionCache.ResolveCollectionAsync(request, CancellationToken.None);
-                        QueryPartitionProvider queryPartitionProvider = await this.Client.GetQueryPartitionProviderAsync(cancellationToken);
-                        IRoutingMapProvider routingMapProvider = await this.Client.GetRoutingMapProviderAsync();
+                        QueryPartitionProvider queryPartitionProvider = await Client.GetQueryPartitionProviderAsync(cancellationToken);
+                        IRoutingMapProvider routingMapProvider = await Client.GetRoutingMapProviderAsync();
 
                         // Figure out what partition you are going to based on the range from the continuation token
                         // If token is null then just start at partitionKeyRangeId "0"
-                        List<CompositeContinuationToken> suppliedTokens;
                         Range<string> rangeFromContinuationToken =
-                            this.partitionRoutingHelper.ExtractPartitionKeyRangeFromContinuationToken(
+                            partitionRoutingHelper.ExtractPartitionKeyRangeFromContinuationToken(
                                 request.Headers,
-                                out suppliedTokens);
+                                out List<CompositeContinuationToken> suppliedTokens);
                         Tuple<PartitionRoutingHelper.ResolvedRangeInfo, IReadOnlyList<Range<string>>> queryRoutingInfo =
-                            await this.TryGetTargetPartitionKeyRangeAsync(
+                            await TryGetTargetPartitionKeyRangeAsync(
                                 request,
                                 collection,
                                 queryPartitionProvider,
@@ -183,7 +182,7 @@ namespace Microsoft.Azure.Cosmos.Query
                         {
                             request.ForceNameCacheRefresh = true;
                             collection = await collectionCache.ResolveCollectionAsync(request, CancellationToken.None);
-                            queryRoutingInfo = await this.TryGetTargetPartitionKeyRangeAsync(
+                            queryRoutingInfo = await TryGetTargetPartitionKeyRangeAsync(
                                 request,
                                 collection,
                                 queryPartitionProvider,
@@ -198,13 +197,13 @@ namespace Microsoft.Azure.Cosmos.Query
                         }
 
                         request.RouteTo(new PartitionKeyRangeIdentity(collection.ResourceId, queryRoutingInfo.Item1.ResolvedRange.Id));
-                        DocumentFeedResponse<CosmosElement> response = await this.ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
+                        DocumentFeedResponse<CosmosElement> response = await ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
 
                         // Form a composite continuation token (range + backend continuation token).
                         // If the backend continuation token was null for the range, 
                         // then use the next adjacent range.
                         // This is how the default execution context serially visits every partition.
-                        if (!await this.partitionRoutingHelper.TryAddPartitionKeyRangeToContinuationTokenAsync(
+                        if (!await partitionRoutingHelper.TryAddPartitionKeyRangeToContinuationTokenAsync(
                             response.Headers,
                             providedPartitionKeyRanges: queryRoutingInfo.Item2,
                             routingMapProvider: routingMapProvider,
@@ -226,7 +225,7 @@ namespace Microsoft.Azure.Cosmos.Query
                         // as the ServiceInterop dll is only available in 64-bit.
 
                         request.UseGatewayMode = true;
-                        feedRespose = await this.ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
+                        feedRespose = await ExecuteRequestAsync(request, retryPolicyInstance, cancellationToken);
                         partitionIdentifier = "Gateway";
                     }
                 }
@@ -278,12 +277,11 @@ namespace Microsoft.Azure.Cosmos.Query
                 }
             }
 
-            IReadOnlyList<Range<string>> providedRanges;
-            if (!this.providedRangesCache.TryGetValue(collection.ResourceId, out providedRanges))
+            if (!providedRangesCache.TryGetValue(collection.ResourceId, out IReadOnlyList<Range<string>> providedRanges))
             {
-                if (this.ShouldExecuteQueryRequest)
+                if (ShouldExecuteQueryRequest)
                 {
-                    FeedOptions feedOptions = this.GetFeedOptions(null);
+                    FeedOptions feedOptions = GetFeedOptions(null);
                     PartitionKeyDefinition partitionKeyDefinition;
                     if ((feedOptions.Properties != null) && feedOptions.Properties.TryGetValue(
                         DefaultDocumentQueryExecutionContext.InternalPartitionKeyDefinitionProperty,
@@ -307,10 +305,10 @@ namespace Microsoft.Azure.Cosmos.Query
 
                     providedRanges = PartitionRoutingHelper.GetProvidedPartitionKeyRanges(
                         (errorMessage) => new BadRequestException(errorMessage),
-                        this.QuerySpec,
+                        QuerySpec,
                         enableCrossPartitionQuery,
                         false,
-                        this.isContinuationExpected,
+                        isContinuationExpected,
                         false, //haslogicalpartitionkey
                         partitionKeyDefinition,
                         queryPartitionProvider,
@@ -347,10 +345,10 @@ namespace Microsoft.Azure.Cosmos.Query
                     };
                 }
 
-                this.providedRangesCache[collection.ResourceId] = providedRanges;
+                providedRangesCache[collection.ResourceId] = providedRanges;
             }
 
-            PartitionRoutingHelper.ResolvedRangeInfo resolvedRangeInfo = await this.partitionRoutingHelper.TryGetTargetRangeFromContinuationTokenRangeAsync(
+            PartitionRoutingHelper.ResolvedRangeInfo resolvedRangeInfo = await partitionRoutingHelper.TryGetTargetRangeFromContinuationTokenRangeAsync(
                     providedRanges,
                     routingMapProvider,
                     collection.ResourceId,
@@ -369,15 +367,15 @@ namespace Microsoft.Azure.Cosmos.Query
 
         private async Task<DocumentServiceRequest> CreateRequestAsync()
         {
-            INameValueCollection requestHeaders = await this.CreateCommonHeadersAsync(
-                    this.GetFeedOptions(this.ContinuationToken));
+            INameValueCollection requestHeaders = await CreateCommonHeadersAsync(
+                    GetFeedOptions(ContinuationToken));
 
-            requestHeaders[HttpConstants.HttpHeaders.IsContinuationExpected] = this.isContinuationExpected.ToString();
+            requestHeaders[HttpConstants.HttpHeaders.IsContinuationExpected] = isContinuationExpected.ToString();
 
-            return this.CreateDocumentServiceRequest(
+            return CreateDocumentServiceRequest(
                 requestHeaders,
-                this.QuerySpec,
-                this.PartitionKeyInternal);
+                QuerySpec,
+                PartitionKeyInternal);
         }
     }
 }

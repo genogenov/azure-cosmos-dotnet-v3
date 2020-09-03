@@ -8,7 +8,7 @@ namespace Microsoft.Azure.Cosmos.Pagination
     {
         public DocumentContainerState(long resourceIdentifier)
         {
-            this.ResourceIdentifer = resourceIdentifier;
+            ResourceIdentifer = resourceIdentifier;
         }
 
         public long ResourceIdentifer { get; }

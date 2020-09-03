@@ -33,21 +33,21 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override async Task<bool> IsInitializedAsync()
         {
-            string markerDocId = this.GetStoreMarkerName();
+            string markerDocId = GetStoreMarkerName();
 
-            return await this.container.ItemExistsAsync(this.requestOptionsFactory.GetPartitionKey(markerDocId), markerDocId).ConfigureAwait(false);
+            return await container.ItemExistsAsync(requestOptionsFactory.GetPartitionKey(markerDocId), markerDocId).ConfigureAwait(false);
         }
 
         public override async Task MarkInitializedAsync()
         {
-            string markerDocId = this.GetStoreMarkerName();
+            string markerDocId = GetStoreMarkerName();
             dynamic containerDocument = new { id = markerDocId };
 
             using (Stream itemStream = CosmosContainerExtensions.DefaultJsonSerializer.ToStream(containerDocument))
             {
-                using (ResponseMessage responseMessage = await this.container.CreateItemStreamAsync(
+                using (ResponseMessage responseMessage = await container.CreateItemStreamAsync(
                     itemStream,
-                    this.requestOptionsFactory.GetPartitionKey(markerDocId)).ConfigureAwait(false))
+                    requestOptionsFactory.GetPartitionKey(markerDocId)).ConfigureAwait(false))
                 {
                     responseMessage.EnsureSuccessStatusCode();
                 }
@@ -56,15 +56,15 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override async Task<bool> AcquireInitializationLockAsync(TimeSpan lockTime)
         {
-            string lockId = this.GetStoreLockName();
+            string lockId = GetStoreLockName();
             LockDocument containerDocument = new LockDocument() { Id = lockId, TimeToLive = (int)lockTime.TotalSeconds };
-            ItemResponse<LockDocument> document = await this.container.TryCreateItemAsync<LockDocument>(
-                this.requestOptionsFactory.GetPartitionKey(lockId),
+            ItemResponse<LockDocument> document = await container.TryCreateItemAsync<LockDocument>(
+                requestOptionsFactory.GetPartitionKey(lockId),
                 containerDocument).ConfigureAwait(false);
 
             if (document != null)
             {
-                this.lockETag = document.ETag;
+                lockETag = document.ETag;
                 return true;
             }
 
@@ -73,20 +73,20 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         public override async Task<bool> ReleaseInitializationLockAsync()
         {
-            string lockId = this.GetStoreLockName();
+            string lockId = GetStoreLockName();
             ItemRequestOptions requestOptions = new ItemRequestOptions()
             {
-                IfMatchEtag = this.lockETag,
+                IfMatchEtag = lockETag,
             };
 
-            bool deleted = await this.container.TryDeleteItemAsync<LockDocument>(
-                this.requestOptionsFactory.GetPartitionKey(lockId),
+            bool deleted = await container.TryDeleteItemAsync<LockDocument>(
+                requestOptionsFactory.GetPartitionKey(lockId),
                 lockId,
                 requestOptions).ConfigureAwait(false);
 
             if (deleted)
             {
-                this.lockETag = null;
+                lockETag = null;
                 return true;
             }
 
@@ -95,12 +95,12 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.LeaseManagement
 
         private string GetStoreMarkerName()
         {
-            return this.containerNamePrefix + ".info";
+            return containerNamePrefix + ".info";
         }
 
         private string GetStoreLockName()
         {
-            return this.containerNamePrefix + ".lock";
+            return containerNamePrefix + ".lock";
         }
 
         private class LockDocument

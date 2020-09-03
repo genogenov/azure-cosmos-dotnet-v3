@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos
 
         internal ResourceFeedReader(DocumentClient client, ResourceType resourceType, FeedOptions options, string resourceLink, object partitionKey = null)
         {
-            this.documentQuery = new DocumentQuery<T>(client, resourceType, typeof(T), resourceLink, options, partitionKey);
+            documentQuery = new DocumentQuery<T>(client, resourceType, typeof(T), resourceLink, options, partitionKey);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>Returns true if there are additional results to retrieve. Returns false otherwise.</returns>
         public bool HasMoreResults
         {
-            get { return this.documentQuery.HasMoreResults; }
+            get { return documentQuery.HasMoreResults; }
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An enumerator for the feed.</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            return this.documentQuery.GetEnumerator();
+            return documentQuery.GetEnumerator();
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>An enumerator for the feed.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.documentQuery.GetEnumerator();
+            return documentQuery.GetEnumerator();
         }
 
         /// <summary>
@@ -107,12 +107,12 @@ namespace Microsoft.Azure.Cosmos
         /// <returns>The response from a single call to ReadFeed for the specified resource.</returns>
         public Task<DocumentFeedResponse<T>> ExecuteNextAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return TaskHelper.InlineIfPossible(() => this.InternalExecuteNextAsync(cancellationToken), null, cancellationToken);
+            return TaskHelper.InlineIfPossible(() => InternalExecuteNextAsync(cancellationToken), null, cancellationToken);
         }
 
         private async Task<DocumentFeedResponse<T>> InternalExecuteNextAsync(CancellationToken cancellationToken)
         {
-            return await this.documentQuery.ExecuteNextAsync<T>(cancellationToken);
+            return await documentQuery.ExecuteNextAsync<T>(cancellationToken);
         }
     }
 }

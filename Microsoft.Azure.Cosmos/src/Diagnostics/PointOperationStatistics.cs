@@ -23,16 +23,16 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
             string requestSessionToken,
             string responseSessionToken)
         {
-            this.ActivityId = activityId;
-            this.StatusCode = statusCode;
-            this.SubStatusCode = subStatusCode;
-            this.RequestCharge = requestCharge;
-            this.ErrorMessage = errorMessage;
-            this.Method = method;
-            this.RequestUri = requestUri;
-            this.RequestSessionToken = requestSessionToken;
-            this.ResponseSessionToken = responseSessionToken;
-            this.ResponseTimeUtc = responseTimeUtc;
+            ActivityId = activityId;
+            StatusCode = statusCode;
+            SubStatusCode = subStatusCode;
+            RequestCharge = requestCharge;
+            ErrorMessage = errorMessage;
+            Method = method;
+            RequestUri = requestUri;
+            RequestSessionToken = requestSessionToken;
+            ResponseSessionToken = responseSessionToken;
+            ResponseTimeUtc = responseTimeUtc;
         }
 
         public string ActivityId { get; }

@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
         private SqlNumberPathExpression(SqlPathExpression parentPath, SqlNumberLiteral value)
             : base(parentPath)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public SqlNumberLiteral Value { get; }

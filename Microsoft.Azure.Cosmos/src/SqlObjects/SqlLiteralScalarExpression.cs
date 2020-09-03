@@ -22,7 +22,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
 
         private SqlLiteralScalarExpression(SqlLiteral literal)
         {
-            this.Literal = literal ?? throw new ArgumentNullException(nameof(literal));
+            Literal = literal ?? throw new ArgumentNullException(nameof(literal));
         }
 
         public SqlLiteral Literal { get; }

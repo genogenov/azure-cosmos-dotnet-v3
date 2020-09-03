@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.Diagnostics
         public CosmosSystemInfo(
             CpuLoadHistory cpuLoadHistory)
         {
-            this.CpuLoadHistory = cpuLoadHistory ?? throw new ArgumentNullException(nameof(cpuLoadHistory));
+            CpuLoadHistory = cpuLoadHistory ?? throw new ArgumentNullException(nameof(cpuLoadHistory));
         }
 
         public override void Accept(CosmosDiagnosticsInternalVisitor visitor)

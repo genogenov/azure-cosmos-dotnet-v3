@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Cosmos
     using System.Collections;
     using System.Collections.Generic;
     using Microsoft.Azure.Cosmos.Diagnostics;
-    using Microsoft.Azure.Documents.Rntbd;
 
     /// <summary>
     /// This represents the diagnostics interface used in the SDK.
@@ -58,7 +57,7 @@ namespace Microsoft.Azure.Cosmos
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         internal static CosmosDiagnosticsContext Create(

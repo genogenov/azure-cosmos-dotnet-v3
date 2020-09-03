@@ -144,7 +144,7 @@ namespace Microsoft.Azure.Cosmos
         {
             public FailedToGetQueryPlanResult(Exception exception)
             {
-                this.Exception = exception ?? throw new ArgumentNullException(nameof(exception));
+                Exception = exception ?? throw new ArgumentNullException(nameof(exception));
             }
 
             public Exception Exception { get; }
@@ -154,7 +154,7 @@ namespace Microsoft.Azure.Cosmos
         {
             public QueryPlanNotSupportedResult(PartitionedQueryExecutionInfo partitionedQueryExecutionInfo)
             {
-                this.QueryPlan = partitionedQueryExecutionInfo ?? throw new ArgumentNullException(nameof(partitionedQueryExecutionInfo));
+                QueryPlan = partitionedQueryExecutionInfo ?? throw new ArgumentNullException(nameof(partitionedQueryExecutionInfo));
             }
 
             public PartitionedQueryExecutionInfo QueryPlan { get; }
@@ -164,7 +164,7 @@ namespace Microsoft.Azure.Cosmos
         {
             public QueryPlanIsSupportedResult(QueryIterator queryIterator)
             {
-                this.QueryIterator = queryIterator ?? throw new ArgumentNullException(nameof(queryIterator));
+                QueryIterator = queryIterator ?? throw new ArgumentNullException(nameof(queryIterator));
             }
 
             public QueryIterator QueryIterator { get; }

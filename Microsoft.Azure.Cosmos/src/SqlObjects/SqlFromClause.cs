@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Cosmos.SqlObjects
     {
         private SqlFromClause(SqlCollectionExpression expression)
         {
-            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+            Expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public SqlCollectionExpression Expression { get; }

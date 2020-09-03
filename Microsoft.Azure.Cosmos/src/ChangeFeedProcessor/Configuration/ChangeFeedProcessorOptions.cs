@@ -19,9 +19,9 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Configuration
         /// <summary>Initializes a new instance of the <see cref="ChangeFeedProcessorOptions" /> class.</summary>
         public ChangeFeedProcessorOptions()
         {
-            this.FeedPollDelay = DefaultFeedPollDelay;
-            this.QueryFeedMaxBatchSize = DefaultQueryPartitionsMaxBatchSize;
-            this.CheckpointFrequency = new CheckpointFrequency();
+            FeedPollDelay = DefaultFeedPollDelay;
+            QueryFeedMaxBatchSize = DefaultQueryPartitionsMaxBatchSize;
+            CheckpointFrequency = new CheckpointFrequency();
         }
 
         /// <summary>
@@ -66,14 +66,17 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed.Configuration
         {
             get
             {
-                return this.startTime;
+                return startTime;
             }
 
             set
             {
                 if (value.HasValue && value.Value.Kind == DateTimeKind.Unspecified)
+                {
                     throw new ArgumentException("StartTime cannot have DateTimeKind.Unspecified", nameof(value));
-                this.startTime = value;
+                }
+
+                startTime = value;
             }
         }
 

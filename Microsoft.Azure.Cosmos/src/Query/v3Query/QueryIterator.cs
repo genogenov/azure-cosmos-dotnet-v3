@@ -5,11 +5,9 @@
 namespace Microsoft.Azure.Cosmos.Query
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.CosmosElements;
-    using Microsoft.Azure.Cosmos.Diagnostics;
     using Microsoft.Azure.Cosmos.Query.Core;
     using Microsoft.Azure.Cosmos.Query.Core.Exceptions;
     using Microsoft.Azure.Cosmos.Query.Core.ExecutionContext;
@@ -130,18 +128,18 @@ namespace Microsoft.Azure.Cosmos.Query
                 clientContext);
         }
 
-        public override bool HasMoreResults => !this.cosmosQueryExecutionContext.IsDone;
+        public override bool HasMoreResults => !cosmosQueryExecutionContext.IsDone;
 
         public override async Task<ResponseMessage> ReadNextAsync(CancellationToken cancellationToken = default)
         {
-            CosmosDiagnosticsContext diagnostics = CosmosDiagnosticsContext.Create(this.requestOptions);
+            CosmosDiagnosticsContext diagnostics = CosmosDiagnosticsContext.Create(requestOptions);
             using (diagnostics.GetOverallScope())
             {
                 QueryResponseCore responseCore;
                 try
                 {
                     // This catches exception thrown by the pipeline and converts it to QueryResponse
-                    responseCore = await this.cosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
+                    responseCore = await cosmosQueryExecutionContext.ExecuteNextAsync(cancellationToken);
                 }
                 catch (OperationCanceledException ex) when (!(ex is CosmosOperationCanceledException))
                 {
@@ -150,7 +148,7 @@ namespace Microsoft.Azure.Cosmos.Query
                 finally
                 {
                     // This swaps the diagnostics in the context. This shows all the page reads between the previous ReadNextAsync and the current ReadNextAsync
-                    diagnostics.AddDiagnosticsInternal(this.cosmosQueryContext.GetAndResetDiagnostics());
+                    diagnostics.AddDiagnosticsInternal(cosmosQueryContext.GetAndResetDiagnostics());
                 }
 
                 if (responseCore.IsSuccess)
@@ -160,12 +158,12 @@ namespace Microsoft.Azure.Cosmos.Query
                         count: responseCore.CosmosElements.Count,
                         responseLengthBytes: responseCore.ResponseLengthBytes,
                         diagnostics: diagnostics,
-                        serializationOptions: this.cosmosSerializationFormatOptions,
+                        serializationOptions: cosmosSerializationFormatOptions,
                         responseHeaders: new CosmosQueryResponseMessageHeaders(
                             responseCore.ContinuationToken,
                             responseCore.DisallowContinuationTokenMessage,
-                            this.cosmosQueryContext.ResourceTypeEnum,
-                            this.cosmosQueryContext.ContainerResourceId)
+                            cosmosQueryContext.ResourceTypeEnum,
+                            cosmosQueryContext.ContainerResourceId)
                         {
                             RequestCharge = responseCore.RequestCharge,
                             ActivityId = responseCore.ActivityId,
@@ -186,8 +184,8 @@ namespace Microsoft.Azure.Cosmos.Query
                     responseHeaders: new CosmosQueryResponseMessageHeaders(
                         responseCore.ContinuationToken,
                         responseCore.DisallowContinuationTokenMessage,
-                        this.cosmosQueryContext.ResourceTypeEnum,
-                        this.cosmosQueryContext.ContainerResourceId)
+                        cosmosQueryContext.ResourceTypeEnum,
+                        cosmosQueryContext.ContainerResourceId)
                     {
                         RequestCharge = responseCore.RequestCharge,
                         ActivityId = responseCore.ActivityId,
@@ -198,12 +196,12 @@ namespace Microsoft.Azure.Cosmos.Query
 
         public override CosmosElement GetCosmosElementContinuationToken()
         {
-            return this.cosmosQueryExecutionContext.GetCosmosElementContinuationToken();
+            return cosmosQueryExecutionContext.GetCosmosElementContinuationToken();
         }
 
         protected override void Dispose(bool disposing)
         {
-            this.cosmosQueryExecutionContext.Dispose();
+            cosmosQueryExecutionContext.Dispose();
             base.Dispose(disposing);
         }
     }

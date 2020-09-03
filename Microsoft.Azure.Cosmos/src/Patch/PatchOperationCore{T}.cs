@@ -20,11 +20,11 @@ namespace Microsoft.Azure.Cosmos
             string path,
             T value)
         {
-            this.OperationType = operationType;
-            this.Path = string.IsNullOrWhiteSpace(path)
+            OperationType = operationType;
+            Path = string.IsNullOrWhiteSpace(path)
                 ? throw new ArgumentNullException(nameof(path))
                 : path;
-            this.Value = value ?? throw new ArgumentNullException(nameof(value));
+            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override T Value { get; }
@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Cosmos
             out string valueParam)
         {
             // Use the user serializer so custom conversions are correctly handled
-            using (Stream stream = cosmosSerializer.ToStream(this.Value))
+            using (Stream stream = cosmosSerializer.ToStream(Value))
             {
                 using (StreamReader streamReader = new StreamReader(stream))
                 {

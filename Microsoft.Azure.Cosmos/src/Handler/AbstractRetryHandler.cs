@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Cosmos.Handlers
             RequestMessage request,
             CancellationToken cancellationToken)
         {
-            IDocumentClientRetryPolicy retryPolicyInstance = await this.GetRetryPolicyAsync(request);
+            IDocumentClientRetryPolicy retryPolicyInstance = await GetRetryPolicyAsync(request);
             request.OnBeforeSendRequestActions += retryPolicyInstance.OnBeforeSendRequest;
 
             try

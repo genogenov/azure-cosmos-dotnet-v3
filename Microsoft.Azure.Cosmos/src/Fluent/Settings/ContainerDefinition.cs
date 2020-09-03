@@ -13,7 +13,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         where T : ContainerDefinition<T>
     {
         private readonly string containerName;
-        private string partitionKeyPath;
+        private readonly string partitionKeyPath;
         private int? defaultTimeToLive;
         private IndexingPolicy indexingPolicy;
         private string timeToLivePropertyPath;
@@ -30,7 +30,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
             string name,
             string partitionKeyPath = null)
         {
-            this.containerName = name;
+            containerName = name;
             this.partitionKeyPath = partitionKeyPath;
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(defaultTtlTimeSpan));
             }
 
-            this.defaultTimeToLive = (int)defaultTtlTimeSpan.TotalSeconds;
+            defaultTimeToLive = (int)defaultTtlTimeSpan.TotalSeconds;
             return (T)this;
         }
 
@@ -85,7 +85,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentOutOfRangeException(nameof(defaultTtlInSeconds));
             }
 
-            this.defaultTimeToLive = defaultTtlInSeconds;
+            defaultTimeToLive = defaultTtlInSeconds;
             return (T)this;
         }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
                 throw new ArgumentNullException(nameof(propertyPath));
             }
 
-            this.timeToLivePropertyPath = propertyPath;
+            timeToLivePropertyPath = propertyPath;
             return (T)this;
         }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>An instance of <see cref="IndexingPolicyDefinition{T}"/>.</returns>
         public IndexingPolicyDefinition<T> WithIndexingPolicy()
         {
-            if (this.indexingPolicy != null)
+            if (indexingPolicy != null)
             {
                 // Overwrite
                 throw new NotSupportedException();
@@ -120,7 +120,7 @@ namespace Microsoft.Azure.Cosmos.Fluent
 
             return new IndexingPolicyDefinition<T>(
                 (T)this,
-                (indexingPolicy) => this.WithIndexingPolicy(indexingPolicy));
+                (indexingPolicy) => WithIndexingPolicy(indexingPolicy));
         }
 
         /// <summary>
@@ -129,27 +129,27 @@ namespace Microsoft.Azure.Cosmos.Fluent
         /// <returns>Builds the current Fluent configuration into an instance of <see cref="ContainerProperties"/>.</returns>
         public ContainerProperties Build()
         {
-            ContainerProperties containerProperties = new ContainerProperties(id: this.containerName, partitionKeyPath: this.partitionKeyPath);
-            if (this.indexingPolicy != null)
+            ContainerProperties containerProperties = new ContainerProperties(id: containerName, partitionKeyPath: partitionKeyPath);
+            if (indexingPolicy != null)
             {
-                containerProperties.IndexingPolicy = this.indexingPolicy;
+                containerProperties.IndexingPolicy = indexingPolicy;
             }
 
-            if (this.defaultTimeToLive.HasValue)
+            if (defaultTimeToLive.HasValue)
             {
-                containerProperties.DefaultTimeToLive = this.defaultTimeToLive.Value;
+                containerProperties.DefaultTimeToLive = defaultTimeToLive.Value;
             }
 
-            if (this.timeToLivePropertyPath != null)
+            if (timeToLivePropertyPath != null)
             {
 #pragma warning disable 0612
-                containerProperties.TimeToLivePropertyPath = this.timeToLivePropertyPath;
+                containerProperties.TimeToLivePropertyPath = timeToLivePropertyPath;
 #pragma warning restore 0612
             }
 
-            if (this.partitionKeyDefinitionVersion.HasValue)
+            if (partitionKeyDefinitionVersion.HasValue)
             {
-                containerProperties.PartitionKeyDefinitionVersion = this.partitionKeyDefinitionVersion.Value;
+                containerProperties.PartitionKeyDefinitionVersion = partitionKeyDefinitionVersion.Value;
             }
 
             containerProperties.ValidateRequiredProperties();

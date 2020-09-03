@@ -24,8 +24,8 @@ namespace Microsoft.Azure.Cosmos.ChangeFeed
                 throw new ArgumentOutOfRangeException($"{nameof(time)}.{nameof(DateTime.Kind)} must be {nameof(DateTimeKind)}.{nameof(DateTimeKind.Utc)}");
             }
 
-            this.StartTime = time;
-            this.FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
+            StartTime = time;
+            FeedRange = feedRange ?? throw new ArgumentNullException(nameof(feedRange));
         }
 
         /// <summary>
